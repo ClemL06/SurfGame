@@ -9,7 +9,7 @@ signal high_score_changed(new_high_score: int)
 var state: int = GameState.MENU
 var high_score: int = 0
 
-const SAVE_PATH := "user://save.json"
+const SAVE_PATH: String = "user://save.json"
 
 func _ready() -> void:
 	load_game()
@@ -17,7 +17,7 @@ func _ready() -> void:
 func set_state(new_state: int) -> void:
 	if new_state == state:
 		return
-	var old := state
+	var old: int = state
 	state = new_state
 	state_changed.emit(old, state)
 
@@ -56,8 +56,8 @@ func _try_set_high_score(score: int) -> void:
 	high_score_changed.emit(high_score)
 
 func save_game() -> void:
-	var data := {"high_score": high_score}
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var data: Dictionary = {"high_score": high_score}
+	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
 		return
 	f.store_string(JSON.stringify(data))
@@ -68,17 +68,18 @@ func load_game() -> void:
 		high_score = 0
 		return
 
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if f == null:
 		high_score = 0
 		return
 
-	var text := f.get_as_text()
+	var text: String = f.get_as_text()
 	f.close()
 
-	var parsed := JSON.parse_string(text)
+	var parsed: Variant = JSON.parse_string(text)
 	if typeof(parsed) != TYPE_DICTIONARY:
 		high_score = 0
 		return
 
-	high_score = int(parsed.get("high_score", 0))
+	var dict: Dictionary = parsed as Dictionary
+	high_score = int(dict.get("high_score", 0))
