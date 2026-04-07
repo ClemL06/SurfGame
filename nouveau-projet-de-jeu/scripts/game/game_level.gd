@@ -63,10 +63,10 @@ func _draw() -> void:
 		Color(0.08, 0.55, 0.78)
 	)
 
-	# Vagues en couches (effet niveau de surf).
-	_draw_wave_band(size, size.y * 0.57, 50.0, 170.0, 0.55, Color(0.07, 0.69, 0.86))
-	_draw_wave_band(size, size.y * 0.66, 42.0, 140.0, 0.80, Color(0.05, 0.62, 0.80))
-	_draw_wave_band(size, size.y * 0.76, 35.0, 120.0, 1.10, Color(0.03, 0.53, 0.73))
+	# Vagues plus realistes (profondeur + cretes + ecume).
+	_draw_wave_band(size, size.y * 0.55, 58.0, 220.0, 0.40, Color(0.05, 0.48, 0.70), Color(0.50, 0.88, 0.98, 0.55), Color(0.97, 0.99, 1.0, 0.70))
+	_draw_wave_band(size, size.y * 0.65, 52.0, 175.0, 0.65, Color(0.04, 0.56, 0.79), Color(0.55, 0.92, 1.0, 0.50), Color(0.98, 1.0, 1.0, 0.75))
+	_draw_wave_band(size, size.y * 0.76, 42.0, 145.0, 0.92, Color(0.03, 0.44, 0.67), Color(0.48, 0.84, 0.95, 0.45), Color(1.0, 1.0, 1.0, 0.82))
 
 	# Surfeur pilotable.
 	var surfer_bob := Vector2(
@@ -96,17 +96,26 @@ func _draw_wave_band(
 	amplitude: float,
 	wavelength: float,
 	speed: float,
-	color: Color
+	color: Color,
+	highlight_color: Color,
+	foam_color: Color
 ) -> void:
 	var points := PackedVector2Array()
+	var crest := PackedVector2Array()
+	var foam := PackedVector2Array()
 	var x: float = 0.0
 	while x <= size.x + 8.0:
-		var y := base_y + sin((x / wavelength) + (surf_time * speed)) * amplitude
+		var phase := (x / wavelength) + (surf_time * speed)
+		var y := base_y + sin(phase) * amplitude + sin(phase * 2.2 + 0.8) * (amplitude * 0.22)
 		points.append(Vector2(x, y))
+		crest.append(Vector2(x, y - 5.0))
+		foam.append(Vector2(x, y - 11.0 + sin(phase * 2.8) * 2.5))
 		x += 8.0
 	points.append(Vector2(size.x, size.y))
 	points.append(Vector2(0.0, size.y))
 	draw_colored_polygon(points, color)
+	draw_polyline(crest, highlight_color, 4.0, true)
+	draw_polyline(foam, foam_color, 2.0, true)
 
 func _draw_surfer(position: Vector2, board_angle: float) -> void:
 	# Planche style surfboard: nose arrondi, tail plus large.
@@ -137,13 +146,66 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
 
-	# Surfeur plus grand.
-	draw_circle(position + Vector2(0.0, -42.0), 18.0, Color(0.15, 0.16, 0.22))
-	draw_line(position + Vector2(0.0, -24.0), position + Vector2(0.0, 14.0), Color(0.15, 0.16, 0.22), 7.0)
-	draw_line(position + Vector2(0.0, -10.0), position + Vector2(-22.0, 8.0), Color(0.15, 0.16, 0.22), 5.0)
-	draw_line(position + Vector2(0.0, -10.0), position + Vector2(22.0, 6.0), Color(0.15, 0.16, 0.22), 5.0)
-	draw_line(position + Vector2(0.0, 14.0), position + Vector2(-20.0, 30.0), Color(0.15, 0.16, 0.22), 5.0)
-	draw_line(position + Vector2(0.0, 14.0), position + Vector2(18.0, 30.0), Color(0.15, 0.16, 0.22), 5.0)
+	# Personnage style "vrai surfeur" avec combinaison neoprene.
+	var body_offset := position + Vector2(0.0, -4.0)
+	var wetsuit_main := Color(0.09, 0.11, 0.16)
+	var wetsuit_panel := Color(0.20, 0.62, 0.92)
+	var skin := Color(0.93, 0.78, 0.64)
+
+	var torso := _transform_points([
+		Vector2(-16.0, -40.0),
+		Vector2(14.0, -40.0),
+		Vector2(20.0, -8.0),
+		Vector2(13.0, 26.0),
+		Vector2(-12.0, 28.0),
+		Vector2(-20.0, -6.0)
+	], body_offset, board_angle * 0.4)
+	draw_colored_polygon(torso, wetsuit_main)
+
+	var chest_panel := _transform_points([
+		Vector2(-7.0, -32.0),
+		Vector2(7.0, -32.0),
+		Vector2(10.0, 12.0),
+		Vector2(-10.0, 12.0)
+	], body_offset, board_angle * 0.4)
+	draw_colored_polygon(chest_panel, wetsuit_panel)
+
+	var back_arm := _transform_points([
+		Vector2(12.0, -28.0),
+		Vector2(24.0, -24.0),
+		Vector2(28.0, -5.0),
+		Vector2(16.0, -8.0)
+	], body_offset, board_angle * 0.6)
+	draw_colored_polygon(back_arm, wetsuit_main)
+	draw_circle(_transform_point(Vector2(26.0, -2.0), body_offset, board_angle * 0.6), 5.5, skin)
+
+	var front_arm := _transform_points([
+		Vector2(-15.0, -22.0),
+		Vector2(-34.0, -10.0),
+		Vector2(-29.0, 0.0),
+		Vector2(-10.0, -11.0)
+	], body_offset, board_angle * 0.6)
+	draw_colored_polygon(front_arm, wetsuit_main)
+	draw_circle(_transform_point(Vector2(-31.0, 2.0), body_offset, board_angle * 0.6), 5.5, skin)
+
+	var back_leg := _transform_points([
+		Vector2(5.0, 22.0),
+		Vector2(17.0, 21.0),
+		Vector2(26.0, 45.0),
+		Vector2(12.0, 47.0)
+	], body_offset, board_angle * 0.5)
+	draw_colored_polygon(back_leg, wetsuit_main)
+
+	var front_leg := _transform_points([
+		Vector2(-13.0, 22.0),
+		Vector2(-1.0, 22.0),
+		Vector2(6.0, 45.0),
+		Vector2(-10.0, 45.0)
+	], body_offset, board_angle * 0.5)
+	draw_colored_polygon(front_leg, wetsuit_main)
+
+	draw_circle(_transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3), 14.0, skin)
+	draw_circle(_transform_point(Vector2(-4.0, -55.0), body_offset, board_angle * 0.3), 14.5, Color(0.12, 0.08, 0.06))
 
 func _transform_points(points: Array[Vector2], offset: Vector2, angle: float) -> PackedVector2Array:
 	var output := PackedVector2Array()
@@ -153,6 +215,12 @@ func _transform_points(points: Array[Vector2], offset: Vector2, angle: float) ->
 		var rotated := Vector2((p.x * c) - (p.y * s), (p.x * s) + (p.y * c))
 		output.append(rotated + offset)
 	return output
+
+func _transform_point(point: Vector2, offset: Vector2, angle: float) -> Vector2:
+	var c := cos(angle)
+	var s := sin(angle)
+	var rotated := Vector2((point.x * c) - (point.y * s), (point.x * s) + (point.y * c))
+	return rotated + offset
 
 func player_died() -> void:
 	if is_dead:
