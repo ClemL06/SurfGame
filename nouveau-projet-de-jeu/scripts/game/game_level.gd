@@ -132,7 +132,7 @@ func _spawn_obstacle(size: Vector2) -> void:
 		obstacles.append({
 			"type": "shark",
 			"position": pos,
-			"radius": 34.0,
+			"radius": 22.0,
 			"speed": randf_range(230.0, 340.0),
 			"phase": randf() * TAU,
 			"bob_amp": randf_range(12.0, 20.0),
@@ -142,7 +142,7 @@ func _spawn_obstacle(size: Vector2) -> void:
 		obstacles.append({
 			"type": "jellyfish",
 			"position": pos,
-			"radius": 28.0,
+			"radius": 18.0,
 			"speed": randf_range(170.0, 250.0),
 			"phase": randf() * TAU,
 			"bob_amp": randf_range(20.0, 36.0),
@@ -190,19 +190,36 @@ func _draw_jellyfish(pos: Vector2) -> void:
 		)
 
 func _check_obstacle_collisions() -> void:
-	var surfer_collision_center := surfer_position + Vector2(0.0, -8.0)
-	var board_collision_center := surfer_position + Vector2(0.0, 38.0)
-	var surfer_radius := 30.0
-	var board_radius := 72.0
+	var surfer_collision_center := surfer_position + Vector2(0.0, -16.0)
+	var surfer_radius := 20.0
+
+	# Hitbox planche precise: capsule le long de la planche.
+	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
+	var board_center := surfer_position + Vector2(0.0, 40.0)
+	var board_half_length := 86.0
+	var board_thickness_radius := 9.0
+	var board_axis := Vector2(cos(board_angle), sin(board_angle))
+	var board_start := board_center - board_axis * board_half_length
+	var board_end := board_center + board_axis * board_half_length
 
 	for obstacle in obstacles:
 		var obstacle_pos: Vector2 = obstacle["position"]
 		var obstacle_radius: float = obstacle["radius"]
 		var hits_surfer := surfer_collision_center.distance_to(obstacle_pos) <= (surfer_radius + obstacle_radius)
-		var hits_board := board_collision_center.distance_to(obstacle_pos) <= (board_radius + obstacle_radius)
+		var obstacle_to_board := _distance_point_to_segment(obstacle_pos, board_start, board_end)
+		var hits_board := obstacle_to_board <= (board_thickness_radius + obstacle_radius)
 		if hits_surfer or hits_board:
 			player_died()
 			return
+
+func _distance_point_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
+	var ab := b - a
+	var ab_length_squared := ab.length_squared()
+	if ab_length_squared <= 0.0001:
+		return point.distance_to(a)
+	var t := clampf((point - a).dot(ab) / ab_length_squared, 0.0, 1.0)
+	var projection := a + ab * t
+	return point.distance_to(projection)
 
 func _draw_wave_band(
 	size: Vector2,
