@@ -4,6 +4,9 @@ class_name GameLevel
 var score: int = 0
 var is_dead: bool = false
 var surf_time: float = 0.0
+var surfer_position: Vector2 = Vector2.ZERO
+var surfer_velocity: Vector2 = Vector2.ZERO
+var surfer_speed: float = 420.0
 
 var hud: HUD
 var pause_menu: PauseMenu
@@ -11,6 +14,8 @@ var game_over: GameOverScreen
 
 func _ready() -> void:
 	GameManager.set_state(GameManager.GameState.PLAYING)
+	var size := get_viewport_rect().size
+	surfer_position = Vector2(size.x * 0.34, size.y * 0.58)
 
 	hud = preload("res://scenes/ui/HUD.tscn").instantiate() as HUD
 	add_child(hud)
@@ -37,6 +42,8 @@ func _process(delta: float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 
+	_update_surfer_controls(delta)
+
 	# Score simple (temps). Toi peut remplacer par distance plus tard.
 	score += int(60.0 * delta)
 	hud.set_score(score)
@@ -61,12 +68,27 @@ func _draw() -> void:
 	_draw_wave_band(size, size.y * 0.66, 42.0, 140.0, 0.80, Color(0.05, 0.62, 0.80))
 	_draw_wave_band(size, size.y * 0.76, 35.0, 120.0, 1.10, Color(0.03, 0.53, 0.73))
 
-	# Surfeur stylisé.
-	var surfer_pos := Vector2(
-		size.x * 0.34 + sin(surf_time * 1.7) * 85.0,
-		size.y * 0.56 + cos(surf_time * 2.2) * 12.0
+	# Surfeur pilotable.
+	var surfer_bob := Vector2(
+		sin(surf_time * 2.1) * 8.0,
+		cos(surf_time * 2.6) * 8.0
 	)
-	_draw_surfer(surfer_pos, sin(surf_time * 2.0) * 0.14)
+	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
+	_draw_surfer(surfer_position + surfer_bob, board_angle)
+
+func _update_surfer_controls(delta: float) -> void:
+	var size := get_viewport_rect().size
+	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	surfer_velocity = direction * surfer_speed
+	surfer_position += surfer_velocity * delta
+
+	# Le surfeur reste dans la zone d'eau.
+	var min_x := 70.0
+	var max_x := size.x - 70.0
+	var min_y := size.y * 0.46
+	var max_y := size.y * 0.84
+	surfer_position.x = clampf(surfer_position.x, min_x, max_x)
+	surfer_position.y = clampf(surfer_position.y, min_y, max_y)
 
 func _draw_wave_band(
 	size: Vector2,
@@ -87,22 +109,41 @@ func _draw_wave_band(
 	draw_colored_polygon(points, color)
 
 func _draw_surfer(position: Vector2, board_angle: float) -> void:
-	# Planche.
+	# Planche style surfboard: nose arrondi, tail plus large.
 	var board_shape := _transform_points([
-		Vector2(-36.0, 0.0),
-		Vector2(30.0, -7.0),
-		Vector2(40.0, 0.0),
-		Vector2(30.0, 7.0)
-	], position + Vector2(0.0, 22.0), board_angle)
-	draw_colored_polygon(board_shape, Color(0.96, 0.97, 1.0))
+		Vector2(-95.0, 0.0),
+		Vector2(-70.0, -16.0),
+		Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0),
+		Vector2(92.0, 0.0),
+		Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0),
+		Vector2(-70.0, 16.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
 
-	# Corps.
-	draw_circle(position + Vector2(0.0, -22.0), 11.0, Color(0.15, 0.16, 0.22))
-	draw_line(position + Vector2(0.0, -10.0), position + Vector2(0.0, 12.0), Color(0.15, 0.16, 0.22), 4.0)
-	draw_line(position + Vector2(0.0, -2.0), position + Vector2(-12.0, 6.0), Color(0.15, 0.16, 0.22), 3.0)
-	draw_line(position + Vector2(0.0, -2.0), position + Vector2(12.0, 5.0), Color(0.15, 0.16, 0.22), 3.0)
-	draw_line(position + Vector2(0.0, 12.0), position + Vector2(-10.0, 20.0), Color(0.15, 0.16, 0.22), 3.0)
-	draw_line(position + Vector2(0.0, 12.0), position + Vector2(10.0, 20.0), Color(0.15, 0.16, 0.22), 3.0)
+	var stripe := _transform_points([
+		Vector2(-82.0, -3.0),
+		Vector2(80.0, -3.0),
+		Vector2(80.0, 3.0),
+		Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+
+	var fin := _transform_points([
+		Vector2(-56.0, 10.0),
+		Vector2(-46.0, 25.0),
+		Vector2(-36.0, 10.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
+
+	# Surfeur plus grand.
+	draw_circle(position + Vector2(0.0, -42.0), 18.0, Color(0.15, 0.16, 0.22))
+	draw_line(position + Vector2(0.0, -24.0), position + Vector2(0.0, 14.0), Color(0.15, 0.16, 0.22), 7.0)
+	draw_line(position + Vector2(0.0, -10.0), position + Vector2(-22.0, 8.0), Color(0.15, 0.16, 0.22), 5.0)
+	draw_line(position + Vector2(0.0, -10.0), position + Vector2(22.0, 6.0), Color(0.15, 0.16, 0.22), 5.0)
+	draw_line(position + Vector2(0.0, 14.0), position + Vector2(-20.0, 30.0), Color(0.15, 0.16, 0.22), 5.0)
+	draw_line(position + Vector2(0.0, 14.0), position + Vector2(18.0, 30.0), Color(0.15, 0.16, 0.22), 5.0)
 
 func _transform_points(points: Array[Vector2], offset: Vector2, angle: float) -> PackedVector2Array:
 	var output := PackedVector2Array()
