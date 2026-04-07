@@ -7,6 +7,9 @@ var surf_time: float = 0.0
 var surfer_position: Vector2 = Vector2.ZERO
 var surfer_velocity: Vector2 = Vector2.ZERO
 var surfer_speed: float = 420.0
+var obstacles: Array[Dictionary] = []
+var obstacle_spawn_timer: float = 0.0
+var obstacle_spawn_interval: float = 1.5
 
 var hud: HUD
 var pause_menu: PauseMenu
@@ -14,6 +17,7 @@ var game_over: GameOverScreen
 
 func _ready() -> void:
 	GameManager.set_state(GameManager.GameState.PLAYING)
+	randomize()
 	var size := get_viewport_rect().size
 	surfer_position = Vector2(size.x * 0.34, size.y * 0.58)
 
@@ -43,6 +47,8 @@ func _process(delta: float) -> void:
 		return
 
 	_update_surfer_controls(delta)
+	_update_obstacles(delta)
+	_check_obstacle_collisions()
 
 	# Score simple (temps). Toi peut remplacer par distance plus tard.
 	score += int(60.0 * delta)
@@ -75,6 +81,7 @@ func _draw() -> void:
 	)
 	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
 	_draw_surfer(surfer_position + surfer_bob, board_angle)
+	_draw_obstacles()
 
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
@@ -89,6 +96,106 @@ func _update_surfer_controls(delta: float) -> void:
 	var max_y := size.y * 0.84
 	surfer_position.x = clampf(surfer_position.x, min_x, max_x)
 	surfer_position.y = clampf(surfer_position.y, min_y, max_y)
+
+func _update_obstacles(delta: float) -> void:
+	var size := get_viewport_rect().size
+	obstacle_spawn_timer += delta
+	if obstacle_spawn_timer >= obstacle_spawn_interval:
+		obstacle_spawn_timer = 0.0
+		_spawn_obstacle(size)
+		obstacle_spawn_interval = randf_range(1.0, 1.9)
+
+	for obstacle in obstacles:
+		var pos: Vector2 = obstacle["position"]
+		pos.x -= obstacle["speed"] * delta
+		pos.y += sin(surf_time * obstacle["bob_speed"] + obstacle["phase"]) * obstacle["bob_amp"] * delta
+		obstacle["position"] = pos
+
+	obstacles = obstacles.filter(func(obstacle: Dictionary) -> bool:
+		return obstacle["position"].x > -140.0
+	)
+
+func _spawn_obstacle(size: Vector2) -> void:
+	var obstacle_type := "shark" if randf() < 0.45 else "jellyfish"
+	var water_min_y := size.y * 0.50
+	var water_max_y := size.y * 0.84
+	var pos := Vector2(size.x + randf_range(80.0, 220.0), randf_range(water_min_y, water_max_y))
+
+	if obstacle_type == "shark":
+		obstacles.append({
+			"type": "shark",
+			"position": pos,
+			"radius": 34.0,
+			"speed": randf_range(230.0, 340.0),
+			"phase": randf() * TAU,
+			"bob_amp": randf_range(12.0, 20.0),
+			"bob_speed": randf_range(2.0, 3.4)
+		})
+	else:
+		obstacles.append({
+			"type": "jellyfish",
+			"position": pos,
+			"radius": 28.0,
+			"speed": randf_range(170.0, 250.0),
+			"phase": randf() * TAU,
+			"bob_amp": randf_range(20.0, 36.0),
+			"bob_speed": randf_range(2.4, 4.0)
+		})
+
+func _draw_obstacles() -> void:
+	for obstacle in obstacles:
+		var pos: Vector2 = obstacle["position"]
+		if obstacle["type"] == "shark":
+			_draw_shark(pos)
+		else:
+			_draw_jellyfish(pos)
+
+func _draw_shark(pos: Vector2) -> void:
+	var body := PackedVector2Array([
+		pos + Vector2(-42.0, 0.0),
+		pos + Vector2(-8.0, -17.0),
+		pos + Vector2(26.0, -12.0),
+		pos + Vector2(42.0, 0.0),
+		pos + Vector2(26.0, 12.0),
+		pos + Vector2(-8.0, 17.0)
+	])
+	draw_colored_polygon(body, Color(0.32, 0.37, 0.44))
+
+	var fin := PackedVector2Array([
+		pos + Vector2(2.0, -12.0),
+		pos + Vector2(13.0, -42.0),
+		pos + Vector2(24.0, -14.0)
+	])
+	draw_colored_polygon(fin, Color(0.26, 0.30, 0.36))
+	draw_circle(pos + Vector2(22.0, -2.0), 2.3, Color(0.02, 0.02, 0.03))
+
+func _draw_jellyfish(pos: Vector2) -> void:
+	draw_circle(pos + Vector2(0.0, -8.0), 20.0, Color(0.82, 0.42, 0.92, 0.78))
+	draw_circle(pos + Vector2(-6.0, -12.0), 12.0, Color(0.95, 0.72, 1.0, 0.50))
+	for i in range(5):
+		var x_offset := -14.0 + (i * 7.0)
+		var wobble := sin(surf_time * 4.2 + float(i)) * 6.0
+		draw_line(
+			pos + Vector2(x_offset, 8.0),
+			pos + Vector2(x_offset + wobble, 36.0 + sin(surf_time * 3.3 + float(i) * 0.7) * 4.0),
+			Color(0.92, 0.70, 1.0, 0.75),
+			2.0
+		)
+
+func _check_obstacle_collisions() -> void:
+	var surfer_collision_center := surfer_position + Vector2(0.0, -8.0)
+	var board_collision_center := surfer_position + Vector2(0.0, 38.0)
+	var surfer_radius := 30.0
+	var board_radius := 72.0
+
+	for obstacle in obstacles:
+		var obstacle_pos: Vector2 = obstacle["position"]
+		var obstacle_radius: float = obstacle["radius"]
+		var hits_surfer := surfer_collision_center.distance_to(obstacle_pos) <= (surfer_radius + obstacle_radius)
+		var hits_board := board_collision_center.distance_to(obstacle_pos) <= (board_radius + obstacle_radius)
+		if hits_surfer or hits_board:
+			player_died()
+			return
 
 func _draw_wave_band(
 	size: Vector2,
