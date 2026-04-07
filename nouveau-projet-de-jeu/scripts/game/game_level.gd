@@ -59,20 +59,27 @@ func _draw() -> void:
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
 
-	# Fond ciel + soleil.
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.96, 0.66, 0.42))
+	# Ciel "anime realiste" en degrade.
+	_draw_gradient_rect(
+		Rect2(Vector2.ZERO, Vector2(size.x, size.y * 0.45)),
+		Color(0.99, 0.74, 0.50),
+		Color(0.45, 0.76, 0.98)
+	)
 	draw_circle(Vector2(size.x * 0.80, size.y * 0.20), min(size.x, size.y) * 0.08, Color(1.0, 0.85, 0.45, 0.9))
+	draw_circle(Vector2(size.x * 0.80, size.y * 0.20), min(size.x, size.y) * 0.12, Color(1.0, 0.75, 0.35, 0.15))
+	draw_rect(Rect2(Vector2(0.0, size.y * 0.44), Vector2(size.x, 3.0)), Color(0.86, 0.96, 1.0, 0.55))
 
 	# Mer de base.
-	draw_rect(
+	_draw_gradient_rect(
 		Rect2(Vector2(0.0, size.y * 0.45), Vector2(size.x, size.y * 0.55)),
-		Color(0.08, 0.55, 0.78)
+		Color(0.09, 0.66, 0.86),
+		Color(0.02, 0.24, 0.40)
 	)
 
-	# Vagues plus realistes (profondeur + cretes + ecume).
-	_draw_wave_band(size, size.y * 0.55, 58.0, 220.0, 0.40, Color(0.05, 0.48, 0.70), Color(0.50, 0.88, 0.98, 0.55), Color(0.97, 0.99, 1.0, 0.70))
-	_draw_wave_band(size, size.y * 0.65, 52.0, 175.0, 0.65, Color(0.04, 0.56, 0.79), Color(0.55, 0.92, 1.0, 0.50), Color(0.98, 1.0, 1.0, 0.75))
-	_draw_wave_band(size, size.y * 0.76, 42.0, 145.0, 0.92, Color(0.03, 0.44, 0.67), Color(0.48, 0.84, 0.95, 0.45), Color(1.0, 1.0, 1.0, 0.82))
+	# Vagues plus realistes + pseudo 3D (volume/ombre).
+	_draw_wave_band(size, size.y * 0.55, 58.0, 220.0, 0.40, Color(0.05, 0.48, 0.70), Color(0.50, 0.88, 0.98, 0.55), Color(0.97, 0.99, 1.0, 0.70), 13.0)
+	_draw_wave_band(size, size.y * 0.65, 52.0, 175.0, 0.65, Color(0.04, 0.56, 0.79), Color(0.55, 0.92, 1.0, 0.50), Color(0.98, 1.0, 1.0, 0.75), 17.0)
+	_draw_wave_band(size, size.y * 0.76, 42.0, 145.0, 0.92, Color(0.03, 0.44, 0.67), Color(0.48, 0.84, 0.95, 0.45), Color(1.0, 1.0, 1.0, 0.82), 22.0)
 
 	# Surfeur pilotable.
 	var surfer_bob := Vector2(
@@ -205,9 +212,11 @@ func _draw_wave_band(
 	speed: float,
 	color: Color,
 	highlight_color: Color,
-	foam_color: Color
+	foam_color: Color,
+	depth: float
 ) -> void:
 	var points := PackedVector2Array()
+	var shadow := PackedVector2Array()
 	var crest := PackedVector2Array()
 	var foam := PackedVector2Array()
 	var x: float = 0.0
@@ -215,9 +224,13 @@ func _draw_wave_band(
 		var phase := (x / wavelength) + (surf_time * speed)
 		var y := base_y + sin(phase) * amplitude + sin(phase * 2.2 + 0.8) * (amplitude * 0.22)
 		points.append(Vector2(x, y))
+		shadow.append(Vector2(x, y + depth))
 		crest.append(Vector2(x, y - 5.0))
 		foam.append(Vector2(x, y - 11.0 + sin(phase * 2.8) * 2.5))
 		x += 8.0
+	shadow.append(Vector2(size.x, size.y))
+	shadow.append(Vector2(0.0, size.y))
+	draw_colored_polygon(shadow, color.darkened(0.25))
 	points.append(Vector2(size.x, size.y))
 	points.append(Vector2(0.0, size.y))
 	draw_colored_polygon(points, color)
@@ -237,6 +250,7 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 		Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var stripe := _transform_points([
 		Vector2(-82.0, -3.0),
@@ -245,6 +259,12 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 		Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	draw_colored_polygon(_transform_points([
+		Vector2(-70.0, -10.0),
+		Vector2(68.0, -10.0),
+		Vector2(68.0, -3.0),
+		Vector2(-70.0, -3.0)
+	], position + Vector2(0.0, 40.0), board_angle), Color(0.76, 0.91, 1.0, 0.40))
 
 	var fin := _transform_points([
 		Vector2(-56.0, 10.0),
@@ -311,8 +331,48 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 	], body_offset, board_angle * 0.5)
 	draw_colored_polygon(front_leg, wetsuit_main)
 
-	draw_circle(_transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3), 14.0, skin)
-	draw_circle(_transform_point(Vector2(-4.0, -55.0), body_offset, board_angle * 0.3), 14.5, Color(0.12, 0.08, 0.06))
+	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
+	draw_circle(head_center, 14.0, skin)
+
+	# Cheveux longs blonds.
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -10.0),
+		Vector2(10.0, -12.0),
+		Vector2(14.0, -2.0),
+		Vector2(14.0, 18.0),
+		Vector2(-13.0, 20.0),
+		Vector2(-16.0, 4.0)
+	], head_center, board_angle * 0.25), Color(0.95, 0.82, 0.34))
+	draw_colored_polygon(_transform_points([
+		Vector2(8.0, 6.0),
+		Vector2(19.0, 10.0),
+		Vector2(13.0, 24.0),
+		Vector2(4.0, 18.0)
+	], head_center, board_angle * 0.25), Color(0.93, 0.78, 0.28))
+
+	# Yeux visibles.
+	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
+	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
+	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
+	draw_circle(eye_right, 2.2, Color(1.0, 1.0, 1.0))
+	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
+	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
+	draw_line(_transform_point(Vector2(-3.5, 4.0), head_center, board_angle * 0.25), _transform_point(Vector2(3.5, 4.0), head_center, board_angle * 0.25), Color(0.54, 0.31, 0.24), 1.6)
+
+func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> void:
+	var points := PackedVector2Array([
+		rect.position,
+		rect.position + Vector2(rect.size.x, 0.0),
+		rect.position + rect.size,
+		rect.position + Vector2(0.0, rect.size.y)
+	])
+	var colors := PackedColorArray([
+		top_color,
+		top_color,
+		bottom_color,
+		bottom_color
+	])
+	draw_polygon(points, colors)
 
 func _transform_points(points: Array[Vector2], offset: Vector2, angle: float) -> PackedVector2Array:
 	var output := PackedVector2Array()
