@@ -162,6 +162,7 @@ offset_bottom = 68.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
 theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_font_sizes/font_size = 34
 text = "Profil"
 
 [node name="ProfilePanel" type="PanelContainer" parent="."]
