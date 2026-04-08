@@ -10,6 +10,8 @@ extends Control
 @onready var left_house_button: Button = %LeftHouseButton
 @onready var right_house_button: Button = %RightHouseButton
 @onready var profile_info_label: Label = %ProfileInfoLabel
+@onready var profile_panel: PanelContainer = %ProfilePanel
+@onready var profile_tab_button: Button = %ProfileTabButton
 
 func _ready() -> void:
 	set_process(true)
@@ -22,6 +24,9 @@ func _ready() -> void:
 	create_account_button.pressed.connect(_on_create_account_pressed)
 	left_house_button.pressed.connect(_on_house_pressed)
 	right_house_button.pressed.connect(_on_house_pressed)
+	profile_tab_button.pressed.connect(_on_profile_tab_pressed)
+
+	profile_panel.visible = false
 
 func _process(delta: float) -> void:
 	queue_redraw()
@@ -218,6 +223,9 @@ func _on_settings_pressed() -> void:
 
 func _on_house_pressed() -> void:
 	GameManager.goto_shop_dressing()
+
+func _on_profile_tab_pressed() -> void:
+	profile_panel.visible = not profile_panel.visible
 
 func _setup_character_choices() -> void:
 	character_option.clear()

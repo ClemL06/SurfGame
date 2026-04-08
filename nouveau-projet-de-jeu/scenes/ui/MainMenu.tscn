@@ -2,6 +2,30 @@
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_tab"]
+bg_color = Color(0.24, 0.62, 0.95, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.96, 1, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_tab_hover"]
+bg_color = Color(0.30, 0.70, 1, 0.98)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.99, 1, 0.95)
+
 [node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -85,13 +109,28 @@ offset_bottom = 1140.0
 flat = true
 text = ""
 
-[node name="ProfilePanel" type="PanelContainer" parent="."]
+[node name="ProfileTabButton" type="Button" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 0
 offset_left = 20.0
 offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 68.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
+theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
+text = "Profil"
+
+[node name="ProfilePanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 76.0
 offset_right = 420.0
-offset_bottom = 330.0
+offset_bottom = 386.0
+visible = false
 
 [node name="ProfileVBox" type="VBoxContainer" parent="ProfilePanel"]
 layout_mode = 2
