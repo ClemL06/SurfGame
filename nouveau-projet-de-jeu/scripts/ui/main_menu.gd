@@ -9,6 +9,7 @@ extends Control
 @onready var account_status: Label = %AccountStatus
 @onready var left_house_button: Button = %LeftHouseButton
 @onready var right_house_button: Button = %RightHouseButton
+@onready var surfer_start_button: Button = %SurferStartButton
 @onready var profile_info_label: Label = %ProfileInfoLabel
 @onready var profile_tab_button: Button = %ProfileTabButton
 
@@ -16,6 +17,7 @@ func _ready() -> void:
 	set_process(true)
 	_setup_character_choices()
 	_load_account_into_form()
+	_update_surfer_start_button_hitbox()
 	GameManager.profile_progress_changed.connect(_on_profile_progress_changed)
 
 	play_button.pressed.connect(_on_play_pressed)
@@ -24,9 +26,11 @@ func _ready() -> void:
 	create_account_button.pressed.connect(_on_create_account_pressed)
 	left_house_button.pressed.connect(_on_house_pressed)
 	right_house_button.pressed.connect(_on_house_pressed)
+	surfer_start_button.pressed.connect(_on_surfer_start_pressed)
 	profile_tab_button.pressed.connect(_on_profile_tab_pressed)
 
 func _process(delta: float) -> void:
+	_update_surfer_start_button_hitbox()
 	queue_redraw()
 
 func _draw() -> void:
@@ -319,6 +323,12 @@ func _on_settings_pressed() -> void:
 func _on_house_pressed() -> void:
 	GameManager.goto_shop_dressing()
 
+func _on_surfer_start_pressed() -> void:
+	if not GameManager.has_account:
+		GameManager.goto_profile_page()
+		return
+	GameManager.start_game()
+
 func _on_profile_tab_pressed() -> void:
 	GameManager.goto_profile_page()
 
@@ -383,6 +393,13 @@ func _character_name_from_index(character_index: int) -> String:
 			return "Water Ninja"
 		_:
 			return "Inconnu"
+
+func _update_surfer_start_button_hitbox() -> void:
+	var size: Vector2 = get_viewport_rect().size
+	var surfer_center := Vector2(size.x * 0.56, size.y * 0.61)
+	var hitbox_size := Vector2(230.0, 220.0)
+	surfer_start_button.position = surfer_center - (hitbox_size * 0.5)
+	surfer_start_button.size = hitbox_size
 
 func _on_profile_progress_changed(_new_total_xp: int, _new_total_surfcoin: int) -> void:
 	_update_account_ui_state()
