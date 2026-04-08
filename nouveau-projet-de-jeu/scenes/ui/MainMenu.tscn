@@ -80,29 +80,42 @@ horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="SafeArea/Margin/VBox"]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(320, 0)
 theme_override_constants/separation = 16
 
 [node name="PlayButton" type="Button" parent="SafeArea/Margin/VBox/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Jouer"
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 90)
+theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
+theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_font_sizes/font_size = 36
+text = "Jouer"
+custom_minimum_size = Vector2(320, 90)
 
 [node name="ShopButton" type="Button" parent="SafeArea/Margin/VBox/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Boutique/Skins"
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 90)
+theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
+theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_font_sizes/font_size = 36
+text = "Boutique/Skins"
+custom_minimum_size = Vector2(320, 90)
 
 [node name="SettingsButton" type="Button" parent="SafeArea/Margin/VBox/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Paramètres"
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 90)
+theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
+theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
+theme_override_font_sizes/font_size = 36
+text = "Paramètres"
+custom_minimum_size = Vector2(320, 90)
 
 [node name="LeftHouseButton" type="Button" parent="."]
 unique_name_in_owner = true
