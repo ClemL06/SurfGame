@@ -8,6 +8,9 @@ signal high_score_changed(new_high_score: int)
 
 var state: int = GameState.MENU
 var high_score: int = 0
+var player_pseudo: String = ""
+var selected_character_index: int = 0
+var has_account: bool = false
 
 const SAVE_PATH : String = "user://save.json"
 
@@ -31,6 +34,11 @@ func start_game() -> void:
 	set_state(GameState.PLAYING)
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/game/GameLevel.tscn")
+
+func goto_shop_dressing() -> void:
+	set_state(GameState.MENU)
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/ShopDressing.tscn")
 
 func pause_game() -> void:
 	if state != GameState.PLAYING:
@@ -57,8 +65,19 @@ func _try_set_high_score(score: int) -> void:
 	save_game()
 	high_score_changed.emit(high_score)
 
+func create_or_update_account(pseudo: String, character_index: int) -> void:
+	player_pseudo = pseudo.strip_edges()
+	selected_character_index = maxi(0, character_index)
+	has_account = not player_pseudo.is_empty()
+	save_game()
+
 func save_game() -> void:
-	var data : Dictionary = {"high_score": high_score}
+	var data : Dictionary = {
+		"high_score": high_score,
+		"player_pseudo": player_pseudo,
+		"selected_character_index": selected_character_index,
+		"has_account": has_account
+	}
 	var f : FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
 		return
@@ -82,6 +101,12 @@ func load_game() -> void:
 	
 	if typeof(parsed) != TYPE_DICTIONARY:
 		high_score = 0
+		player_pseudo = ""
+		selected_character_index = 0
+		has_account = false
 		return
 
 	high_score = int(parsed.get("high_score", 0))
+	player_pseudo = str(parsed.get("player_pseudo", ""))
+	selected_character_index = maxi(0, int(parsed.get("selected_character_index", 0)))
+	has_account = bool(parsed.get("has_account", false)) and not player_pseudo.is_empty()

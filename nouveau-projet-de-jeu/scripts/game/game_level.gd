@@ -10,6 +10,10 @@ var surfer_speed: float = 420.0
 var obstacles: Array[Dictionary] = []
 var obstacle_spawn_timer: float = 0.0
 var obstacle_spawn_interval: float = 1.5
+var xp: int = 0
+var surfcoin: int = 0
+var xp_timer: float = 0.0
+var surfcoin_timer: float = 0.0
 
 var hud: HUD
 var pause_menu: PauseMenu
@@ -25,6 +29,8 @@ func _ready() -> void:
 	add_child(hud)
 	hud.pause_pressed.connect(_on_pause_pressed)
 	hud.set_score(score)
+	hud.set_xp(xp)
+	hud.set_surfcoin(surfcoin)
 
 	pause_menu = preload("res://scenes/ui/PauseMenu.tscn").instantiate() as PauseMenu
 	add_child(pause_menu)
@@ -49,10 +55,24 @@ func _process(delta: float) -> void:
 	_update_surfer_controls(delta)
 	_update_obstacles(delta)
 	_check_obstacle_collisions()
+	_update_rewards(delta)
 
 	# Score simple (temps). Toi peut remplacer par distance plus tard.
 	score += int(60.0 * delta)
 	hud.set_score(score)
+
+func _update_rewards(delta: float) -> void:
+	xp_timer += delta
+	while xp_timer >= 10.0:
+		xp_timer -= 10.0
+		xp += 1
+		hud.set_xp(xp)
+
+	surfcoin_timer += delta
+	while surfcoin_timer >= 3.0:
+		surfcoin_timer -= 3.0
+		surfcoin += 1
+		hud.set_surfcoin(surfcoin)
 
 func _draw() -> void:
 	var size: Vector2 = get_viewport_rect().size

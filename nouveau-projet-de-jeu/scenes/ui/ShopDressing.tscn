@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/shop_dressing.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble"]
+bg_color = Color(0.96, 0.98, 1, 0.9)
+corner_radius_top_left = 34
+corner_radius_top_right = 34
+corner_radius_bottom_right = 34
+corner_radius_bottom_left = 34
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.63, 0.93, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble_active"]
+bg_color = Color(0.33, 0.69, 0.98, 0.95)
+corner_radius_top_left = 34
+corner_radius_top_right = 34
+corner_radius_bottom_right = 34
+corner_radius_bottom_left = 34
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.90, 0.97, 1, 0.95)
+
+[node name="ShopDressing" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -280.0
+offset_top = 20.0
+offset_right = 280.0
+offset_bottom = 66.0
+text = "Interieur Maison - Dressing"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -320.0
+offset_top = 66.0
+offset_right = 320.0
+offset_bottom = 102.0
+text = "Pseudo: - | Personnage: -"
+horizontal_alignment = 1
+
+[node name="CenterCharacter" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -145.0
+offset_top = -195.0
+offset_right = 145.0
+offset_bottom = 175.0
+
+[node name="CenterVBox" type="VBoxContainer" parent="CenterCharacter"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CenterLabel" type="Label" parent="CenterCharacter/CenterVBox"]
+layout_mode = 2
+text = "Personnage"
+horizontal_alignment = 1
+
+[node name="CharacterOption" type="OptionButton" parent="CenterCharacter/CenterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SaveCharacterButton" type="Button" parent="CenterCharacter/CenterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Equiper ce personnage"
+
+[node name="ShopPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -165.0
+offset_top = -50.0
+offset_right = 165.0
+offset_bottom = 130.0
+visible = false
+
+[node name="ShopLabel" type="Label" parent="ShopPanel"]
+layout_mode = 2
+text = "Boutique ouverte\nSkins exclusifs bientot."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TabDressingButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -120.0
+offset_right = -150.0
+offset_bottom = -48.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_bubble_active")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bubble")
+text = "Dressing"
+
+[node name="TabShopButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 150.0
+offset_top = -120.0
+offset_right = 320.0
+offset_bottom = -48.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bubble_active")
+text = "Boutique"
+
+[node name="BuyButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 180.0
+offset_top = 45.0
+offset_right = 350.0
+offset_bottom = 117.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bubble_active")
+text = "Acheter Skin"
+
+[node name="BackButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 198.0
+offset_bottom = 90.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bubble")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bubble_active")
+text = "Retour au menu"
+
+[node name="HintLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -64.0
+offset_right = -24.0
+offset_bottom = -22.0
+text = "Choisis un onglet bulle autour du personnage central."
+horizontal_alignment = 1
