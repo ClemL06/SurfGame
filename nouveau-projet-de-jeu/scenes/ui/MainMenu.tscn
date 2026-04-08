@@ -37,39 +37,6 @@ layout_mode = 2
 text = "SURF RUNNER"
 horizontal_alignment = 1
 
-[node name="AccountPanel" type="PanelContainer" parent="SafeArea/Margin/VBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="AccountVBox" type="VBoxContainer" parent="SafeArea/Margin/VBox/AccountPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="AccountTitle" type="Label" parent="SafeArea/Margin/VBox/AccountPanel/AccountVBox"]
-layout_mode = 2
-text = "Creer ton compte"
-horizontal_alignment = 1
-
-[node name="PseudoInput" type="LineEdit" parent="SafeArea/Margin/VBox/AccountPanel/AccountVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "Entre ton pseudo"
-
-[node name="CharacterOption" type="OptionButton" parent="SafeArea/Margin/VBox/AccountPanel/AccountVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="CreateAccountButton" type="Button" parent="SafeArea/Margin/VBox/AccountPanel/AccountVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Creer le compte"
-
-[node name="AccountStatus" type="Label" parent="SafeArea/Margin/VBox/AccountPanel/AccountVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Compte non cree"
-horizontal_alignment = 1
-
 [node name="Buttons" type="VBoxContainer" parent="SafeArea/Margin/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -117,3 +84,43 @@ offset_right = 645.0
 offset_bottom = 1140.0
 flat = true
 text = ""
+
+[node name="ProfilePanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 420.0
+offset_bottom = 330.0
+
+[node name="ProfileVBox" type="VBoxContainer" parent="ProfilePanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProfileTitleLabel" type="Label" parent="ProfilePanel/ProfileVBox"]
+layout_mode = 2
+text = "Profil"
+
+[node name="ProfileInfoLabel" type="Label" parent="ProfilePanel/ProfileVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pseudo: - | Perso: -"
+
+[node name="PseudoInput" type="LineEdit" parent="ProfilePanel/ProfileVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Entre ton pseudo"
+
+[node name="CharacterOption" type="OptionButton" parent="ProfilePanel/ProfileVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CreateAccountButton" type="Button" parent="ProfilePanel/ProfileVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Creer le compte"
+
+[node name="AccountStatus" type="Label" parent="ProfilePanel/ProfileVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Compte non cree"

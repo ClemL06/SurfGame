@@ -9,6 +9,7 @@ extends Control
 @onready var account_status: Label = %AccountStatus
 @onready var left_house_button: Button = %LeftHouseButton
 @onready var right_house_button: Button = %RightHouseButton
+@onready var profile_info_label: Label = %ProfileInfoLabel
 
 func _ready() -> void:
 	set_process(true)
@@ -250,6 +251,24 @@ func _update_account_ui_state() -> void:
 			GameManager.selected_character_index + 1
 		]
 		create_account_button.text = "Mettre a jour le compte"
+		profile_info_label.text = "Pseudo: %s | Perso: %s" % [
+			GameManager.player_pseudo,
+			_character_name_from_index(GameManager.selected_character_index)
+		]
 	else:
 		account_status.text = "Compte non cree"
 		create_account_button.text = "Creer le compte"
+		profile_info_label.text = "Pseudo: Invite | Perso: -"
+
+func _character_name_from_index(character_index: int) -> String:
+	match character_index:
+		0:
+			return "Surfeur Classique"
+		1:
+			return "Surfeuse Pro"
+		2:
+			return "Rider Neon"
+		3:
+			return "Water Ninja"
+		_:
+			return "Inconnu"

@@ -10,10 +10,12 @@ var surfer_speed: float = 420.0
 var obstacles: Array[Dictionary] = []
 var obstacle_spawn_timer: float = 0.0
 var obstacle_spawn_interval: float = 1.5
+var coins: Array[Dictionary] = []
+var coin_spawn_timer: float = 0.0
+var coin_spawn_interval: float = 1.2
 var xp: int = 0
 var surfcoin: int = 0
 var xp_timer: float = 0.0
-var surfcoin_timer: float = 0.0
 
 var hud: HUD
 var pause_menu: PauseMenu
@@ -54,7 +56,9 @@ func _process(delta: float) -> void:
 
 	_update_surfer_controls(delta)
 	_update_obstacles(delta)
+	_update_coins(delta)
 	_check_obstacle_collisions()
+	_collect_coins()
 	_update_rewards(delta)
 
 	# Score simple (temps). Toi peut remplacer par distance plus tard.
@@ -67,12 +71,6 @@ func _update_rewards(delta: float) -> void:
 		xp_timer -= 10.0
 		xp += 1
 		hud.set_xp(xp)
-
-	surfcoin_timer += delta
-	while surfcoin_timer >= 3.0:
-		surfcoin_timer -= 3.0
-		surfcoin += 1
-		hud.set_surfcoin(surfcoin)
 
 func _draw() -> void:
 	var size: Vector2 = get_viewport_rect().size
@@ -109,6 +107,7 @@ func _draw() -> void:
 	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
 	_draw_surfer(surfer_position + surfer_bob, board_angle)
 	_draw_obstacles()
+	_draw_coins()
 
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
@@ -141,6 +140,37 @@ func _update_obstacles(delta: float) -> void:
 	obstacles = obstacles.filter(func(obstacle: Dictionary) -> bool:
 		return obstacle["position"].x > -140.0
 	)
+
+func _update_coins(delta: float) -> void:
+	var size := get_viewport_rect().size
+	coin_spawn_timer += delta
+	if coin_spawn_timer >= coin_spawn_interval:
+		coin_spawn_timer = 0.0
+		_spawn_coin(size)
+		coin_spawn_interval = randf_range(0.9, 1.6)
+
+	for coin in coins:
+		var pos: Vector2 = coin["position"]
+		pos.x -= coin["speed"] * delta
+		pos.y += sin(surf_time * coin["bob_speed"] + coin["phase"]) * coin["bob_amp"] * delta
+		coin["position"] = pos
+
+	coins = coins.filter(func(coin: Dictionary) -> bool:
+		return coin["position"].x > -90.0
+	)
+
+func _spawn_coin(size: Vector2) -> void:
+	var water_min_y := size.y * 0.50
+	var water_max_y := size.y * 0.84
+	var pos := Vector2(size.x + randf_range(80.0, 220.0), randf_range(water_min_y, water_max_y))
+	coins.append({
+		"position": pos,
+		"radius": 14.0,
+		"speed": randf_range(185.0, 285.0),
+		"phase": randf() * TAU,
+		"bob_amp": randf_range(10.0, 24.0),
+		"bob_speed": randf_range(2.2, 4.1)
+	})
 
 func _spawn_obstacle(size: Vector2) -> void:
 	var obstacle_type := "shark" if randf() < 0.45 else "jellyfish"
@@ -176,6 +206,16 @@ func _draw_obstacles() -> void:
 			_draw_shark(pos)
 		else:
 			_draw_jellyfish(pos)
+
+func _draw_coins() -> void:
+	for coin in coins:
+		_draw_coin(coin["position"])
+
+func _draw_coin(pos: Vector2) -> void:
+	draw_circle(pos, 14.0, Color(0.96, 0.76, 0.18))
+	draw_circle(pos, 10.5, Color(0.99, 0.88, 0.31))
+	draw_circle(pos + Vector2(-3.0, -3.0), 4.0, Color(1.0, 0.95, 0.55, 0.65))
+	draw_string(ThemeDB.fallback_font, pos + Vector2(-10.0, 5.0), "SC", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 14, Color(0.55, 0.34, 0.07))
 
 func _draw_shark(pos: Vector2) -> void:
 	var body := PackedVector2Array([
@@ -231,6 +271,36 @@ func _check_obstacle_collisions() -> void:
 		if hits_surfer or hits_board:
 			player_died()
 			return
+
+func _collect_coins() -> void:
+	var surfer_collision_center := surfer_position + Vector2(0.0, -16.0)
+	var surfer_radius := 20.0
+
+	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
+	var board_center := surfer_position + Vector2(0.0, 40.0)
+	var board_half_length := 86.0
+	var board_thickness_radius := 9.0
+	var board_axis := Vector2(cos(board_angle), sin(board_angle))
+	var board_start := board_center - board_axis * board_half_length
+	var board_end := board_center + board_axis * board_half_length
+
+	var collected_count: int = 0
+	var remaining: Array[Dictionary] = []
+	for coin in coins:
+		var coin_pos: Vector2 = coin["position"]
+		var coin_radius: float = coin["radius"]
+		var hits_surfer := surfer_collision_center.distance_to(coin_pos) <= (surfer_radius + coin_radius)
+		var coin_to_board := _distance_point_to_segment(coin_pos, board_start, board_end)
+		var hits_board := coin_to_board <= (board_thickness_radius + coin_radius)
+		if hits_surfer or hits_board:
+			collected_count += 1
+		else:
+			remaining.append(coin)
+
+	if collected_count > 0:
+		surfcoin += collected_count
+		hud.set_surfcoin(surfcoin)
+	coins = remaining
 
 func _distance_point_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab := b - a
