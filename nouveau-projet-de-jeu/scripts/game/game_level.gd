@@ -354,8 +354,133 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 		_draw_surfer_female(position, board_angle)
 	elif idx == 2:
 		_draw_surfer_neon(position, board_angle)
+	elif idx == 3:
+		_draw_surfer_water_ninja(position, board_angle)
 	else:
 		_draw_surfer_male(position, board_angle)
+
+func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
+	# Skin Water Ninja: bleu clair, indépendant des autres skins.
+	var board_shape := _transform_points([
+		Vector2(-95.0, 0.0),
+		Vector2(-70.0, -16.0),
+		Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0),
+		Vector2(92.0, 0.0),
+		Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0),
+		Vector2(-70.0, 16.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
+
+	var ninja_blue := Color(0.46, 0.90, 1.0)
+	var ninja_blue_dark := Color(0.14, 0.52, 0.78)
+	var ink := Color(0.03, 0.04, 0.06)
+
+	# Liseré bleu sur la planche.
+	var board_stripe := _transform_points([
+		Vector2(-82.0, -3.0),
+		Vector2(80.0, -3.0),
+		Vector2(80.0, 3.0),
+		Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_stripe, ninja_blue)
+	draw_polyline(board_stripe, ninja_blue_dark, 2.0, true)
+
+	# Personnage.
+	var body_offset := position + Vector2(0.0, -4.0)
+	var skin := Color(0.93, 0.78, 0.64)
+
+	# Combinaison bleu clair.
+	var torso := _transform_points([
+		Vector2(-14.0, -44.0),
+		Vector2(12.0, -44.0),
+		Vector2(18.0, -10.0),
+		Vector2(11.0, 28.0),
+		Vector2(-11.0, 30.0),
+		Vector2(-18.0, -8.0)
+	], body_offset, board_angle * 0.4)
+	draw_colored_polygon(torso, ninja_blue)
+
+	# Motif "ninja" (traits/ceinture) en bleu foncé.
+	var belt := _transform_points([
+		Vector2(-12.0, 2.0),
+		Vector2(12.0, 2.0),
+		Vector2(12.0, 8.0),
+		Vector2(-12.0, 8.0)
+	], body_offset, board_angle * 0.4)
+	draw_colored_polygon(belt, ninja_blue_dark)
+	draw_circle(_transform_point(Vector2(0.0, 5.0), body_offset, board_angle * 0.4), 2.0, ink)
+
+	var back_arm := _transform_points([
+		Vector2(11.0, -32.0),
+		Vector2(22.0, -26.0),
+		Vector2(26.0, -7.0),
+		Vector2(15.0, -10.0)
+	], body_offset, board_angle * 0.6)
+	draw_colored_polygon(back_arm, ninja_blue)
+	draw_circle(_transform_point(Vector2(24.0, -3.0), body_offset, board_angle * 0.6), 5.4, skin)
+
+	var front_arm := _transform_points([
+		Vector2(-14.0, -26.0),
+		Vector2(-32.0, -12.0),
+		Vector2(-28.0, 0.0),
+		Vector2(-10.0, -14.0)
+	], body_offset, board_angle * 0.6)
+	draw_colored_polygon(front_arm, ninja_blue)
+	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
+
+	# Brassards.
+	draw_circle(_transform_point(Vector2(18.0, -18.0), body_offset, board_angle * 0.6), 3.2, ninja_blue_dark)
+	draw_circle(_transform_point(Vector2(-22.0, -14.0), body_offset, board_angle * 0.6), 3.2, ninja_blue_dark)
+
+	var back_leg := _transform_points([
+		Vector2(5.0, 24.0),
+		Vector2(14.0, 22.0),
+		Vector2(22.0, 50.0),
+		Vector2(11.0, 52.0)
+	], body_offset, board_angle * 0.5)
+	draw_colored_polygon(back_leg, ninja_blue)
+
+	var front_leg := _transform_points([
+		Vector2(-12.0, 24.0),
+		Vector2(-3.0, 24.0),
+		Vector2(4.0, 50.0),
+		Vector2(-10.0, 50.0)
+	], body_offset, board_angle * 0.5)
+	draw_colored_polygon(front_leg, ninja_blue)
+
+	# Jambières.
+	var shin := _transform_points([
+		Vector2(-6.0, 34.0),
+		Vector2(6.0, 34.0),
+		Vector2(6.0, 40.0),
+		Vector2(-6.0, 40.0)
+	], body_offset, board_angle * 0.5)
+	draw_colored_polygon(shin, ninja_blue_dark)
+
+	# Tête.
+	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
+	draw_circle(head_center, 14.0, skin)
+
+	# Cheveux courts.
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -14.0),
+		Vector2(12.0, -14.0),
+		Vector2(16.0, -6.0),
+		Vector2(12.0, -1.0),
+		Vector2(-12.0, -1.0),
+		Vector2(-16.0, -6.0)
+	], head_center, board_angle * 0.25), Color(0.12, 0.10, 0.12))
+
+	# Yeux.
+	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
+	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
+	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
+	draw_circle(eye_right, 2.2, Color(1.0, 1.0, 1.0))
+	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
+	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
 
 func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
 	# Skin Rider Neon: combinaison jaune flashy + traits noirs (indépendant des autres skins).
