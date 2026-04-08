@@ -75,10 +75,6 @@ func _draw() -> void:
 	_draw_surfboard(Vector2(shelf.position.x + 136.0, shelf.position.y + 46.0), 0.70, 0.06, Color(0.99, 0.87, 0.58), Color(0.91, 0.39, 0.20))
 	_draw_surfboard(Vector2(shelf.position.x + 212.0, shelf.position.y + 44.0), 0.72, -0.02, Color(0.84, 0.98, 0.90), Color(0.19, 0.70, 0.42))
 
-	# Personnage central (hero image).
-	var hero_center := Vector2(size.x * 0.5, size.y * 0.52)
-	_draw_central_character(hero_center)
-
 func _setup_character_choices() -> void:
 	character_option.clear()
 	character_option.add_item("Surfeur Classique")
