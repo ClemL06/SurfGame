@@ -172,35 +172,84 @@ func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> 
 	draw_polygon(points, colors)
 
 func _draw_central_character(center: Vector2) -> void:
+	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), autres: fallback
+	var idx: int = GameManager.selected_character_index
+	if idx == 1:
+		_draw_central_surfer_female(center)
+	else:
+		_draw_central_surfer_male(center)
+
+func _draw_central_surfer_female(center: Vector2) -> void:
 	# Ombre.
 	draw_circle(center + Vector2(0.0, 128.0), 56.0, Color(0.05, 0.04, 0.03, 0.22))
-	# Tete / cheveux.
-	draw_circle(center + Vector2(0.0, -116.0), 28.0, Color(0.95, 0.81, 0.68))
-	draw_colored_polygon(PackedVector2Array([
-		center + Vector2(-30.0, -132.0),
-		center + Vector2(24.0, -136.0),
-		center + Vector2(34.0, -114.0),
-		center + Vector2(26.0, -74.0),
-		center + Vector2(-30.0, -70.0),
-		center + Vector2(-36.0, -102.0)
-	]), Color(0.95, 0.82, 0.36))
+
+	# Tête + cheveux bouclés.
+	var skin := Color(0.95, 0.81, 0.68)
+	draw_circle(center + Vector2(0.0, -116.0), 28.0, skin)
+	var hair_dark := Color(0.23, 0.14, 0.09)
+	var hair_light := Color(0.34, 0.22, 0.14)
+	for p in [
+		Vector2(-26.0, -130.0), Vector2(-14.0, -142.0), Vector2(0.0, -146.0), Vector2(14.0, -142.0), Vector2(26.0, -130.0),
+		Vector2(-30.0, -114.0), Vector2(30.0, -114.0),
+		Vector2(-24.0, -92.0), Vector2(24.0, -92.0),
+		Vector2(-12.0, -82.0), Vector2(12.0, -82.0)
+	]:
+		draw_circle(center + p, 10.0, hair_dark)
+	for p in [
+		Vector2(-18.0, -138.0), Vector2(18.0, -138.0),
+		Vector2(-32.0, -122.0), Vector2(32.0, -122.0),
+		Vector2(-26.0, -98.0), Vector2(26.0, -98.0)
+	]:
+		draw_circle(center + p, 6.5, hair_light)
 	draw_circle(center + Vector2(-9.0, -117.0), 3.3, Color(1, 1, 1))
 	draw_circle(center + Vector2(9.0, -117.0), 3.3, Color(1, 1, 1))
 	draw_circle(center + Vector2(-8.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
 	draw_circle(center + Vector2(10.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
 
-	# Combinaison.
+	# Combinaison (silhouette mince).
+	var wetsuit_main := Color(0.11, 0.14, 0.20)
+	var wetsuit_panel := Color(0.24, 0.65, 0.95)
 	draw_colored_polygon(PackedVector2Array([
-		center + Vector2(-32.0, -82.0),
-		center + Vector2(32.0, -82.0),
-		center + Vector2(44.0, 8.0),
-		center + Vector2(26.0, 96.0),
-		center + Vector2(-26.0, 96.0),
-		center + Vector2(-44.0, 8.0)
-	]), Color(0.11, 0.14, 0.20))
+		center + Vector2(-26.0, -82.0),
+		center + Vector2(26.0, -82.0),
+		center + Vector2(36.0, 6.0),
+		center + Vector2(22.0, 98.0),
+		center + Vector2(-22.0, 98.0),
+		center + Vector2(-36.0, 6.0)
+	]), wetsuit_main)
 	draw_colored_polygon(PackedVector2Array([
-		center + Vector2(-13.0, -70.0),
-		center + Vector2(13.0, -70.0),
-		center + Vector2(18.0, 58.0),
-		center + Vector2(-18.0, 58.0)
-	]), Color(0.24, 0.65, 0.95))
+		center + Vector2(-11.0, -72.0),
+		center + Vector2(11.0, -72.0),
+		center + Vector2(16.0, 62.0),
+		center + Vector2(-16.0, 62.0)
+	]), wetsuit_panel)
+
+func _draw_central_surfer_male(center: Vector2) -> void:
+	# Ombre.
+	draw_circle(center + Vector2(0.0, 128.0), 58.0, Color(0.05, 0.04, 0.03, 0.22))
+
+	# Tete / cheveux (brun, courts).
+	var skin := Color(0.93, 0.78, 0.64)
+	draw_circle(center + Vector2(0.0, -116.0), 28.0, skin)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -140.0),
+		center + Vector2(26.0, -140.0),
+		center + Vector2(30.0, -120.0),
+		center + Vector2(0.0, -126.0),
+		center + Vector2(-30.0, -120.0)
+	]), Color(0.16, 0.10, 0.06))
+	draw_circle(center + Vector2(-9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(-8.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+	draw_circle(center + Vector2(10.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+
+	# Combinaison full black + silhouette mince.
+	var wetsuit_main := Color(0.03, 0.03, 0.04)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, -84.0),
+		center + Vector2(28.0, -84.0),
+		center + Vector2(38.0, 8.0),
+		center + Vector2(24.0, 100.0),
+		center + Vector2(-24.0, 100.0),
+		center + Vector2(-38.0, 8.0)
+	]), wetsuit_main)
