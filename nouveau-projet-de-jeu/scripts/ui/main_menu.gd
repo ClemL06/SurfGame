@@ -9,6 +9,7 @@ extends Control
 @onready var account_status: Label = %AccountStatus
 @onready var left_house_button: Button = %LeftHouseButton
 @onready var right_house_button: Button = %RightHouseButton
+@onready var surfer_start_button: Button = %SurferStartButton
 @onready var profile_info_label: Label = %ProfileInfoLabel
 @onready var profile_tab_button: Button = %ProfileTabButton
 
@@ -16,6 +17,7 @@ func _ready() -> void:
 	set_process(true)
 	_setup_character_choices()
 	_load_account_into_form()
+	_update_surfer_start_button_hitbox()
 	GameManager.profile_progress_changed.connect(_on_profile_progress_changed)
 
 	play_button.pressed.connect(_on_play_pressed)
@@ -24,9 +26,11 @@ func _ready() -> void:
 	create_account_button.pressed.connect(_on_create_account_pressed)
 	left_house_button.pressed.connect(_on_house_pressed)
 	right_house_button.pressed.connect(_on_house_pressed)
+	surfer_start_button.pressed.connect(_on_surfer_start_pressed)
 	profile_tab_button.pressed.connect(_on_profile_tab_pressed)
 
 func _process(delta: float) -> void:
+	_update_surfer_start_button_hitbox()
 	queue_redraw()
 
 func _draw() -> void:
@@ -40,12 +44,12 @@ func _draw() -> void:
 		Color(0.48, 0.82, 1.0)
 	)
 	_draw_gradient_rect(
-		Rect2(Vector2(0.0, size.y * 0.58), Vector2(size.x, size.y * 0.22)),
+		Rect2(Vector2(0.0, size.y * 0.58), Vector2(size.x, size.y * 0.14)),
 		Color(0.12, 0.63, 0.83),
 		Color(0.03, 0.36, 0.57)
 	)
 	_draw_gradient_rect(
-		Rect2(Vector2(0.0, size.y * 0.80), Vector2(size.x, size.y * 0.20)),
+		Rect2(Vector2(0.0, size.y * 0.72), Vector2(size.x, size.y * 0.28)),
 		Color(0.97, 0.86, 0.58),
 		Color(0.90, 0.74, 0.44)
 	)
@@ -53,12 +57,16 @@ func _draw() -> void:
 	draw_circle(Vector2(size.x * 0.86, size.y * 0.18), size.y * 0.06, Color(1.0, 0.89, 0.56, 0.95))
 	draw_circle(Vector2(size.x * 0.86, size.y * 0.18), size.y * 0.09, Color(1.0, 0.75, 0.35, 0.20))
 	draw_rect(Rect2(Vector2(0.0, size.y * 0.575), Vector2(size.x, 3.0)), Color(0.90, 0.98, 1.0, 0.45))
+	_draw_home_wave_band(size, size.y * 0.62, 22.0, 180.0, 0.65, Color(0.08, 0.59, 0.81), Color(0.86, 0.98, 1.0, 0.62), size.y * 0.72)
+	_draw_home_wave_band(size, size.y * 0.68, 18.0, 150.0, 0.92, Color(0.05, 0.49, 0.72), Color(0.90, 1.0, 1.0, 0.58), size.y * 0.72)
+	draw_rect(Rect2(Vector2(0.0, size.y * 0.72), Vector2(size.x, 4.0)), Color(1.0, 0.97, 0.82, 0.70))
 
 	_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.0)
 	_draw_hut(Vector2(size.x * 0.74, size.y * 0.84), 0.85)
 	_draw_palm(Vector2(size.x * 0.08, size.y * 0.84), 1.2, -0.12)
 	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.0, 0.14)
 	_draw_palm(Vector2(size.x * 0.62, size.y * 0.83), 0.75, 0.08)
+	_draw_home_surfer(Vector2(size.x * 0.56, size.y * 0.61), sin(Time.get_ticks_msec() * 0.0016) * 0.12)
 
 func _draw_hut(base: Vector2, scale_factor: float) -> void:
 	var wall_w := 120.0 * scale_factor
@@ -207,6 +215,99 @@ func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> 
 	var colors := PackedColorArray([top_color, top_color, bottom_color, bottom_color])
 	draw_polygon(points, colors)
 
+func _draw_home_wave_band(
+	size: Vector2,
+	base_y: float,
+	amplitude: float,
+	wavelength: float,
+	speed: float,
+	color: Color,
+	foam_color: Color,
+	water_bottom: float
+) -> void:
+	var t: float = float(Time.get_ticks_msec()) * 0.001
+	var points := PackedVector2Array()
+	var foam := PackedVector2Array()
+	var x: float = 0.0
+	while x <= size.x + 8.0:
+		var phase := (x / wavelength) + (t * speed)
+		var y := base_y + sin(phase) * amplitude + sin(phase * 2.1 + 0.8) * (amplitude * 0.20)
+		points.append(Vector2(x, y))
+		foam.append(Vector2(x, y - 7.0 + sin(phase * 2.9) * 1.6))
+		x += 8.0
+	points.append(Vector2(size.x, water_bottom))
+	points.append(Vector2(0.0, water_bottom))
+	draw_colored_polygon(points, color)
+	draw_polyline(foam, foam_color, 2.0, true)
+
+func _draw_home_surfer(center: Vector2, angle: float) -> void:
+	# Planche style gameplay.
+	var board := _transform_points_local([
+		Vector2(-95.0, 0.0),
+		Vector2(-70.0, -16.0),
+		Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0),
+		Vector2(92.0, 0.0),
+		Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0),
+		Vector2(-70.0, 16.0)
+	], center + Vector2(0.0, 38.0), angle, 0.72)
+	draw_colored_polygon(board, Color(0.97, 0.98, 1.0))
+	draw_polyline(board, Color(0.73, 0.80, 0.90), 1.8, true)
+
+	var stripe := _transform_points_local([
+		Vector2(-82.0, -3.0),
+		Vector2(80.0, -3.0),
+		Vector2(80.0, 3.0),
+		Vector2(-82.0, 3.0)
+	], center + Vector2(0.0, 38.0), angle, 0.72)
+	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+
+	var body_center := center + Vector2(0.0, 0.0)
+	var wetsuit_main := Color(0.09, 0.11, 0.16)
+	var wetsuit_panel := Color(0.20, 0.62, 0.92)
+	var skin := Color(0.93, 0.78, 0.64)
+
+	draw_colored_polygon(_transform_points_local([
+		Vector2(-14.0, -38.0),
+		Vector2(12.0, -38.0),
+		Vector2(18.0, -7.0),
+		Vector2(12.0, 24.0),
+		Vector2(-12.0, 26.0),
+		Vector2(-18.0, -7.0)
+	], body_center, angle * 0.4, 1.0), wetsuit_main)
+	draw_colored_polygon(_transform_points_local([
+		Vector2(-6.0, -30.0),
+		Vector2(6.0, -30.0),
+		Vector2(9.0, 12.0),
+		Vector2(-9.0, 12.0)
+	], body_center, angle * 0.4, 1.0), wetsuit_panel)
+
+	draw_line(body_center + Vector2(-10.0, -18.0), body_center + Vector2(-28.0, -6.0), wetsuit_main, 4.0)
+	draw_line(body_center + Vector2(10.0, -18.0), body_center + Vector2(28.0, -8.0), wetsuit_main, 4.0)
+	draw_line(body_center + Vector2(-4.0, 24.0), body_center + Vector2(-18.0, 46.0), wetsuit_main, 4.4)
+	draw_line(body_center + Vector2(4.0, 24.0), body_center + Vector2(16.0, 45.0), wetsuit_main, 4.4)
+
+	var head := body_center + Vector2(0.0, -48.0)
+	draw_circle(head, 13.0, skin)
+	draw_colored_polygon(_transform_points_local([
+		Vector2(-13.0, -10.0),
+		Vector2(10.0, -12.0),
+		Vector2(14.0, -3.0),
+		Vector2(13.0, 17.0),
+		Vector2(-12.0, 18.0),
+		Vector2(-16.0, 2.0)
+	], head, angle * 0.24, 1.0), Color(0.95, 0.82, 0.34))
+	draw_circle(head + Vector2(-4.5, -2.0), 1.8, Color(1, 1, 1))
+	draw_circle(head + Vector2(4.5, -2.0), 1.8, Color(1, 1, 1))
+	draw_circle(head + Vector2(-4.0, -1.6), 0.9, Color(0.15, 0.28, 0.55))
+	draw_circle(head + Vector2(5.0, -1.6), 0.9, Color(0.15, 0.28, 0.55))
+
+	for i in range(6):
+		var splash_x := -62.0 + float(i) * 24.0
+		var t: float = float(Time.get_ticks_msec()) * 0.002
+		draw_circle(center + Vector2(splash_x, 42.0 + sin(float(i) + t) * 2.0), 2.8, Color(1.0, 1.0, 1.0, 0.80))
+
 func _on_play_pressed() -> void:
 	if not GameManager.has_account:
 		account_status.text = "Cree un compte avant de jouer."
@@ -221,6 +322,12 @@ func _on_settings_pressed() -> void:
 
 func _on_house_pressed() -> void:
 	GameManager.goto_shop_dressing()
+
+func _on_surfer_start_pressed() -> void:
+	if not GameManager.has_account:
+		GameManager.goto_profile_page()
+		return
+	GameManager.start_game()
 
 func _on_profile_tab_pressed() -> void:
 	GameManager.goto_profile_page()
@@ -286,6 +393,13 @@ func _character_name_from_index(character_index: int) -> String:
 			return "Water Ninja"
 		_:
 			return "Inconnu"
+
+func _update_surfer_start_button_hitbox() -> void:
+	var size: Vector2 = get_viewport_rect().size
+	var surfer_center := Vector2(size.x * 0.56, size.y * 0.61)
+	var hitbox_size := Vector2(230.0, 220.0)
+	surfer_start_button.position = surfer_center - (hitbox_size * 0.5)
+	surfer_start_button.size = hitbox_size
 
 func _on_profile_progress_changed(_new_total_xp: int, _new_total_surfcoin: int) -> void:
 	_update_account_ui_state()
