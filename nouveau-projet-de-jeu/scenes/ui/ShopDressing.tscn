@@ -26,6 +26,30 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.90, 0.97, 1, 0.95)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_to_menu"]
+bg_color = Color(0.24, 0.62, 0.95, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.96, 1, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_to_menu_hover"]
+bg_color = Color(0.30, 0.70, 1, 0.98)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.99, 1, 0.95)
+
 [node name="ShopDressing" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -162,14 +186,17 @@ text = "Acheter Skin"
 [node name="BackButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 198.0
-offset_bottom = 90.0
-theme_override_styles/normal = SubResource("StyleBoxFlat_bubble")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bubble")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bubble_active")
-text = "Retour au menu"
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 68.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_back_to_menu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_back_to_menu_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_back_to_menu_hover")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+text = "Retour menu"
 
 [node name="HintLabel" type="Label" parent="."]
 unique_name_in_owner = true
