@@ -1,6 +1,8 @@
 extends Control
 
 @export var center_y_ratio: float = 0.52
+@export var scale_factor: float = 1.0
+@export var feet_offset_y: float = 100.0
 
 func _ready() -> void:
 	set_process(true)
@@ -14,7 +16,11 @@ func _draw() -> void:
 		return
 
 	var hero_center := Vector2(size.x * 0.5, size.y * center_y_ratio)
-	_draw_central_character(hero_center)
+	var feet_anchor := hero_center + Vector2(0.0, feet_offset_y)
+	draw_set_transform(feet_anchor, 0.0, Vector2(scale_factor, scale_factor))
+	var local_center := hero_center - feet_anchor
+	_draw_central_character(local_center)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _draw_central_character(center: Vector2) -> void:
 	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), 2: Rider Neon, 3: Water Ninja, autres: fallback
