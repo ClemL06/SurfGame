@@ -172,12 +172,66 @@ func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> 
 	draw_polygon(points, colors)
 
 func _draw_central_character(center: Vector2) -> void:
-	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), autres: fallback
+	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), 2: Rider Neon, autres: fallback
 	var idx: int = GameManager.selected_character_index
 	if idx == 1:
 		_draw_central_surfer_female(center)
+	elif idx == 2:
+		_draw_central_surfer_neon(center)
 	else:
 		_draw_central_surfer_male(center)
+
+func _draw_central_surfer_neon(center: Vector2) -> void:
+	# Rider Neon: combinaison jaune flashy + traits noirs (skin indépendant).
+	draw_circle(center + Vector2(0.0, 128.0), 58.0, Color(0.05, 0.04, 0.03, 0.22))
+
+	var skin := Color(0.93, 0.78, 0.64)
+	var neon_yellow := Color(1.0, 0.93, 0.10)
+	var stripe_black := Color(0.04, 0.04, 0.05)
+
+	# Tête + cheveux courts bruns.
+	draw_circle(center + Vector2(0.0, -116.0), 28.0, skin)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -142.0),
+		center + Vector2(26.0, -142.0),
+		center + Vector2(30.0, -126.0),
+		center + Vector2(0.0, -132.0),
+		center + Vector2(-30.0, -126.0)
+	]), Color(0.16, 0.10, 0.06))
+	draw_circle(center + Vector2(-9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(-8.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+	draw_circle(center + Vector2(10.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+
+	# Corps (même silhouette mince) en jaune.
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -84.0),
+		center + Vector2(26.0, -84.0),
+		center + Vector2(36.0, 8.0),
+		center + Vector2(22.0, 100.0),
+		center + Vector2(-22.0, 100.0),
+		center + Vector2(-36.0, 8.0)
+	]), neon_yellow)
+
+	# Traits noirs.
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-18.0, -52.0),
+		center + Vector2(18.0, -52.0),
+		center + Vector2(20.0, -44.0),
+		center + Vector2(-20.0, -44.0)
+	]), stripe_black)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-14.0, -18.0),
+		center + Vector2(14.0, -18.0),
+		center + Vector2(16.0, -10.0),
+		center + Vector2(-16.0, -10.0)
+	]), stripe_black)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-10.0, 34.0),
+		center + Vector2(10.0, 34.0),
+		center + Vector2(10.0, 42.0),
+		center + Vector2(-10.0, 42.0)
+	]), stripe_black)
 
 func _draw_central_surfer_female(center: Vector2) -> void:
 	# Ombre.
