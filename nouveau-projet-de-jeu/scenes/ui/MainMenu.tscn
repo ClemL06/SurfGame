@@ -26,6 +26,18 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.93, 0.99, 1, 0.95)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_panel_opaque"]
+bg_color = Color(0.08, 0.13, 0.20, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.88, 1, 0.95)
+
 [node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -125,11 +137,14 @@ text = "Profil"
 [node name="ProfilePanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 0
-offset_left = 20.0
-offset_top = 76.0
-offset_right = 420.0
-offset_bottom = 386.0
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -312.0
+offset_top = 120.0
+offset_right = 312.0
+offset_bottom = 430.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_profile_panel_opaque")
 visible = false
 
 [node name="ProfileVBox" type="VBoxContainer" parent="ProfilePanel"]

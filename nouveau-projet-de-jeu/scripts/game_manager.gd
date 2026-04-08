@@ -43,6 +43,11 @@ func goto_shop_dressing() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/ui/ShopDressing.tscn")
 
+func goto_profile_page() -> void:
+	set_state(GameState.MENU)
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/ProfilePage.tscn")
+
 func pause_game() -> void:
 	if state != GameState.PLAYING:
 		return
