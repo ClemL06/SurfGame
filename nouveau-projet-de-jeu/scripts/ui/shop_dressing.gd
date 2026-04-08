@@ -172,14 +172,64 @@ func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> 
 	draw_polygon(points, colors)
 
 func _draw_central_character(center: Vector2) -> void:
-	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), 2: Rider Neon, autres: fallback
+	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), 2: Rider Neon, 3: Water Ninja, autres: fallback
 	var idx: int = GameManager.selected_character_index
 	if idx == 1:
 		_draw_central_surfer_female(center)
 	elif idx == 2:
 		_draw_central_surfer_neon(center)
+	elif idx == 3:
+		_draw_central_surfer_water_ninja(center)
 	else:
 		_draw_central_surfer_male(center)
+
+func _draw_central_surfer_water_ninja(center: Vector2) -> void:
+	# Water Ninja: bleu clair, skin indépendant.
+	draw_circle(center + Vector2(0.0, 128.0), 58.0, Color(0.05, 0.04, 0.03, 0.22))
+
+	var skin := Color(0.93, 0.78, 0.64)
+	var ninja_blue := Color(0.46, 0.90, 1.0)
+	var ninja_blue_dark := Color(0.14, 0.52, 0.78)
+	var ink := Color(0.03, 0.04, 0.06)
+
+	# Tête + cheveux courts.
+	draw_circle(center + Vector2(0.0, -116.0), 28.0, skin)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -142.0),
+		center + Vector2(26.0, -142.0),
+		center + Vector2(30.0, -126.0),
+		center + Vector2(0.0, -132.0),
+		center + Vector2(-30.0, -126.0)
+	]), Color(0.12, 0.10, 0.12))
+	draw_circle(center + Vector2(-9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(9.0, -117.0), 3.3, Color(1, 1, 1))
+	draw_circle(center + Vector2(-8.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+	draw_circle(center + Vector2(10.0, -116.0), 1.5, Color(0.15, 0.28, 0.55))
+
+	# Corps bleu clair.
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -84.0),
+		center + Vector2(26.0, -84.0),
+		center + Vector2(36.0, 8.0),
+		center + Vector2(22.0, 100.0),
+		center + Vector2(-22.0, 100.0),
+		center + Vector2(-36.0, 8.0)
+	]), ninja_blue)
+
+	# Ceinture + jambières en bleu foncé.
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-14.0, -10.0),
+		center + Vector2(14.0, -10.0),
+		center + Vector2(14.0, 0.0),
+		center + Vector2(-14.0, 0.0)
+	]), ninja_blue_dark)
+	draw_circle(center + Vector2(0.0, -5.0), 2.2, ink)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-10.0, 34.0),
+		center + Vector2(10.0, 34.0),
+		center + Vector2(10.0, 44.0),
+		center + Vector2(-10.0, 44.0)
+	]), ninja_blue_dark)
 
 func _draw_central_surfer_neon(center: Vector2) -> void:
 	# Rider Neon: combinaison jaune flashy + traits noirs (skin indépendant).
