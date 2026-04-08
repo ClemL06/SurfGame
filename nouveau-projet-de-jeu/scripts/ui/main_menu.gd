@@ -17,6 +17,7 @@ func _ready() -> void:
 	set_process(true)
 	_setup_character_choices()
 	_load_account_into_form()
+	GameManager.profile_progress_changed.connect(_on_profile_progress_changed)
 
 	play_button.pressed.connect(_on_play_pressed)
 	shop_button.pressed.connect(_on_shop_pressed)
@@ -259,14 +260,22 @@ func _update_account_ui_state() -> void:
 			GameManager.selected_character_index + 1
 		]
 		create_account_button.text = "Mettre a jour le compte"
-		profile_info_label.text = "Pseudo: %s | Perso: %s" % [
+		profile_info_label.text = "Pseudo: %s | Perso: %s | XP: %d | SurfCoin: %d" % [
 			GameManager.player_pseudo,
-			_character_name_from_index(GameManager.selected_character_index)
+			_character_name_from_index(GameManager.selected_character_index),
+			GameManager.total_xp,
+			GameManager.total_surfcoin
 		]
 	else:
-		account_status.text = "Compte non cree"
+		account_status.text = "Compte non cree | XP: %d | SurfCoin: %d" % [
+			GameManager.total_xp,
+			GameManager.total_surfcoin
+		]
 		create_account_button.text = "Creer le compte"
-		profile_info_label.text = "Pseudo: Invite | Perso: -"
+		profile_info_label.text = "Pseudo: Invite | Perso: - | XP: %d | SurfCoin: %d" % [
+			GameManager.total_xp,
+			GameManager.total_surfcoin
+		]
 
 func _character_name_from_index(character_index: int) -> String:
 	match character_index:
@@ -280,3 +289,6 @@ func _character_name_from_index(character_index: int) -> String:
 			return "Water Ninja"
 		_:
 			return "Inconnu"
+
+func _on_profile_progress_changed(_new_total_xp: int, _new_total_surfcoin: int) -> void:
+	_update_account_ui_state()

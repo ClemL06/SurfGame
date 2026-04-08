@@ -26,6 +26,8 @@ func _ready() -> void:
 	randomize()
 	var size := get_viewport_rect().size
 	surfer_position = Vector2(size.x * 0.34, size.y * 0.58)
+	xp = GameManager.total_xp
+	surfcoin = GameManager.total_surfcoin
 
 	hud = preload("res://scenes/ui/HUD.tscn").instantiate() as HUD
 	add_child(hud)
@@ -69,7 +71,8 @@ func _update_rewards(delta: float) -> void:
 	xp_timer += delta
 	while xp_timer >= 10.0:
 		xp_timer -= 10.0
-		xp += 1
+		GameManager.add_xp(1)
+		xp = GameManager.total_xp
 		hud.set_xp(xp)
 
 func _draw() -> void:
@@ -298,7 +301,8 @@ func _collect_coins() -> void:
 			remaining.append(coin)
 
 	if collected_count > 0:
-		surfcoin += collected_count
+		GameManager.add_surfcoin(collected_count)
+		surfcoin = GameManager.total_surfcoin
 		hud.set_surfcoin(surfcoin)
 	coins = remaining
 
