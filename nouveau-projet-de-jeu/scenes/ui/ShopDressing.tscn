@@ -272,4 +272,4 @@ z_as_relative = false
 mouse_filter = 2
 script = ExtResource("2")
 center_y_ratio = 0.78
-scale_factor = 1.25
+scale_factor = 1.6
