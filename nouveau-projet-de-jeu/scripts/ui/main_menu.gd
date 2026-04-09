@@ -135,6 +135,13 @@ func _draw_surfboard(center: Vector2, scale_factor: float, angle: float, base_co
 	], center, angle, scale_factor)
 	draw_colored_polygon(stripe, stripe_color)
 
+	var wall_rect := Rect2(base - Vector2(wall_w * 0.5, wall_h + 48.0 * sc), Vector2(wall_w, wall_h))
+
+	# Pilotis (6 poteaux plus epais)
+	for x_shift in [-0.40, -0.24, -0.08, 0.08, 0.24, 0.40]:
+		var pile_x: float = wall_rect.position.x + wall_rect.size.x * (0.5 + x_shift)
+		var pile_top: Vector2 = Vector2(pile_x, wall_rect.position.y + wall_rect.size.y)
+		var pile_bottom: Vector2 = Vector2(pile_x, base.y + 4.0 * sc)
 func _transform_points_local(points: Array[Vector2], offset: Vector2, angle: float, scale_factor: float) -> PackedVector2Array:
 	var out := PackedVector2Array()
 	var c := cos(angle)
