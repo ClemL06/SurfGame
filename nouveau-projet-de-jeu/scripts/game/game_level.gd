@@ -17,6 +17,14 @@ var xp: int = 0
 var surfcoin: int = 0
 var xp_timer: float = 0.0
 
+# Trick system.
+var trick_active: bool = false
+var trick_timer: float = 0.0
+var trick_duration: float = 0.85
+var trick_jump_offset: float = 0.0
+var trick_rotation: float = 0.0
+var trick_cooldown: float = 0.0
+
 var hud: HUD
 var pause_menu: PauseMenu
 var game_over: GameOverScreen
@@ -57,6 +65,7 @@ func _process(delta: float) -> void:
 		return
 
 	_update_surfer_controls(delta)
+	_update_trick(delta)
 	_update_obstacles(delta)
 	_update_coins(delta)
 	_check_obstacle_collisions()
@@ -107,15 +116,27 @@ func _draw() -> void:
 		sin(surf_time * 2.1) * 8.0,
 		cos(surf_time * 2.6) * 8.0
 	)
-	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
-	_draw_surfer(surfer_position + surfer_bob, board_angle)
+	var board_angle := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05 + trick_rotation
+	var draw_pos := surfer_position + surfer_bob + Vector2(0.0, trick_jump_offset)
+
+	# Spray de figure pendant le trick.
+	if trick_active:
+		var prog := trick_timer / trick_duration
+		var spray_alpha := sin(prog * PI) * 0.75
+		for i in range(8):
+			var ang := TAU * float(i) / 8.0 + surf_time * 6.0
+			var dist := 40.0 + sin(prog * PI * 3.0 + float(i)) * 20.0
+			draw_circle(draw_pos + Vector2(cos(ang), sin(ang)) * dist,
+				randf_range(2.0, 5.0), Color(0.78, 0.96, 1.0, spray_alpha * 0.8))
+
+	_draw_surfer(draw_pos, board_angle)
 	_draw_obstacles()
 	_draw_coins()
 
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	surfer_velocity = direction * surfer_speed
+	surfer_velocity = direction * surfer_speed * GameManager.controls_sensitivity
 	surfer_position += surfer_velocity * delta
 
 	# Le surfeur reste dans la zone d'eau.
@@ -125,6 +146,51 @@ func _update_surfer_controls(delta: float) -> void:
 	var max_y := size.y * 0.84
 	surfer_position.x = clampf(surfer_position.x, min_x, max_x)
 	surfer_position.y = clampf(surfer_position.y, min_y, max_y)
+
+	# Espace = figure (bureau).
+	if Input.is_action_just_pressed("ui_accept") and not trick_active and trick_cooldown <= 0.0:
+		_start_trick()
+
+func _input(event: InputEvent) -> void:
+	# Toucher l'ecran = figure (mobile).
+	if event is InputEventScreenTouch and event.pressed:
+		if not is_dead and not trick_active and trick_cooldown <= 0.0:
+			if GameManager.state == GameManager.GameState.PLAYING:
+				_start_trick()
+
+func _start_trick() -> void:
+	trick_active = true
+	trick_timer = 0.0
+	trick_rotation = 0.0
+	trick_jump_offset = 0.0
+
+func _update_trick(delta: float) -> void:
+	if trick_cooldown > 0.0:
+		trick_cooldown -= delta
+
+	if not trick_active:
+		return
+
+	trick_timer += delta
+	var prog: float = trick_timer / trick_duration
+
+	# Arc de saut parabolique (monte puis redescend).
+	trick_jump_offset = -sin(prog * PI) * 110.0
+
+	# Backflip : rotation complete vers l'arriere.
+	trick_rotation = prog * -TAU
+
+	if trick_timer >= trick_duration:
+		trick_active = false
+		trick_jump_offset = 0.0
+		trick_rotation = 0.0
+		trick_cooldown = 0.6
+		# Bonus XP pour la figure reussie.
+		GameManager.add_xp(5)
+		xp = GameManager.total_xp
+		hud.set_xp(xp)
+		score += 250
+		hud.set_score(score)
 
 func _update_obstacles(delta: float) -> void:
 	var size := get_viewport_rect().size
@@ -1238,7 +1304,6 @@ func player_died() -> void:
 	if is_dead:
 		return
 	is_dead = true
-
 	GameManager.game_over(score)
 	game_over.open(score, GameManager.high_score)
 

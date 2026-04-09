@@ -471,7 +471,7 @@ func _on_shop_pressed() -> void:
 	GameManager.goto_shop_dressing()
 
 func _on_settings_pressed() -> void:
-	print("Settings: TODO")
+	GameManager.goto_settings_page()
 
 func _on_house_pressed() -> void:
 	GameManager.goto_shop_dressing()
