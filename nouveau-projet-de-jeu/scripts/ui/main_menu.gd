@@ -241,12 +241,30 @@ func _draw_home_wave_band(
 	draw_polyline(foam, foam_color, 2.0, true)
 
 func _draw_home_surfer(center: Vector2, angle: float) -> void:
+	var idx: int    = GameManager.selected_character_index
 	var skin        := Color(0.93, 0.79, 0.64)
 	var wet_dark    := Color(0.07, 0.09, 0.15)
 	var wet_mid     := Color(0.13, 0.17, 0.27)
 	var wet_blue    := Color(0.18, 0.58, 0.95)
 	var t: float    = float(Time.get_ticks_msec()) * 0.001
 	var sc: float   = 0.74
+
+	# Couleurs selon le personnage selectionne.
+	if idx == 1:   # Surfeuse Pro
+		skin     = Color(0.85, 0.62, 0.45)
+		wet_dark = Color(0.15, 0.18, 0.28)
+		wet_mid  = Color(0.20, 0.85, 0.85)
+		wet_blue = Color(0.76, 0.18, 0.52)
+	elif idx == 2: # Rider Neon
+		skin     = Color(0.85, 0.60, 0.45)
+		wet_dark = Color(0.10, 0.10, 0.15)
+		wet_mid  = Color(0.95, 0.95, 0.10)
+		wet_blue = Color(0.0,  0.80, 1.0)
+	elif idx == 3: # Water Ninja
+		skin     = Color(0.85, 0.62, 0.45)
+		wet_dark = Color(0.10, 0.12, 0.18)
+		wet_mid  = Color(0.18, 0.35, 0.55)
+		wet_blue = Color(0.0,  0.85, 1.0)
 
 	# ── PLANCHE ─────────────────────────────────────────────────────────
 	var bc := center + Vector2(0.0, 44.0)
@@ -277,10 +295,10 @@ func _draw_home_surfer(center: Vector2, angle: float) -> void:
 	var stg := _transform_points_local([Vector2(0.0, -21.0), Vector2(0.0, 20.0)], bc, angle, sc)
 	draw_line(stg[0], stg[1], Color(0.78, 0.82, 0.90, 0.55), 1.2)
 
-	# Stripe bleue.
+	# Stripe couleur du personnage.
 	draw_colored_polygon(_transform_points_local([
 		Vector2(-82.0, -4.0), Vector2(80.0, -4.0), Vector2(80.0, 4.0), Vector2(-82.0, 4.0)
-	], bc, angle, sc), Color(0.18, 0.52, 0.92))
+	], bc, angle, sc), wet_blue)
 
 	# Thruster fins (setup 3 ailerons).
 	draw_colored_polygon(_transform_points_local([
@@ -382,72 +400,105 @@ func _draw_home_surfer(center: Vector2, angle: float) -> void:
 	# ── TETE + CASQUE + LUNETTES ─────────────────────────────────────────
 	var head := center + Vector2(4.0, -44.0)
 
-	# Cou.
-	draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
+	if idx == 1:   # Surfeuse Pro — cheveux roses en chignon, lunettes roses.
+		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
+		draw_circle(head, 15.0, skin)
+		var hair_pink   := Color(0.95, 0.25, 0.60)
+		var hair_dark   := Color(0.70, 0.10, 0.40)
+		draw_circle(head + Vector2(-14.0, -6.0), 8.0, hair_dark)
+		draw_circle(head + Vector2(-14.0, -6.0), 6.0, hair_pink)
+		draw_circle(head + Vector2(0.0, -18.0), 10.0, hair_dark)
+		draw_circle(head + Vector2(0.0, -18.0), 7.0, hair_pink)
+		draw_circle(head + Vector2(10.0, -12.0), 7.0, hair_dark)
+		draw_circle(head + Vector2(10.0, -12.0), 5.0, hair_pink)
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-14.0, -4.0), head + Vector2(-22.0, 2.0),
+			head + Vector2(-20.0, 8.0),  head + Vector2(-12.0, 4.0)
+		]), hair_pink)
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
+			head + Vector2(12.0,   2.0), head + Vector2(-12.0,  1.0)
+		]), Color(0.05, 0.06, 0.09, 0.90))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
+			head + Vector2(-1.0,   1.5), head + Vector2(-12.0,  1.0)
+		]), Color(0.85, 0.15, 0.55, 0.85))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(1.0, -5.5), head + Vector2(13.0, -6.0),
+			head + Vector2(12.0,  2.0), head + Vector2(  1.0,  1.5)
+		]), Color(0.85, 0.15, 0.55, 0.85))
+		draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
+		draw_line(head + Vector2(-9.0, -4.0), head + Vector2(-4.0, -4.5), Color(1.0, 1.0, 1.0, 0.35), 1.5)
 
-	# Visage.
-	draw_circle(head, 15.0, skin)
+	elif idx == 2: # Rider Neon — casque noir avec visiere jaune neon et LEDs.
+		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
+		draw_circle(head, 19.0, Color(0.10, 0.10, 0.15))
+		draw_circle(head, 16.0, Color(0.18, 0.18, 0.24))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
+			head + Vector2(12.0,   4.0), head + Vector2(-12.0,  3.0)
+		]), Color(0.95, 0.95, 0.10, 0.92))
+		draw_line(head + Vector2(-10.0, -3.5), head + Vector2(-4.0, -4.0), Color(1.0, 1.0, 1.0, 0.45), 2.0)
+		draw_line(head + Vector2(-16.0, -9.0), head + Vector2(16.0, -10.0), Color(0.0, 0.80, 1.0), 2.0)
+		draw_circle(head + Vector2(-17.0, 1.0), 3.5, Color(1.0, 0.10, 0.60))
+		draw_circle(head + Vector2( 17.0, 1.0), 3.5, Color(1.0, 0.10, 0.60))
 
-	# Cheveux blonds (masse principale sur le crane).
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(-15.0,  2.0),
-		head + Vector2(-13.0, -10.0),
-		head + Vector2( -6.0, -17.0),
-		head + Vector2(  0.0, -19.0),
-		head + Vector2(  8.0, -17.0),
-		head + Vector2( 14.0,  -8.0),
-		head + Vector2( 15.0,   2.0)
-	]), Color(0.92, 0.78, 0.28))
-	# Meches qui depassent sur les cotes (vent).
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(-13.0, -8.0),
-		head + Vector2(-20.0, -4.0),
-		head + Vector2(-22.0,  4.0),
-		head + Vector2(-16.0,  6.0),
-		head + Vector2(-14.0,  2.0)
-	]), Color(0.90, 0.76, 0.24))
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2( 12.0, -10.0),
-		head + Vector2( 20.0,  -8.0),
-		head + Vector2( 18.0,   2.0),
-		head + Vector2( 14.0,   2.0)
-	]), Color(0.90, 0.76, 0.24))
-	# Meches dans le vent (vers l'arriere).
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(-14.0, -6.0),
-		head + Vector2(-18.0, -14.0),
-		head + Vector2(-28.0, -10.0),
-		head + Vector2(-26.0,  -2.0),
-		head + Vector2(-18.0,   2.0)
-	]), Color(0.94, 0.80, 0.30))
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2( -8.0, -16.0),
-		head + Vector2( -4.0, -22.0),
-		head + Vector2( -14.0, -22.0),
-		head + Vector2( -18.0, -14.0)
-	]), Color(0.88, 0.72, 0.22))
-	# Reflets soleil sur les cheveux.
-	draw_line(head + Vector2(-5.0, -18.0), head + Vector2(6.0, -17.0), Color(1.0, 0.96, 0.68, 0.55), 2.5)
-	draw_line(head + Vector2(-2.0, -14.0), head + Vector2(8.0, -12.0), Color(1.0, 0.94, 0.60, 0.35), 1.5)
+	elif idx == 3: # Water Ninja — cagoule sombre avec visiere cyber bleue.
+		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), Color(0.10, 0.12, 0.18), 11.0)
+		draw_circle(head, 19.0, Color(0.10, 0.12, 0.18))
+		draw_circle(head, 16.0, Color(0.14, 0.18, 0.26))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-12.0, -3.0), head + Vector2(12.0, -4.0),
+			head + Vector2(11.0,   2.0), head + Vector2(-11.0,  1.0)
+		]), Color(0.0, 0.85, 1.0, 0.88))
+		draw_line(head + Vector2(-8.0, -2.5), head + Vector2(-2.0, -3.0), Color(1.0, 1.0, 1.0, 0.45), 1.5)
+		draw_line(head + Vector2(-15.0, -10.0), head + Vector2(15.0, -11.0), Color(0.0, 0.85, 1.0, 0.55), 1.5)
+		draw_line(head + Vector2(-15.0,   6.0), head + Vector2(15.0,   5.0), Color(0.0, 0.85, 1.0, 0.55), 1.5)
 
-	# Lunettes de surf (wrap-around miroir bleu).
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
-		head + Vector2(12.0,   2.0), head + Vector2(-12.0, 1.0)
-	]), Color(0.05, 0.06, 0.09, 0.90))
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
-		head + Vector2(-1.0,   1.5), head + Vector2(-12.0, 1.0)
-	]), Color(0.06, 0.20, 0.58, 0.90))
-	draw_colored_polygon(PackedVector2Array([
-		head + Vector2(1.0,  -5.5), head + Vector2(13.0, -6.0),
-		head + Vector2(12.0,  2.0), head + Vector2( 1.0,  1.5)
-	]), Color(0.06, 0.20, 0.58, 0.90))
-	# Pont des lunettes.
-	draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
-	# Reflets lunettes.
-	draw_line(head + Vector2(-10.0, -4.0), head + Vector2(-5.0, -4.5), Color(1.0, 1.0, 1.0, 0.32), 1.5)
-	draw_line(head + Vector2(  5.0, -4.5), head + Vector2(10.0, -5.0), Color(1.0, 1.0, 1.0, 0.32), 1.5)
+	else:          # Surfeur Classique — cheveux blonds, lunettes miroir bleues.
+		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
+		draw_circle(head, 15.0, skin)
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-15.0,  2.0), head + Vector2(-13.0, -10.0),
+			head + Vector2( -6.0, -17.0), head + Vector2(  0.0, -19.0),
+			head + Vector2(  8.0, -17.0), head + Vector2( 14.0,  -8.0),
+			head + Vector2( 15.0,   2.0)
+		]), Color(0.92, 0.78, 0.28))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -8.0), head + Vector2(-20.0, -4.0),
+			head + Vector2(-22.0,  4.0), head + Vector2(-16.0,  6.0),
+			head + Vector2(-14.0,  2.0)
+		]), Color(0.90, 0.76, 0.24))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2( 12.0, -10.0), head + Vector2( 20.0, -8.0),
+			head + Vector2( 18.0,   2.0), head + Vector2( 14.0,  2.0)
+		]), Color(0.90, 0.76, 0.24))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-14.0,  -6.0), head + Vector2(-18.0, -14.0),
+			head + Vector2(-28.0, -10.0), head + Vector2(-26.0,  -2.0),
+			head + Vector2(-18.0,   2.0)
+		]), Color(0.94, 0.80, 0.30))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2( -8.0, -16.0), head + Vector2( -4.0, -22.0),
+			head + Vector2(-14.0, -22.0), head + Vector2(-18.0, -14.0)
+		]), Color(0.88, 0.72, 0.22))
+		draw_line(head + Vector2(-5.0, -18.0), head + Vector2(6.0, -17.0), Color(1.0, 0.96, 0.68, 0.55), 2.5)
+		draw_line(head + Vector2(-2.0, -14.0), head + Vector2(8.0, -12.0), Color(1.0, 0.94, 0.60, 0.35), 1.5)
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
+			head + Vector2(12.0,   2.0), head + Vector2(-12.0,  1.0)
+		]), Color(0.05, 0.06, 0.09, 0.90))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
+			head + Vector2(-1.0,   1.5), head + Vector2(-12.0,  1.0)
+		]), Color(0.06, 0.20, 0.58, 0.90))
+		draw_colored_polygon(PackedVector2Array([
+			head + Vector2(1.0,  -5.5), head + Vector2(13.0, -6.0),
+			head + Vector2(12.0,  2.0), head + Vector2( 1.0,  1.5)
+		]), Color(0.06, 0.20, 0.58, 0.90))
+		draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
+		draw_line(head + Vector2(-10.0, -4.0), head + Vector2(-5.0, -4.5), Color(1.0, 1.0, 1.0, 0.32), 1.5)
+		draw_line(head + Vector2(  5.0, -4.5), head + Vector2(10.0, -5.0), Color(1.0, 1.0, 1.0, 0.32), 1.5)
 
 	# ── SPRAY / ECLABOUSSURES ────────────────────────────────────────────
 	# Gouttelettes sous la planche.
