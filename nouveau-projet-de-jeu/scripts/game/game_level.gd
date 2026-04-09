@@ -72,8 +72,8 @@ func _process(delta: float) -> void:
 	_collect_coins()
 	_update_rewards(delta)
 
-	# Score simple (temps). Toi peut remplacer par distance plus tard.
-	score += int(60.0 * delta)
+	# Score : accélère légèrement avec la difficulté pour récompenser la durée.
+	score += int(60.0 * (1.0 + _difficulty() * 0.8) * delta)
 	hud.set_score(score)
 
 func _update_rewards(delta: float) -> void:
@@ -133,10 +133,17 @@ func _draw() -> void:
 	_draw_obstacles()
 	_draw_coins()
 
+# Retourne un facteur entre 0.0 et ~1.0 qui augmente très lentement.
+# À 5 min ≈ 0.50 | À 10 min ≈ 0.67 | À 20 min ≈ 0.80 | À 30 min ≈ 0.86
+func _difficulty() -> float:
+	return 1.0 - 1.0 / (1.0 + surf_time / 300.0)
+
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	surfer_velocity = direction * surfer_speed * GameManager.controls_sensitivity
+	# Le joueur accélère légèrement pour rester manœuvrable malgré les obstacles plus rapides.
+	var move_speed := surfer_speed * (1.0 + _difficulty() * 0.35) * GameManager.controls_sensitivity
+	surfer_velocity = direction * move_speed
 	surfer_position += surfer_velocity * delta
 
 	# Le surfeur reste dans la zone d'eau.
@@ -198,7 +205,9 @@ func _update_obstacles(delta: float) -> void:
 	if obstacle_spawn_timer >= obstacle_spawn_interval:
 		obstacle_spawn_timer = 0.0
 		_spawn_obstacle(size)
-		obstacle_spawn_interval = randf_range(1.0, 1.9)
+		# L'intervalle se réduit progressivement : à df=0.5 → ÷1.6 | à df=0.8 → ÷2.0
+		var base_interval := randf_range(1.0, 1.9) / (1.0 + _difficulty() * 1.2)
+		obstacle_spawn_interval = maxf(base_interval, 0.45)
 
 	for obstacle in obstacles:
 		var pos: Vector2 = obstacle["position"]
@@ -235,7 +244,7 @@ func _spawn_coin(size: Vector2) -> void:
 	coins.append({
 		"position": pos,
 		"radius": 14.0,
-		"speed": randf_range(185.0, 285.0),
+		"speed": randf_range(185.0, 285.0) * (1.0 + _difficulty() * 1.4),
 		"phase": randf() * TAU,
 		"bob_amp": randf_range(10.0, 24.0),
 		"bob_speed": randf_range(2.2, 4.1)
@@ -247,12 +256,14 @@ func _spawn_obstacle(size: Vector2) -> void:
 	var water_max_y := size.y * 0.84
 	var pos := Vector2(size.x + randf_range(80.0, 220.0), randf_range(water_min_y, water_max_y))
 
+	var speed_mult := 1.0 + _difficulty() * 1.4
+
 	if obstacle_type == "shark":
 		obstacles.append({
 			"type": "shark",
 			"position": pos,
 			"radius": 22.0,
-			"speed": randf_range(230.0, 340.0),
+			"speed": randf_range(230.0, 340.0) * speed_mult,
 			"phase": randf() * TAU,
 			"bob_amp": randf_range(12.0, 20.0),
 			"bob_speed": randf_range(2.0, 3.4)
@@ -262,7 +273,7 @@ func _spawn_obstacle(size: Vector2) -> void:
 			"type": "jellyfish",
 			"position": pos,
 			"radius": 18.0,
-			"speed": randf_range(170.0, 250.0),
+			"speed": randf_range(170.0, 250.0) * speed_mult,
 			"phase": randf() * TAU,
 			"bob_amp": randf_range(20.0, 36.0),
 			"bob_speed": randf_range(2.4, 4.0)
