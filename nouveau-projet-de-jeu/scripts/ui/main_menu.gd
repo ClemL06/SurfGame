@@ -70,7 +70,8 @@ func _draw() -> void:
 		_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.5)
 		_draw_hut(Vector2(size.x * 0.74, size.y * 0.91), 1.3)
 	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.55, 0.14)
-	_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
+	if GameManager.total_xp < 200:
+		_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
 	_draw_surfer(Vector2(size.x * 0.56, size.y * 0.61), sin(Time.get_ticks_msec() * 0.0016) * 0.12)
 
 func _draw_hut(base: Vector2, scale_factor: float) -> void:
@@ -1436,6 +1437,32 @@ func _on_settings_pressed() -> void:
 
 func _on_house_pressed() -> void:
 	GameManager.goto_shop_dressing()
+
+func _gui_input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	if not GameManager.has_account:
+		return
+	var size := get_viewport_rect().size
+	var pos  := (event as InputEventMouseButton).position
+	if GameManager.total_xp >= 500:
+		# Zone cliquable du chateau
+		var cx     := size.x * 0.50
+		var cy     := size.y * 0.96
+		var sc     := 2.4
+		var half_w := (136.0 * sc * 0.5) + (58.0 * sc * 0.88)
+		var h      := (112.0 + 58.0) * sc
+		if Rect2(cx - half_w, cy - h, half_w * 2.0, h).has_point(pos):
+			GameManager.goto_shop_dressing()
+	elif GameManager.total_xp >= 200:
+		# Zone cliquable de la grande maison
+		var cx     := size.x * 0.38
+		var cy     := size.y * 0.88
+		var sc     := 1.4
+		var half_w := 240.0 * sc * 0.5 + 14.0 * sc
+		var h      := (90.0 + 48.0) * sc
+		if Rect2(cx - half_w, cy - h, half_w * 2.0, h).has_point(pos):
+			GameManager.goto_shop_dressing()
 
 func _on_surfer_start_pressed() -> void:
 	if not GameManager.has_account:
