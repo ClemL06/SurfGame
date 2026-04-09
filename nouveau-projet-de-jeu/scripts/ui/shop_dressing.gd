@@ -1,6 +1,5 @@
 extends Control
 
-@onready var subtitle: Label = %Subtitle
 @onready var character_option: OptionButton = %CharacterOption
 @onready var save_character_button: Button = %SaveCharacterButton
 @onready var back_button: Button = %BackButton
@@ -8,6 +7,7 @@ extends Control
 @onready var tab_shop_button: Button = %TabShopButton
 @onready var buy_button: Button = %BuyButton
 @onready var shop_panel: PanelContainer = %ShopPanel
+@onready var dressing_panel: PanelContainer = %DressingPanel
 @onready var hint_label: Label = %HintLabel
 @onready var character_front: Control = $CharacterFront
 
@@ -179,15 +179,12 @@ func _load_current_data() -> void:
 	var idx: int = maxi(0, character_option.get_item_index(GameManager.selected_character_index))
 	if idx >= 0:
 		character_option.select(idx)
-	_update_subtitle()
 
 func _on_save_character_pressed() -> void:
 	if not GameManager.has_account:
-		subtitle.text = "Cree un compte dans le menu principal d'abord."
 		return
 	var selected_idx: int = character_option.get_selected_id()
 	GameManager.create_or_update_account(GameManager.player_pseudo, selected_idx)
-	_update_subtitle()
 
 func _on_back_pressed() -> void:
 	GameManager.goto_main_menu()
@@ -196,30 +193,23 @@ func _on_character_option_selected(index: int) -> void:
 	character_front.preview_index = index
 
 func _on_tab_dressing_pressed() -> void:
-	current_tab = "dressing"
-	_apply_tab_state()
+	dressing_panel.visible = not dressing_panel.visible
+	shop_panel.visible = false
+	buy_button.visible = false
 
 func _on_tab_shop_pressed() -> void:
-	current_tab = "shop"
-	_apply_tab_state()
+	shop_panel.visible = not shop_panel.visible
+	buy_button.visible = shop_panel.visible
+	dressing_panel.visible = false
 
 func _on_buy_pressed() -> void:
 	hint_label.text = "Boutique: achat de skins disponible bientot."
 
 func _apply_tab_state() -> void:
-	var on_dressing: bool = current_tab == "dressing"
-	character_option.visible = on_dressing
-	save_character_button.visible = on_dressing
-	shop_panel.visible = not on_dressing
-	buy_button.visible = not on_dressing
-	hint_label.text = "Onglet actif: Dressing" if on_dressing else "Onglet actif: Boutique"
+	dressing_panel.visible = false
+	shop_panel.visible = false
+	buy_button.visible = false
 
-func _update_subtitle() -> void:
-	var pseudo: String = GameManager.player_pseudo if GameManager.has_account else "-"
-	var character_label: String = "Aucun"
-	if GameManager.selected_character_index >= 0 and GameManager.selected_character_index < character_option.item_count:
-		character_label = character_option.get_item_text(GameManager.selected_character_index)
-	subtitle.text = "Pseudo: %s | Personnage: %s" % [pseudo, character_label]
 
 func _draw_surfboard(center: Vector2, scale_factor: float, angle: float, base_color: Color, stripe_color: Color) -> void:
 	var board := _transform_points_local([
