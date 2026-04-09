@@ -34,14 +34,14 @@ func _draw() -> void:
 		return
 
 	# Interieur de maison (moins uniforme).
-	_draw_gradient_rect(Rect2(Vector2.ZERO, Vector2(size.x, size.y * 0.68)), Color(0.73, 0.53, 0.33), Color(0.48, 0.33, 0.21))
+	_draw_gradient_rect(Rect2(Vector2.ZERO, Vector2(size.x, size.y * 0.68)), Color(0.97, 0.95, 0.90), Color(0.91, 0.88, 0.82))
 	_draw_gradient_rect(Rect2(Vector2(0.0, size.y * 0.68), Vector2(size.x, size.y * 0.32)), Color(0.60, 0.42, 0.26), Color(0.42, 0.28, 0.18))
 	for i in range(8):
 		var plank_y: float = size.y * 0.70 + float(i) * 42.0
 		draw_rect(Rect2(Vector2(0.0, plank_y), Vector2(size.x, 3.0)), Color(0.31, 0.21, 0.13, 0.34))
 
 	# Fenetre vue ocean.
-	var window_rect := Rect2(Vector2(size.x * 0.08, size.y * 0.10), Vector2(size.x * 0.34, size.y * 0.24))
+	var window_rect := Rect2(Vector2(size.x * 0.06, size.y * 0.08), Vector2(size.x * 0.38, size.y * 0.28))
 	var inner := Rect2(window_rect.position + Vector2(10.0, 10.0), window_rect.size - Vector2(20.0, 20.0))
 	var horizon_y: float = inner.position.y + inner.size.y * 0.42
 
@@ -161,6 +161,12 @@ func _draw() -> void:
 			shadow_floor.append(Vector2(bpos.x + cos(a) * (sc * 8.0), floor_y + 2.0 + sin(a) * 7.0))
 		draw_colored_polygon(shadow_floor, Color(0.10, 0.06, 0.03, 0.35))
 
+	# Plantes decoratives posees sur le portant en haut a droite.
+	var rack_surface_y: float = size.y * 0.22 - 4.0
+	_draw_monstera_plant(Vector2(size.x * 0.67, rack_surface_y), 0.52)
+	_draw_palm_plant(Vector2(size.x * 0.80, rack_surface_y), 0.55)
+	_draw_monstera_plant(Vector2(size.x * 0.92, rack_surface_y), 0.48)
+
 
 func _setup_character_choices() -> void:
 	character_option.clear()
@@ -246,6 +252,151 @@ func _transform_points_local(points: Array[Vector2], offset: Vector2, angle: flo
 		var rotated := Vector2((scaled.x * c) - (scaled.y * s), (scaled.x * s) + (scaled.y * c))
 		out.append(rotated + offset)
 	return out
+
+func _draw_pot(base: Vector2, w: float, h: float) -> void:
+	# Corps principal (trapeze, plus large en bas).
+	draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-w * 0.60,  0.0),
+		base + Vector2( w * 0.60,  0.0),
+		base + Vector2( w * 0.44, -h),
+		base + Vector2(-w * 0.44, -h)
+	]), Color(0.58, 0.24, 0.10))
+	draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-w * 0.54,  0.0),
+		base + Vector2( w * 0.54,  0.0),
+		base + Vector2( w * 0.39, -h * 0.92),
+		base + Vector2(-w * 0.39, -h * 0.92)
+	]), Color(0.72, 0.36, 0.18))
+	# Reflet lateral gauche.
+	draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-w * 0.52, -h * 0.08),
+		base + Vector2(-w * 0.32, -h * 0.08),
+		base + Vector2(-w * 0.26, -h * 0.80),
+		base + Vector2(-w * 0.46, -h * 0.80)
+	]), Color(0.90, 0.50, 0.28, 0.28))
+	# Levre du pot (rebord).
+	draw_rect(Rect2(base + Vector2(-w * 0.52, -h - 6.0), Vector2(w * 1.04, 10.0)), Color(0.52, 0.22, 0.09))
+	draw_rect(Rect2(base + Vector2(-w * 0.52, -h - 6.0), Vector2(w * 1.04, 4.0)), Color(0.78, 0.42, 0.20))
+	# Terre.
+	draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-w * 0.40, -h - 2.0),
+		base + Vector2( w * 0.40, -h - 2.0),
+		base + Vector2( w * 0.34, -h - 10.0),
+		base + Vector2(-w * 0.34, -h - 10.0)
+	]), Color(0.16, 0.09, 0.04))
+
+func _draw_monstera_leaf(root: Vector2, length: float, angle: float, dark: Color, light: Color) -> void:
+	var dir := Vector2(sin(angle), -cos(angle))
+	var perp := Vector2(cos(angle), sin(angle))
+	var tip := root + dir * length
+	var mid := root + dir * (length * 0.52)
+	var leaf_pts := PackedVector2Array([
+		root,
+		mid + perp * (length * 0.26),
+		tip + perp * (length * 0.06),
+		tip,
+		tip - perp * (length * 0.06),
+		mid - perp * (length * 0.26),
+	])
+	draw_colored_polygon(leaf_pts, dark)
+	# Nervure centrale.
+	draw_line(root, tip, light, 2.2)
+	# Nervures secondaires.
+	for i in range(1, 5):
+		var t: float = float(i) / 5.0
+		var vr := root.lerp(tip, t * 0.78)
+		var spread: float = length * 0.17 * (1.0 - t * 0.45)
+		draw_line(vr, vr + perp * spread, light, 1.1)
+		draw_line(vr, vr - perp * spread, light, 1.1)
+	# Fenestrations (trous caracteristiques de la monstera).
+	for fi in range(2):
+		var ft: float = 0.38 + float(fi) * 0.22
+		var side: float = (1.0 if fi % 2 == 0 else -1.0)
+		var hole_c := root + dir * (length * ft) + perp * (length * 0.12 * side)
+		var hole_r: float = length * 0.048
+		draw_circle(hole_c, hole_r, Color(dark.r * 0.62, dark.g * 0.62, dark.b * 0.62, 0.70))
+
+func _draw_hibiscus(center: Vector2, radius: float, petal_color: Color) -> void:
+	for p in range(5):
+		var base_angle: float = float(p) * TAU / 5.0
+		var pts := PackedVector2Array()
+		for j in range(12):
+			var t: float = float(j) / 11.0
+			var a: float = base_angle + (t - 0.5) * (PI * 0.52)
+			var d: float = radius * (0.28 + sin(t * PI) * 0.72)
+			pts.append(center + Vector2(sin(a), -cos(a)) * d)
+		draw_colored_polygon(pts, petal_color)
+		# Ligne centrale de chaque petale.
+		var petal_tip := center + Vector2(sin(base_angle), -cos(base_angle)) * radius * 0.95
+		draw_line(center, petal_tip, Color(petal_color.r * 0.70, petal_color.g * 0.55, petal_color.b * 0.55, 0.60), 1.4)
+	# Etamine centrale.
+	draw_circle(center, radius * 0.20, Color(1.0, 0.92, 0.12))
+	draw_circle(center, radius * 0.11, Color(0.95, 0.52, 0.06))
+	for k in range(6):
+		var ka: float = float(k) * TAU / 6.0
+		draw_circle(center + Vector2(sin(ka), -cos(ka)) * radius * 0.18, radius * 0.04, Color(1.0, 0.88, 0.10))
+
+func _draw_palm_frond(root: Vector2, length: float, angle: float) -> void:
+	var dir := Vector2(sin(angle), -cos(angle))
+	var perp := Vector2(cos(angle), sin(angle))
+	var tip := root + dir * length
+	# Rachis (tige centrale).
+	draw_line(root, tip, Color(0.24, 0.40, 0.14), 3.0)
+	# Folioles.
+	for i in range(7):
+		var t: float = 0.15 + float(i) / 7.0 * 0.80
+		var pt := root.lerp(tip, t)
+		var fl: float = length * 0.30 * (1.0 - t * 0.35)
+		var spread: float = 0.38 + float(i) * 0.04
+		var fr_tip := pt + (dir * 0.30 + perp * spread).normalized() * fl
+		var fl_tip := pt + (dir * 0.30 - perp * spread).normalized() * fl
+		draw_colored_polygon(PackedVector2Array([pt + perp * 2.5, fr_tip, pt - perp * 1.0]), Color(0.18, 0.56, 0.18))
+		draw_colored_polygon(PackedVector2Array([pt + perp * 1.0, fl_tip, pt - perp * 2.5]), Color(0.18, 0.56, 0.18))
+		draw_line(pt, fr_tip, Color(0.28, 0.68, 0.22), 1.0)
+		draw_line(pt, fl_tip, Color(0.28, 0.68, 0.22), 1.0)
+
+func _draw_monstera_plant(base: Vector2, sf: float) -> void:
+	var pot_w: float = 42.0 * sf
+	var pot_h: float = 38.0 * sf
+	_draw_pot(base, pot_w, pot_h)
+	var sb := base + Vector2(0.0, -(pot_h + 10.0))
+	var dk := Color(0.08, 0.38, 0.12)
+	var lt := Color(0.30, 0.64, 0.24)
+	# Tiges.
+	draw_line(sb, sb + Vector2(-14.0, -72.0) * sf, Color(0.14, 0.32, 0.10), 4.0 * sf)
+	draw_line(sb, sb + Vector2(10.0, -88.0) * sf, Color(0.14, 0.32, 0.10), 4.0 * sf)
+	draw_line(sb, sb + Vector2(-28.0, -112.0) * sf, Color(0.14, 0.32, 0.10), 3.0 * sf)
+	draw_line(sb, sb + Vector2(24.0, -56.0) * sf, Color(0.14, 0.32, 0.10), 3.0 * sf)
+	# Feuilles.
+	_draw_monstera_leaf(sb + Vector2(10.0, -88.0) * sf,  82.0 * sf, -0.28, dk, lt)
+	_draw_monstera_leaf(sb + Vector2(-14.0, -72.0) * sf, 74.0 * sf,  0.42, dk, lt)
+	_draw_monstera_leaf(sb + Vector2(-28.0, -112.0) * sf,68.0 * sf, -0.08, dk, lt)
+	_draw_monstera_leaf(sb + Vector2(24.0, -56.0) * sf,  60.0 * sf,  0.72, dk, lt)
+	_draw_monstera_leaf(sb + Vector2(0.0, -18.0) * sf,   54.0 * sf, -0.82, dk, lt)
+	# Fleurs hibiscus.
+	_draw_hibiscus(sb + Vector2(26.0, -104.0) * sf, 16.0 * sf, Color(0.96, 0.22, 0.36))
+	_draw_hibiscus(sb + Vector2(-40.0, -82.0) * sf,  13.0 * sf, Color(1.00, 0.72, 0.08))
+
+func _draw_palm_plant(base: Vector2, sf: float) -> void:
+	var pot_w: float = 36.0 * sf
+	var pot_h: float = 33.0 * sf
+	_draw_pot(base, pot_w, pot_h)
+	var tb := base + Vector2(0.0, -(pot_h + 10.0))
+	var trunk_h: float = 138.0 * sf
+	var tt := tb + Vector2(6.0 * sf, -trunk_h)
+	# Tronc.
+	draw_line(tb, tt, Color(0.32, 0.20, 0.09), 10.0 * sf)
+	draw_line(tb, tt, Color(0.46, 0.30, 0.14), 7.0 * sf)
+	draw_line(tb + Vector2(-2.0 * sf, 0.0), tt + Vector2(-2.0 * sf, 0.0), Color(0.60, 0.42, 0.22, 0.38), 2.0 * sf)
+	# Anneaux caracteristiques du tronc de palmier.
+	for ri in range(6):
+		var ry: float = tb.y - trunk_h * (float(ri + 1) / 7.0)
+		draw_line(Vector2(tb.x - 4.5 * sf, ry), Vector2(tb.x + 8.0 * sf, ry), Color(0.24, 0.15, 0.06), 2.0)
+	# Palmes en eventail.
+	var frond_angles: Array[float] = [-1.30, -0.90, -0.50, -0.10, 0.30, 0.70, 1.10, 1.50]
+	var frond_lens:   Array[float] = [80.0, 100.0, 112.0, 115.0, 108.0, 96.0, 82.0, 68.0]
+	for fi in range(8):
+		_draw_palm_frond(tt, frond_lens[fi] * sf, frond_angles[fi])
 
 func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> void:
 	var points := PackedVector2Array([

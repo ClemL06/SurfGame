@@ -241,72 +241,225 @@ func _draw_home_wave_band(
 	draw_polyline(foam, foam_color, 2.0, true)
 
 func _draw_home_surfer(center: Vector2, angle: float) -> void:
-	# Planche style gameplay.
+	var skin        := Color(0.93, 0.79, 0.64)
+	var wet_dark    := Color(0.07, 0.09, 0.15)
+	var wet_mid     := Color(0.13, 0.17, 0.27)
+	var wet_blue    := Color(0.18, 0.58, 0.95)
+	var t: float    = float(Time.get_ticks_msec()) * 0.001
+	var sc: float   = 0.74
+
+	# ── PLANCHE ─────────────────────────────────────────────────────────
+	var bc := center + Vector2(0.0, 44.0)
+
+	# Ombre portee sous la planche (rail bas).
+	draw_colored_polygon(_transform_points_local([
+		Vector2(-95.0, 6.0), Vector2(-70.0, -10.0), Vector2(-18.0, -16.0),
+		Vector2(65.0, -8.0),  Vector2(92.0, 6.0),   Vector2(65.0, 22.0),
+		Vector2(-18.0, 28.0), Vector2(-70.0, 22.0)
+	], bc + Vector2(0.0, 5.0), angle, sc), Color(0.50, 0.58, 0.70, 0.35))
+
+	# Surface de la planche.
 	var board := _transform_points_local([
-		Vector2(-95.0, 0.0),
-		Vector2(-70.0, -16.0),
-		Vector2(-18.0, -22.0),
-		Vector2(65.0, -14.0),
-		Vector2(92.0, 0.0),
-		Vector2(65.0, 14.0),
-		Vector2(-18.0, 22.0),
-		Vector2(-70.0, 16.0)
-	], center + Vector2(0.0, 38.0), angle, 0.72)
+		Vector2(-95.0, 0.0),  Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0),    Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
+	], bc, angle, sc)
 	draw_colored_polygon(board, Color(0.97, 0.98, 1.0))
-	draw_polyline(board, Color(0.73, 0.80, 0.90), 1.8, true)
+	draw_polyline(board, Color(0.62, 0.72, 0.86, 0.75), 1.8, true)
 
-	var stripe := _transform_points_local([
-		Vector2(-82.0, -3.0),
-		Vector2(80.0, -3.0),
-		Vector2(80.0, 3.0),
-		Vector2(-82.0, 3.0)
-	], center + Vector2(0.0, 38.0), angle, 0.72)
-	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	# Rail highlight (bord superieur brillant).
+	draw_polyline(_transform_points_local([
+		Vector2(-90.0, -2.0), Vector2(-66.0, -14.0), Vector2(-14.0, -20.0),
+		Vector2(62.0, -12.0), Vector2(88.0, 0.0)
+	], bc, angle, sc), Color(1.0, 1.0, 1.0, 0.55), 2.4, false)
 
-	var body_center := center + Vector2(0.0, 0.0)
-	var wetsuit_main := Color(0.09, 0.11, 0.16)
-	var wetsuit_panel := Color(0.20, 0.62, 0.92)
-	var skin := Color(0.93, 0.78, 0.64)
+	# Stringer (ligne centrale de fibre de verre).
+	var stg := _transform_points_local([Vector2(0.0, -21.0), Vector2(0.0, 20.0)], bc, angle, sc)
+	draw_line(stg[0], stg[1], Color(0.78, 0.82, 0.90, 0.55), 1.2)
 
+	# Stripe bleue.
 	draw_colored_polygon(_transform_points_local([
-		Vector2(-14.0, -38.0),
-		Vector2(12.0, -38.0),
-		Vector2(18.0, -7.0),
-		Vector2(12.0, 24.0),
-		Vector2(-12.0, 26.0),
-		Vector2(-18.0, -7.0)
-	], body_center, angle * 0.4, 1.0), wetsuit_main)
+		Vector2(-82.0, -4.0), Vector2(80.0, -4.0), Vector2(80.0, 4.0), Vector2(-82.0, 4.0)
+	], bc, angle, sc), Color(0.18, 0.52, 0.92))
+
+	# Thruster fins (setup 3 ailerons).
 	draw_colored_polygon(_transform_points_local([
-		Vector2(-6.0, -30.0),
-		Vector2(6.0, -30.0),
-		Vector2(9.0, 12.0),
-		Vector2(-9.0, 12.0)
-	], body_center, angle * 0.4, 1.0), wetsuit_panel)
-
-	draw_line(body_center + Vector2(-10.0, -18.0), body_center + Vector2(-28.0, -6.0), wetsuit_main, 4.0)
-	draw_line(body_center + Vector2(10.0, -18.0), body_center + Vector2(28.0, -8.0), wetsuit_main, 4.0)
-	draw_line(body_center + Vector2(-4.0, 24.0), body_center + Vector2(-18.0, 46.0), wetsuit_main, 4.4)
-	draw_line(body_center + Vector2(4.0, 24.0), body_center + Vector2(16.0, 45.0), wetsuit_main, 4.4)
-
-	var head := body_center + Vector2(0.0, -48.0)
-	draw_circle(head, 13.0, skin)
+		Vector2(-60.0, 14.0), Vector2(-50.0, 14.0), Vector2(-44.0, 29.0), Vector2(-66.0, 29.0)
+	], bc, angle, sc), Color(0.10, 0.12, 0.18))
 	draw_colored_polygon(_transform_points_local([
-		Vector2(-13.0, -10.0),
-		Vector2(10.0, -12.0),
-		Vector2(14.0, -3.0),
-		Vector2(13.0, 17.0),
-		Vector2(-12.0, 18.0),
-		Vector2(-16.0, 2.0)
-	], head, angle * 0.24, 1.0), Color(0.95, 0.82, 0.34))
-	draw_circle(head + Vector2(-4.5, -2.0), 1.8, Color(1, 1, 1))
-	draw_circle(head + Vector2(4.5, -2.0), 1.8, Color(1, 1, 1))
-	draw_circle(head + Vector2(-4.0, -1.6), 0.9, Color(0.15, 0.28, 0.55))
-	draw_circle(head + Vector2(5.0, -1.6), 0.9, Color(0.15, 0.28, 0.55))
+		Vector2(-69.0, 12.0), Vector2(-58.0, 12.0), Vector2(-54.0, 23.0), Vector2(-72.0, 23.0)
+	], bc, angle, sc), Color(0.15, 0.17, 0.25))
+	draw_colored_polygon(_transform_points_local([
+		Vector2(-48.0, 12.0), Vector2(-37.0, 12.0), Vector2(-34.0, 23.0), Vector2(-51.0, 23.0)
+	], bc, angle, sc), Color(0.15, 0.17, 0.25))
 
+	# Leash (cheville arriere -> queue).
+	var leash_tail := _transform_points_local([Vector2(-91.0, 2.0)], bc, angle, sc)[0]
+	draw_line(center + Vector2(-22.0, 36.0), leash_tail, Color(0.55, 0.58, 0.68, 0.65), 1.5)
+
+	# ── JAMBES (stance surf basse) ───────────────────────────────────────
+	var foot_back  := center + Vector2(-22.0, 37.0)
+	var foot_front := center + Vector2(13.0,  35.0)
+	var knee_back  := center + Vector2(-14.0, 13.0) + Vector2(angle * 16.0, 0.0)
+	var knee_front := center + Vector2(10.0,  11.0) + Vector2(angle * 9.0,  0.0)
+	var hip        := center + Vector2(-4.0,  2.0)
+
+	# Cuisse arriere.
+	draw_line(hip, knee_back, wet_dark, 13.0)
+	draw_line(hip + Vector2(2.0, 0.0), knee_back + Vector2(2.0, 0.0), wet_mid, 5.0)
+	# Mollet arriere.
+	draw_line(knee_back, foot_back, wet_dark, 11.0)
+	draw_line(knee_back + Vector2(2.0, 0.0), foot_back + Vector2(2.0, 0.0), wet_mid, 4.0)
+	# Genouillere arriere.
+	draw_circle(knee_back, 7.0, wet_dark)
+	draw_circle(knee_back, 4.0, Color(0.18, 0.20, 0.30))
+	# Chaussure arriere.
+	draw_colored_polygon(PackedVector2Array([
+		foot_back + Vector2(-10.0, 0.0), foot_back + Vector2(9.0, 0.0),
+		foot_back + Vector2(11.0,  7.0), foot_back + Vector2(-8.0, 7.0)
+	]), Color(0.18, 0.20, 0.28))
+
+	# Cuisse avant.
+	draw_line(hip, knee_front, wet_dark, 14.0)
+	draw_line(hip + Vector2(2.0, 0.0), knee_front + Vector2(2.0, 0.0), wet_mid, 6.0)
+	# Mollet avant.
+	draw_line(knee_front, foot_front, wet_dark, 12.0)
+	draw_line(knee_front + Vector2(2.0, 0.0), foot_front + Vector2(2.0, 0.0), wet_mid, 5.0)
+	# Genouillere avant.
+	draw_circle(knee_front, 8.0, wet_dark)
+	draw_circle(knee_front, 5.0, Color(0.18, 0.20, 0.30))
+	# Chaussure avant.
+	draw_colored_polygon(PackedVector2Array([
+		foot_front + Vector2(-8.0, 0.0), foot_front + Vector2(11.0, 0.0),
+		foot_front + Vector2(13.0, 7.0), foot_front + Vector2(-6.0, 7.0)
+	]), Color(0.18, 0.20, 0.28))
+
+	# ── TORSE ────────────────────────────────────────────────────────────
+	var sh_l := center + Vector2(-18.0, -22.0)
+	var sh_r := center + Vector2(16.0,  -24.0)
+	draw_colored_polygon(PackedVector2Array([
+		hip   + Vector2(-10.0,  0.0), hip   + Vector2(10.0,  0.0),
+		sh_r  + Vector2(  5.0,  0.0), sh_r,
+		sh_l,                         sh_l  + Vector2(-5.0,  0.0)
+	]), wet_dark)
+	# Panel zip central.
+	draw_colored_polygon(PackedVector2Array([
+		hip + Vector2(-5.0, 0.0), hip + Vector2(5.0, 0.0),
+		center + Vector2(6.0, -20.0), center + Vector2(-6.0, -20.0)
+	]), wet_blue)
+	# Highlight epaule droite.
+	draw_colored_polygon(PackedVector2Array([
+		sh_r, sh_r + Vector2(5.0, 0.0), sh_r + Vector2(3.0, -8.0), sh_r + Vector2(-4.0, -6.0)
+	]), wet_mid)
+
+	# ── BRAS ─────────────────────────────────────────────────────────────
+	# Bras arriere (gauche) - bras bas pour contrebalancer.
+	var el_l   := sh_l + Vector2(-22.0, 20.0)
+	var hand_l := el_l + Vector2(-14.0, 12.0)
+	draw_line(sh_l, el_l,   wet_dark, 10.0)
+	draw_line(sh_l + Vector2(1.0, 1.0), el_l + Vector2(1.0, 1.0), wet_mid, 4.0)
+	draw_line(el_l, hand_l, wet_dark,  9.0)
+	draw_line(el_l + Vector2(1.0, 0.0), hand_l + Vector2(1.0, 0.0), wet_mid, 3.5)
+	draw_circle(el_l, 5.5, wet_dark)
+	draw_colored_polygon(PackedVector2Array([
+		hand_l + Vector2(-6.0, -3.0), hand_l + Vector2(7.0, -4.0),
+		hand_l + Vector2(8.0,   5.0), hand_l + Vector2(-4.0, 6.0)
+	]), skin)
+
+	# Bras avant (droit) - tendu vers la vague.
+	var el_r   := sh_r + Vector2(24.0, 2.0)
+	var hand_r := el_r + Vector2(17.0, 8.0)
+	draw_line(sh_r, el_r,   wet_dark, 10.0)
+	draw_line(sh_r + Vector2(1.0, -1.0), el_r + Vector2(1.0, -1.0), wet_mid, 4.0)
+	draw_line(el_r, hand_r, wet_dark,  9.0)
+	draw_line(el_r + Vector2(1.0, 0.0), hand_r + Vector2(1.0, 0.0), wet_mid, 3.5)
+	draw_circle(el_r, 5.5, wet_dark)
+	draw_colored_polygon(PackedVector2Array([
+		hand_r + Vector2(-5.0, -6.0), hand_r + Vector2(8.0, -2.0),
+		hand_r + Vector2(6.0,   6.0), hand_r + Vector2(-6.0, 4.0)
+	]), skin)
+
+	# ── TETE + CASQUE + LUNETTES ─────────────────────────────────────────
+	var head := center + Vector2(4.0, -44.0)
+
+	# Cou.
+	draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
+
+	# Visage.
+	draw_circle(head, 15.0, skin)
+
+	# Cheveux blonds (masse principale sur le crane).
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(-15.0,  2.0),
+		head + Vector2(-13.0, -10.0),
+		head + Vector2( -6.0, -17.0),
+		head + Vector2(  0.0, -19.0),
+		head + Vector2(  8.0, -17.0),
+		head + Vector2( 14.0,  -8.0),
+		head + Vector2( 15.0,   2.0)
+	]), Color(0.92, 0.78, 0.28))
+	# Meches qui depassent sur les cotes (vent).
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(-13.0, -8.0),
+		head + Vector2(-20.0, -4.0),
+		head + Vector2(-22.0,  4.0),
+		head + Vector2(-16.0,  6.0),
+		head + Vector2(-14.0,  2.0)
+	]), Color(0.90, 0.76, 0.24))
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2( 12.0, -10.0),
+		head + Vector2( 20.0,  -8.0),
+		head + Vector2( 18.0,   2.0),
+		head + Vector2( 14.0,   2.0)
+	]), Color(0.90, 0.76, 0.24))
+	# Meches dans le vent (vers l'arriere).
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(-14.0, -6.0),
+		head + Vector2(-18.0, -14.0),
+		head + Vector2(-28.0, -10.0),
+		head + Vector2(-26.0,  -2.0),
+		head + Vector2(-18.0,   2.0)
+	]), Color(0.94, 0.80, 0.30))
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2( -8.0, -16.0),
+		head + Vector2( -4.0, -22.0),
+		head + Vector2( -14.0, -22.0),
+		head + Vector2( -18.0, -14.0)
+	]), Color(0.88, 0.72, 0.22))
+	# Reflets soleil sur les cheveux.
+	draw_line(head + Vector2(-5.0, -18.0), head + Vector2(6.0, -17.0), Color(1.0, 0.96, 0.68, 0.55), 2.5)
+	draw_line(head + Vector2(-2.0, -14.0), head + Vector2(8.0, -12.0), Color(1.0, 0.94, 0.60, 0.35), 1.5)
+
+	# Lunettes de surf (wrap-around miroir bleu).
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
+		head + Vector2(12.0,   2.0), head + Vector2(-12.0, 1.0)
+	]), Color(0.05, 0.06, 0.09, 0.90))
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
+		head + Vector2(-1.0,   1.5), head + Vector2(-12.0, 1.0)
+	]), Color(0.06, 0.20, 0.58, 0.90))
+	draw_colored_polygon(PackedVector2Array([
+		head + Vector2(1.0,  -5.5), head + Vector2(13.0, -6.0),
+		head + Vector2(12.0,  2.0), head + Vector2( 1.0,  1.5)
+	]), Color(0.06, 0.20, 0.58, 0.90))
+	# Pont des lunettes.
+	draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
+	# Reflets lunettes.
+	draw_line(head + Vector2(-10.0, -4.0), head + Vector2(-5.0, -4.5), Color(1.0, 1.0, 1.0, 0.32), 1.5)
+	draw_line(head + Vector2(  5.0, -4.5), head + Vector2(10.0, -5.0), Color(1.0, 1.0, 1.0, 0.32), 1.5)
+
+	# ── SPRAY / ECLABOUSSURES ────────────────────────────────────────────
+	# Gouttelettes sous la planche.
+	for i in range(9):
+		var sx: float = -76.0 + float(i) * 18.0
+		var sy: float = sin(float(i) * 1.3 + t * 2.4) * 4.0
+		draw_circle(center + Vector2(sx, 48.0 + sy), 1.8 + sin(float(i) + t) * 0.6, Color(1.0, 1.0, 1.0, 0.80))
+	# Spray lateral (cote vague, bras avant).
 	for i in range(6):
-		var splash_x := -62.0 + float(i) * 24.0
-		var t: float = float(Time.get_ticks_msec()) * 0.002
-		draw_circle(center + Vector2(splash_x, 42.0 + sin(float(i) + t) * 2.0), 2.8, Color(1.0, 1.0, 1.0, 0.80))
+		var spx: float = 58.0 + float(i) * 9.0
+		var spy: float = 38.0 - float(i) * 5.0 + sin(float(i) * 1.1 + t * 3.2) * 2.5
+		draw_circle(center + Vector2(spx, spy), 4.0 - float(i) * 0.45, Color(1.0, 1.0, 1.0, 0.70 - float(i) * 0.10))
 
 func _on_play_pressed() -> void:
 	if not GameManager.has_account:
