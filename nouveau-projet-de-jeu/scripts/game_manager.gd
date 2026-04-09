@@ -15,6 +15,13 @@ var has_account: bool = false
 var total_xp: int = 0
 var total_surfcoin: int = 0
 
+# Paramètres.
+var music_volume: float = 0.8
+var sfx_volume: float = 1.0
+var controls_sensitivity: float = 1.0
+var vibration_enabled: bool = true
+var muted: bool = false
+
 const SAVE_PATH : String = "user://save.json"
 
 func _ready() -> void:
@@ -47,6 +54,25 @@ func goto_profile_page() -> void:
 	set_state(GameState.MENU)
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/ui/ProfilePage.tscn")
+
+func goto_settings_page() -> void:
+	set_state(GameState.MENU)
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/SettingsPage.tscn")
+
+func apply_audio_settings() -> void:
+	if muted:
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), -80.0)
+	else:
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(music_volume))
+
+func reset_progress() -> void:
+	high_score = 0
+	total_xp = 0
+	total_surfcoin = 0
+	save_game()
+	profile_progress_changed.emit(total_xp, total_surfcoin)
+	high_score_changed.emit(high_score)
 
 func pause_game() -> void:
 	if state != GameState.PLAYING:
@@ -100,7 +126,12 @@ func save_game() -> void:
 		"selected_character_index": selected_character_index,
 		"has_account": has_account,
 		"total_xp": total_xp,
-		"total_surfcoin": total_surfcoin
+		"total_surfcoin": total_surfcoin,
+		"music_volume": music_volume,
+		"sfx_volume": sfx_volume,
+		"controls_sensitivity": controls_sensitivity,
+		"vibration_enabled": vibration_enabled,
+		"muted": muted
 	}
 	var f : FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
@@ -138,3 +169,9 @@ func load_game() -> void:
 	has_account = bool(parsed.get("has_account", false)) and not player_pseudo.is_empty()
 	total_xp = maxi(0, int(parsed.get("total_xp", 0)))
 	total_surfcoin = maxi(0, int(parsed.get("total_surfcoin", 0)))
+	music_volume = clampf(float(parsed.get("music_volume", 0.8)), 0.0, 1.0)
+	sfx_volume = clampf(float(parsed.get("sfx_volume", 1.0)), 0.0, 1.0)
+	controls_sensitivity = clampf(float(parsed.get("controls_sensitivity", 1.0)), 0.2, 1.5)
+	vibration_enabled = bool(parsed.get("vibration_enabled", true))
+	muted = bool(parsed.get("muted", false))
+	apply_audio_settings()

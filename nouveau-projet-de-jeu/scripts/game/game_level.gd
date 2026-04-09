@@ -136,7 +136,7 @@ func _draw() -> void:
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	surfer_velocity = direction * surfer_speed
+	surfer_velocity = direction * surfer_speed * GameManager.controls_sensitivity
 	surfer_position += surfer_velocity * delta
 
 	# Le surfeur reste dans la zone d'eau.
