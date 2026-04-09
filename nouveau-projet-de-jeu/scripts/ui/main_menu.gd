@@ -61,11 +61,11 @@ func _draw() -> void:
 	_draw_home_wave_band(size, size.y * 0.68, 18.0, 150.0, 0.92, Color(0.05, 0.49, 0.72), Color(0.90, 1.0, 1.0, 0.58), size.y * 0.72)
 	draw_rect(Rect2(Vector2(0.0, size.y * 0.72), Vector2(size.x, 4.0)), Color(1.0, 0.97, 0.82, 0.70))
 
-	_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.0)
-	_draw_hut(Vector2(size.x * 0.74, size.y * 0.84), 0.85)
-	_draw_palm(Vector2(size.x * 0.08, size.y * 0.84), 1.2, -0.12)
-	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.0, 0.14)
-	_draw_palm(Vector2(size.x * 0.62, size.y * 0.83), 0.75, 0.08)
+	_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.5)
+	_draw_hut(Vector2(size.x * 0.74, size.y * 0.91), 1.3)
+	_draw_palm(Vector2(size.x * 0.08, size.y * 0.84), 1.8, -0.12)
+	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.55, 0.14)
+	_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
 	_draw_home_surfer(Vector2(size.x * 0.56, size.y * 0.61), sin(Time.get_ticks_msec() * 0.0016) * 0.12)
 
 func _draw_hut(base: Vector2, scale_factor: float) -> void:
