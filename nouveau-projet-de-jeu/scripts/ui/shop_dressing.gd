@@ -68,12 +68,6 @@ func _draw() -> void:
 		var color_shift: float = float(i) * 0.08
 		draw_colored_polygon(cloth, Color(0.18 + color_shift, 0.45, 0.78 - color_shift * 0.5))
 
-	# Etagere surfboards a gauche.
-	var shelf := Rect2(Vector2(size.x * 0.08, size.y * 0.47), Vector2(size.x * 0.34, size.y * 0.10))
-	draw_rect(shelf, Color(0.35, 0.24, 0.15))
-	_draw_surfboard(Vector2(shelf.position.x + 60.0, shelf.position.y + 44.0), 0.75, -0.10, Color(0.93, 0.96, 1.0), Color(0.12, 0.51, 0.88))
-	_draw_surfboard(Vector2(shelf.position.x + 136.0, shelf.position.y + 46.0), 0.70, 0.06, Color(0.99, 0.87, 0.58), Color(0.91, 0.39, 0.20))
-	_draw_surfboard(Vector2(shelf.position.x + 212.0, shelf.position.y + 44.0), 0.72, -0.02, Color(0.84, 0.98, 0.90), Color(0.19, 0.70, 0.42))
 
 func _setup_character_choices() -> void:
 	character_option.clear()
