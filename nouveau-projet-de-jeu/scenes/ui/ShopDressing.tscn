@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/ui/character_front.gd" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble"]
-bg_color = Color(0.96, 0.98, 1, 0.9)
+bg_color = Color(0.15, 0.45, 0.80, 0.95)
 corner_radius_top_left = 34
 corner_radius_top_right = 34
 corner_radius_bottom_right = 34
@@ -13,7 +13,7 @@ border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.35, 0.63, 0.93, 0.9)
+border_color = Color(0.50, 0.75, 1.0, 0.9)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble_active"]
 bg_color = Color(0.33, 0.69, 0.98, 0.95)
