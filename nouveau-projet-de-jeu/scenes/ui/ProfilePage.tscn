@@ -3,19 +3,19 @@
 [ext_resource type="Script" path="res://scripts/ui/profile_page.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.12, 0.24, 0.39, 0.95)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.05, 0.12, 0.24, 0.92)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.9, 0.97, 1, 0.95)
+border_color = Color(0.30, 0.72, 1.0, 0.80)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_tab"]
-bg_color = Color(0.24, 0.62, 0.95, 0.95)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_card"]
+bg_color = Color(0.08, 0.20, 0.38, 0.90)
 corner_radius_top_left = 18
 corner_radius_top_right = 18
 corner_radius_bottom_right = 18
@@ -24,19 +24,98 @@ border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.86, 0.96, 1, 0.9)
+border_color = Color(0.22, 0.62, 1.0, 0.60)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_tab_hover"]
-bg_color = Color(0.30, 0.70, 1, 0.98)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
+bg_color = Color(0.06, 0.16, 0.30, 0.95)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.93, 0.99, 1, 0.95)
+border_color = Color(0.28, 0.68, 1.0, 0.70)
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input_focus"]
+bg_color = Color(0.06, 0.18, 0.36, 0.98)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.40, 0.82, 1.0, 1.0)
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_save_btn"]
+bg_color = Color(0.10, 0.52, 0.96, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 4
+border_color = Color(0.06, 0.30, 0.65, 1.0)
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_right = 0.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_save_btn_hover"]
+bg_color = Color(0.18, 0.64, 1.0, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 4
+border_color = Color(0.08, 0.38, 0.78, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_save_btn_pressed"]
+bg_color = Color(0.06, 0.40, 0.80, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_btn"]
+bg_color = Color(0.10, 0.18, 0.32, 0.88)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.36, 0.76, 1.0, 0.80)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_btn_hover"]
+bg_color = Color(0.16, 0.28, 0.50, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.50, 0.88, 1.0, 0.95)
 
 [node name="ProfilePage" type="Control"]
 layout_mode = 3
@@ -51,16 +130,35 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
+[node name="BackButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 68.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_back_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_back_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_back_btn_hover")
+theme_override_colors/font_color = Color(0.88, 0.96, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 26
+text = "Accueil"
+
 [node name="Title" type="Label" parent="Root"]
 layout_mode = 1
 anchors_preset = 10
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -260.0
-offset_top = 28.0
-offset_right = 260.0
-offset_bottom = 88.0
-text = "Profil Joueur"
+offset_left = -320.0
+offset_top = 72.0
+offset_right = 320.0
+offset_bottom = 162.0
+theme_override_colors/font_color = Color(0.99, 0.93, 0.48, 1.0)
+theme_override_colors/font_outline_color = Color(0.12, 0.25, 0.47, 1.0)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 72
+text = "PROFIL JOUEUR"
 horizontal_alignment = 1
 
 [node name="Panel" type="PanelContainer" parent="Root"]
@@ -70,56 +168,140 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -250.0
-offset_right = 320.0
-offset_bottom = 250.0
+offset_left = -340.0
+offset_top = -260.0
+offset_right = 340.0
+offset_bottom = 310.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 28
 
-[node name="ProfileInfoLabel" type="Label" parent="Root/Panel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ProfileInfoLabel" type="Label" parent="Root/Panel/Margin/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.90, 0.97, 1.0, 1.0)
+theme_override_font_sizes/font_size = 28
 text = "Pseudo: - | Perso: -"
 horizontal_alignment = 1
 
-[node name="ProgressLabel" type="Label" parent="Root/Panel/VBox"]
-unique_name_in_owner = true
+[node name="StatsRow" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
 layout_mode = 2
-text = "XP: 0 | SurfCoin: 0"
+theme_override_constants/separation = 16
+
+[node name="XPCard" type="PanelContainer" parent="Root/Panel/Margin/VBox/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_card")
+custom_minimum_size = Vector2(0, 88)
+
+[node name="XPVBox" type="VBoxContainer" parent="Root/Panel/Margin/VBox/StatsRow/XPCard"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="XPTitle" type="Label" parent="Root/Panel/Margin/VBox/StatsRow/XPCard/XPVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.60, 0.85, 1.0, 0.85)
+theme_override_font_sizes/font_size = 18
+text = "⚡  XP"
 horizontal_alignment = 1
 
-[node name="PseudoInput" type="LineEdit" parent="Root/Panel/VBox"]
+[node name="XPLabel" type="Label" parent="Root/Panel/Margin/VBox/StatsRow/XPCard/XPVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "Entre ton pseudo"
+theme_override_colors/font_color = Color(0.99, 0.93, 0.48, 1.0)
+theme_override_colors/font_outline_color = Color(0.08, 0.20, 0.44, 1.0)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 36
+text = "0"
+horizontal_alignment = 1
 
-[node name="CharacterOption" type="OptionButton" parent="Root/Panel/VBox"]
-unique_name_in_owner = true
+[node name="CoinCard" type="PanelContainer" parent="Root/Panel/Margin/VBox/StatsRow"]
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_stat_card")
+custom_minimum_size = Vector2(0, 88)
 
-[node name="SaveButton" type="Button" parent="Root/Panel/VBox"]
-unique_name_in_owner = true
+[node name="CoinVBox" type="VBoxContainer" parent="Root/Panel/Margin/VBox/StatsRow/CoinCard"]
 layout_mode = 2
-text = "Enregistrer profil"
+theme_override_constants/separation = 2
 
-[node name="StatusLabel" type="Label" parent="Root/Panel/VBox"]
+[node name="CoinTitle" type="Label" parent="Root/Panel/Margin/VBox/StatsRow/CoinCard/CoinVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.60, 0.85, 1.0, 0.85)
+theme_override_font_sizes/font_size = 18
+text = "🪙  SURFCOIN"
+horizontal_alignment = 1
+
+[node name="CoinLabel" type="Label" parent="Root/Panel/Margin/VBox/StatsRow/CoinCard/CoinVBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.93, 0.48, 1.0)
+theme_override_colors/font_outline_color = Color(0.08, 0.20, 0.44, 1.0)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 36
+text = "0"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/separator_color = Color(0.28, 0.62, 1.0, 0.40)
+
+[node name="FormLabel" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70, 0.88, 1.0, 0.80)
+theme_override_font_sizes/font_size = 20
+text = "Modifier le profil"
+horizontal_alignment = 1
+
+[node name="PseudoInput" type="LineEdit" parent="Root/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+theme_override_styles/focus = SubResource("StyleBoxFlat_input_focus")
+theme_override_colors/font_color = Color(0.92, 0.97, 1.0, 1.0)
+theme_override_colors/font_placeholder_color = Color(0.50, 0.70, 0.90, 0.60)
+theme_override_font_sizes/font_size = 28
+placeholder_text = "Entre ton pseudo..."
+
+[node name="CharacterOption" type="OptionButton" parent="Root/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_colors/font_color = Color(0.92, 0.97, 1.0, 1.0)
+theme_override_font_sizes/font_size = 28
+
+[node name="SaveButton" type="Button" parent="Root/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_save_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_save_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_save_btn_pressed")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 32
+text = "ENREGISTRER LE PROFIL"
+
+[node name="StatusLabel" type="Label" parent="Root/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.60, 0.92, 0.72, 0.90)
+theme_override_font_sizes/font_size = 22
 text = "Modifie ton profil puis enregistre."
 horizontal_alignment = 1
 
-[node name="BackButton" type="Button" parent="Root"]
+[node name="ProgressLabel" type="Label" parent="Root/Panel/Margin/VBox"]
 unique_name_in_owner = true
-layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 210.0
-offset_bottom = 90.0
-theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
-theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
-text = "Retour Accueil"
+layout_mode = 2
+visible = false
+text = ""
