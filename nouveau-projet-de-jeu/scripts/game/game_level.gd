@@ -17,6 +17,14 @@ var xp: int = 0
 var surfcoin: int = 0
 var xp_timer: float = 0.0
 
+# Star boost system.
+var stars: Array[Dictionary] = []
+var star_spawn_timer: float = 0.0
+var star_spawn_interval: float = 10.0
+var boost_active: bool = false
+var boost_timer: float = 0.0
+var boost_duration: float = 8.0
+
 # Trick system.
 var trick_active: bool = false
 var trick_timer: float = 0.0
@@ -68,8 +76,10 @@ func _process(delta: float) -> void:
 	_update_trick(delta)
 	_update_obstacles(delta)
 	_update_coins(delta)
+	_update_stars(delta)
 	_check_obstacle_collisions()
 	_collect_coins()
+	_collect_stars()
 	_update_rewards(delta)
 
 	# Score : accélère légèrement avec la difficulté pour récompenser la durée.
@@ -77,9 +87,17 @@ func _process(delta: float) -> void:
 	hud.set_score(score)
 
 func _update_rewards(delta: float) -> void:
+	if boost_active:
+		boost_timer += delta
+		if boost_timer >= boost_duration:
+			boost_active = false
+			boost_timer = 0.0
+
+	# XP 20x plus rapide pendant le boost (seuil 0.5s au lieu de 10s).
 	xp_timer += delta
-	while xp_timer >= 10.0:
-		xp_timer -= 10.0
+	var xp_threshold := 0.5 if boost_active else 10.0
+	while xp_timer >= xp_threshold:
+		xp_timer -= xp_threshold
 		GameManager.add_xp(1)
 		xp = GameManager.total_xp
 		hud.set_xp(xp)
@@ -129,9 +147,22 @@ func _draw() -> void:
 			draw_circle(draw_pos + Vector2(cos(ang), sin(ang)) * dist,
 				randf_range(2.0, 5.0), Color(0.78, 0.96, 1.0, spray_alpha * 0.8))
 
+	# Aura boost active autour du surfeur.
+	if boost_active:
+		var aura_pulse := 0.55 + sin(surf_time * 12.0) * 0.25
+		draw_circle(draw_pos, 58.0, Color(0.20, 0.90, 1.0, aura_pulse * 0.18))
+		draw_circle(draw_pos, 42.0, Color(0.40, 1.0, 0.90, aura_pulse * 0.25))
+		for i in range(8):
+			var ang := TAU * float(i) / 8.0 + surf_time * 4.0
+			var ray_len := 30.0 + sin(surf_time * 8.0 + float(i)) * 10.0
+			draw_line(draw_pos + Vector2(cos(ang), sin(ang)) * 38.0,
+					  draw_pos + Vector2(cos(ang), sin(ang)) * (38.0 + ray_len),
+					  Color(0.20, 1.0, 0.85, aura_pulse * 0.60), 2.5)
+
 	_draw_surfer(draw_pos, board_angle)
 	_draw_obstacles()
 	_draw_coins()
+	_draw_stars()
 
 # Retourne un facteur entre 0.0 et ~1.0 qui augmente très lentement.
 # À 5 min ≈ 0.50 | À 10 min ≈ 0.67 | À 20 min ≈ 0.80 | À 30 min ≈ 0.86
@@ -291,6 +322,83 @@ func _draw_coins() -> void:
 	for coin in coins:
 		_draw_coin(coin["position"])
 
+func _update_stars(delta: float) -> void:
+	var size := get_viewport_rect().size
+	star_spawn_timer += delta
+	if star_spawn_timer >= star_spawn_interval:
+		star_spawn_timer = 0.0
+		star_spawn_interval = randf_range(9.0, 16.0)
+		_spawn_star(size)
+
+	for star in stars:
+		star["position"] = star["position"] + Vector2(-star["speed"] * delta, 0.0)
+		star["angle"] += delta * star["spin"]
+
+	stars = stars.filter(func(s: Dictionary) -> bool: return s["position"].x > -80.0)
+
+func _spawn_star(size: Vector2) -> void:
+	stars.append({
+		"position": Vector2(size.x + randf_range(60.0, 180.0), randf_range(size.y * 0.50, size.y * 0.80)),
+		"radius": 18.0,
+		"speed": randf_range(160.0, 240.0),
+		"angle": 0.0,
+		"spin": randf_range(1.2, 2.4)
+	})
+
+func _draw_stars() -> void:
+	for star in stars:
+		_draw_star(star["position"], star["radius"], star["angle"])
+
+func _draw_star(pos: Vector2, r: float, angle: float) -> void:
+	# Halo lumineux extérieur
+	var pulse := 0.5 + sin(surf_time * 6.0 + pos.x * 0.02) * 0.3
+	draw_circle(pos, r * 2.2, Color(0.30, 1.0, 0.85, 0.10 + pulse * 0.12))
+	draw_circle(pos, r * 1.5, Color(0.50, 1.0, 0.90, 0.18 + pulse * 0.15))
+
+	# Corps étoile à 5 branches
+	var outer := r
+	var inner := r * 0.42
+	var pts   := PackedVector2Array()
+	for i in range(10):
+		var a   := angle + float(i) * PI / 5.0 - PI * 0.5
+		var rad := outer if i % 2 == 0 else inner
+		pts.append(pos + Vector2(cos(a), sin(a)) * rad)
+	draw_colored_polygon(pts, Color(0.95, 0.95, 0.30))
+	# Contour doré
+	draw_polyline(pts, Color(1.0, 0.80, 0.10), 1.5, true)
+	# Centre blanc brillant
+	draw_circle(pos, r * 0.30, Color(1.0, 1.0, 0.85, 0.95))
+
+	# Rayons scintillants (4 directions)
+	for i in range(4):
+		var a      := angle + float(i) * PI * 0.5
+		var ray_r  := r * (1.4 + pulse * 0.6)
+		var bright := Color(1.0, 1.0, 0.70, 0.55 + pulse * 0.35)
+		draw_line(pos, pos + Vector2(cos(a), sin(a)) * ray_r, bright, 2.2)
+		draw_line(pos, pos + Vector2(cos(a + PI * 0.25), sin(a + PI * 0.25)) * ray_r * 0.55,
+				  Color(1.0, 1.0, 0.80, 0.30 + pulse * 0.20), 1.2)
+
+func _collect_stars() -> void:
+	var surfer_center := surfer_position + Vector2(0.0, -16.0)
+	var board_angle   := (surfer_velocity.x / surfer_speed) * 0.25 + sin(surf_time * 1.7) * 0.05
+	var board_center  := surfer_position + Vector2(0.0, 40.0)
+	var board_axis    := Vector2(cos(board_angle), sin(board_angle))
+	var board_start   := board_center - board_axis * 86.0
+	var board_end     := board_center + board_axis * 86.0
+
+	var remaining: Array[Dictionary] = []
+	for star in stars:
+		var spos: Vector2 = star["position"]
+		var sr: float     = star["radius"]
+		var hits := surfer_center.distance_to(spos) <= (20.0 + sr) or \
+					_distance_point_to_segment(spos, board_start, board_end) <= (9.0 + sr)
+		if hits:
+			boost_active = true
+			boost_timer  = 0.0
+		else:
+			remaining.append(star)
+	stars = remaining
+
 func _draw_coin(pos: Vector2) -> void:
 	draw_circle(pos, 14.0, Color(0.96, 0.76, 0.18))
 	draw_circle(pos, 10.5, Color(0.99, 0.88, 0.31))
@@ -349,6 +457,8 @@ func _check_obstacle_collisions() -> void:
 		var obstacle_to_board := _distance_point_to_segment(obstacle_pos, board_start, board_end)
 		var hits_board := obstacle_to_board <= (board_thickness_radius + obstacle_radius)
 		if hits_surfer or hits_board:
+			if boost_active:
+				continue
 			player_died()
 			return
 
