@@ -61,12 +61,14 @@ func _draw() -> void:
 	_draw_home_wave_band(size, size.y * 0.68, 18.0, 150.0, 0.92, Color(0.05, 0.49, 0.72), Color(0.90, 1.0, 1.0, 0.58), size.y * 0.72)
 	draw_rect(Rect2(Vector2(0.0, size.y * 0.72), Vector2(size.x, 4.0)), Color(1.0, 0.97, 0.82, 0.70))
 
-	if GameManager.total_xp >= 200:
+	_draw_palm(Vector2(size.x * 0.08, size.y * 0.84), 1.8, -0.12)
+	if GameManager.total_xp >= 500:
+		_draw_castle(Vector2(size.x * 0.50, size.y * 0.96), 2.4)
+	elif GameManager.total_xp >= 200:
 		_draw_big_house(Vector2(size.x * 0.38, size.y * 0.88), 1.4)
 	else:
 		_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.5)
 		_draw_hut(Vector2(size.x * 0.74, size.y * 0.91), 1.3)
-	_draw_palm(Vector2(size.x * 0.08, size.y * 0.84), 1.8, -0.12)
 	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.55, 0.14)
 	if GameManager.total_xp < 200:
 		_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
@@ -210,6 +212,238 @@ func _draw_big_house(base: Vector2, sc: float) -> void:
 	_draw_surfboard(base + Vector2(-80.0 * sc, -10.0 * sc), 1.0 * sc,  -0.10, Color(0.94, 0.97, 1.0), Color(0.13, 0.50, 0.90))
 	_draw_surfboard(base + Vector2(-52.0 * sc, -8.0  * sc), 0.95 * sc,  0.07, Color(0.99, 0.88, 0.58), Color(0.92, 0.43, 0.22))
 	_draw_surfboard(base + Vector2(-24.0 * sc, -9.0  * sc), 0.90 * sc, -0.05, Color(0.88, 0.94, 0.85), Color(0.25, 0.70, 0.40))
+
+func _draw_castle(base: Vector2, sc: float) -> void:
+	# Palette chateau fort medieval realiste
+	var stone      := Color(0.73, 0.71, 0.67)   # pierre face principale
+	var stone_lit  := Color(0.86, 0.84, 0.80)   # pierre eclairee (haut-gauche)
+	var stone_sh   := Color(0.50, 0.48, 0.45)   # pierre cote ombre
+	var stone_dk   := Color(0.32, 0.30, 0.28)   # pierre tres sombre
+	var mortar     := Color(0.40, 0.38, 0.36)   # joints mortier
+	var slate      := Color(0.36, 0.34, 0.40)   # ardoise toit
+	var slate_lit  := Color(0.50, 0.48, 0.56)   # reflet ardoise
+	var slate_dk   := Color(0.20, 0.18, 0.24)   # ombre ardoise
+	var flag_red   := Color(0.78, 0.10, 0.10)   # drapeau rouge
+	var flag_dk    := Color(0.50, 0.05, 0.05)   # ombre drapeau
+	var wood_dark  := Color(0.20, 0.13, 0.06)   # bois portail
+	var iron       := Color(0.30, 0.30, 0.32)   # fer herse/ferrures
+	var amber      := Color(0.94, 0.78, 0.28, 0.85) # lueur torche fenetres
+	var surround   := Color(0.58, 0.56, 0.52)   # encadrement pierres taillees
+	var shadow_soft:= Color(0.20, 0.18, 0.16, 0.38) # ombre portee
+
+	# Dimensions
+	var tw   := 58.0 * sc
+	var th   := 112.0 * sc
+	var kw   := 136.0 * sc
+	var kh   := 74.0 * sc
+	var toff := kw * 0.5 + tw * 0.38
+
+	var t_top := base.y - th
+	var k_top := base.y - kh
+
+	# ── FONDATIONS ──────────────────────────────────────────────────────
+	var fw := kw + tw * 2.4
+	draw_rect(Rect2(Vector2(base.x - fw * 0.5 + 5.0, base.y - 9.0 * sc), Vector2(fw, 9.0 * sc)), stone_sh)
+	draw_rect(Rect2(Vector2(base.x - fw * 0.5, base.y - 9.0 * sc), Vector2(fw - 5.0, 9.0 * sc)), stone)
+	var fsh := 9.0 * sc
+	var fsw := 28.0 * sc
+	var fx  := base.x - fw * 0.5
+	while fx < base.x + fw * 0.5:
+		draw_line(Vector2(fx, base.y - fsh), Vector2(fx, base.y), mortar, 0.9)
+		fx += fsw
+
+	# ── TOURS ───────────────────────────────────────────────────────────
+	for side in [-1, 1]:
+		var tx := base.x + float(side) * toff
+		var tl := tx - tw * 0.5
+
+		# Face laterale (ombre 3D)
+		var sh_side := 6.0 * sc
+		if side == 1:
+			draw_rect(Rect2(Vector2(tl - sh_side, t_top), Vector2(sh_side, th)), stone_dk)
+		else:
+			draw_rect(Rect2(Vector2(tl + tw, t_top), Vector2(sh_side, th)), stone_dk)
+
+		# Face principale
+		draw_rect(Rect2(Vector2(tl, t_top), Vector2(tw, th)), stone)
+
+		# Reflet haut-gauche (lumiere)
+		draw_rect(Rect2(Vector2(tl, t_top), Vector2(3.5 * sc, th)), Color(stone_lit.r, stone_lit.g, stone_lit.b, 0.55))
+		draw_rect(Rect2(Vector2(tl, t_top), Vector2(tw, 3.0 * sc)), Color(stone_lit.r, stone_lit.g, stone_lit.b, 0.35))
+
+		# Appareillage maconnerie (joints H + V decales)
+		var ash := 16.0 * sc
+		var asw := 22.0 * sc
+		var row := 0
+		var jy  := t_top
+		while jy < base.y:
+			draw_line(Vector2(tl, jy), Vector2(tl + tw, jy), mortar, 0.85)
+			var off_x := (asw * 0.5) if row % 2 == 1 else 0.0
+			var vx    := tl + off_x
+			while vx < tl + tw:
+				if vx > tl:
+					draw_line(Vector2(vx, jy), Vector2(vx, min(jy + ash, base.y)), mortar, 0.85)
+				vx += asw
+			jy  += ash
+			row += 1
+
+		# Crenelages (3 merlons + 2 crenaux)
+		var merl_w := tw / 5.0
+		var merl_h := 15.0 * sc
+		for i in range(5):
+			var mx := tl + float(i) * merl_w
+			if i % 2 == 0:
+				# Merlon plein
+				draw_rect(Rect2(Vector2(mx, t_top - merl_h), Vector2(merl_w, merl_h)), stone)
+				draw_line(Vector2(mx, t_top - merl_h), Vector2(mx + merl_w, t_top - merl_h), mortar, 0.9)
+				draw_line(Vector2(mx + merl_w, t_top - merl_h), Vector2(mx + merl_w, t_top), mortar, 0.9)
+				# Ombre sous merlon sur chemin de ronde
+				draw_rect(Rect2(Vector2(mx, t_top), Vector2(merl_w, 4.0 * sc)), shadow_soft)
+			else:
+				# Crenel (vide) - ombre au fond
+				draw_rect(Rect2(Vector2(mx, t_top - merl_h * 0.35), Vector2(merl_w, merl_h * 0.35)), shadow_soft)
+
+		# Toit conique ardoise
+		var roof_h := 58.0 * sc
+		var r_left  := Vector2(tl - 6.0 * sc, t_top)
+		var r_right := Vector2(tl + tw + 4.0 * sc, t_top)
+		var r_peak  := Vector2(tx, t_top - roof_h)
+		draw_colored_polygon(PackedVector2Array([r_left, r_right, r_peak]), slate)
+		# Lignes de tuiles ardoise
+		for ti in range(1, 7):
+			var f  := float(ti) / 7.0
+			var lx1 := r_left.x  + (r_peak.x - r_left.x)  * f
+			var lx2 := r_right.x + (r_peak.x - r_right.x) * f
+			var ly  := t_top - roof_h * f
+			draw_line(Vector2(lx1, ly), Vector2(lx2, ly), slate_dk, 1.1)
+		# Reflet gauche toit
+		var rf_mid := r_left + (r_peak - r_left) * 0.5
+		draw_line(r_left + Vector2(4.0, 2.0), rf_mid + Vector2(2.0, 0.0),
+				  Color(slate_lit.r, slate_lit.g, slate_lit.b, 0.5), 5.0 * sc)
+		draw_polyline(PackedVector2Array([r_left, r_right, r_peak]), slate_dk, 1.6, true)
+
+		# Hampe + drapeau (deux triangles pour l'ombre)
+		var ftop := r_peak
+		draw_line(ftop, ftop + Vector2(0.0, -24.0 * sc), stone_dk, 2.2)
+		draw_colored_polygon(PackedVector2Array([
+			ftop + Vector2(0.0, -24.0 * sc),
+			ftop + Vector2(float(side) * 20.0 * sc, -18.0 * sc),
+			ftop + Vector2(float(side) * 20.0 * sc, -10.0 * sc),
+			ftop + Vector2(0.0, -10.0 * sc)
+		]), flag_red)
+		draw_colored_polygon(PackedVector2Array([
+			ftop + Vector2(0.0, -24.0 * sc),
+			ftop + Vector2(float(side) * 20.0 * sc, -18.0 * sc),
+			ftop + Vector2(float(side) * 10.0 * sc, -18.0 * sc),
+			ftop + Vector2(0.0, -24.0 * sc)
+		]), flag_dk)
+
+		# Meurtriere (encadrement pierre + lueur)
+		var wcy := t_top + th * 0.42
+		draw_rect(Rect2(Vector2(tx - 9.0 * sc, wcy - 20.0 * sc), Vector2(18.0 * sc, 36.0 * sc)), surround)
+		draw_rect(Rect2(Vector2(tx - 4.5 * sc, wcy - 16.0 * sc), Vector2(9.0 * sc, 28.0 * sc)), stone_dk)
+		draw_circle(Vector2(tx, wcy - 16.0 * sc), 4.5 * sc, stone_dk)
+		draw_circle(Vector2(tx, wcy), 3.5 * sc, amber)
+		draw_circle(Vector2(tx, wcy), 1.8 * sc, Color(1.0, 0.95, 0.70, 0.95))
+
+	# ── CORPS PRINCIPAL ─────────────────────────────────────────────────
+	var kl := base.x - kw * 0.5
+
+	# Ombre laterale droite
+	draw_rect(Rect2(Vector2(kl + kw, k_top), Vector2(5.0 * sc, kh)), stone_dk)
+	# Face principale
+	draw_rect(Rect2(Vector2(kl, k_top), Vector2(kw, kh)), stone)
+	draw_rect(Rect2(Vector2(kl, k_top), Vector2(3.5 * sc, kh)), Color(stone_lit.r, stone_lit.g, stone_lit.b, 0.55))
+	draw_rect(Rect2(Vector2(kl, k_top), Vector2(kw, 3.0 * sc)), Color(stone_lit.r, stone_lit.g, stone_lit.b, 0.30))
+
+	# Appareillage maconnerie corps
+	var kash := 16.0 * sc
+	var kasw := 26.0 * sc
+	var krow := 0
+	var kjy  := k_top
+	while kjy < base.y:
+		draw_line(Vector2(kl, kjy), Vector2(kl + kw, kjy), mortar, 0.85)
+		var koff := (kasw * 0.5) if krow % 2 == 1 else 0.0
+		var kvx  := kl + koff
+		while kvx < kl + kw:
+			if kvx > kl:
+				draw_line(Vector2(kvx, kjy), Vector2(kvx, min(kjy + kash, base.y)), mortar, 0.85)
+			kvx += kasw
+		kjy  += kash
+		krow += 1
+
+	# Crenelages corps (6 merlons)
+	var kmerl_w := kw / 11.0
+	var kmerl_h := 15.0 * sc
+	for i in range(11):
+		var mx := kl + float(i) * kmerl_w
+		if i % 2 == 0:
+			draw_rect(Rect2(Vector2(mx, k_top - kmerl_h), Vector2(kmerl_w, kmerl_h)), stone)
+			draw_line(Vector2(mx, k_top - kmerl_h), Vector2(mx + kmerl_w, k_top - kmerl_h), mortar, 0.9)
+			draw_rect(Rect2(Vector2(mx, k_top), Vector2(kmerl_w, 4.0 * sc)), shadow_soft)
+		else:
+			draw_rect(Rect2(Vector2(mx, k_top - kmerl_h * 0.35), Vector2(kmerl_w, kmerl_h * 0.35)), shadow_soft)
+
+	# 2 fenetres en ogive avec encadrement et lueur
+	for side in [-1, 1]:
+		var wcx := base.x + float(side) * kw * 0.29
+		var wcy := k_top + kh * 0.36
+		var wr  := 13.0 * sc
+		# Encadrement pierre taillee
+		draw_rect(Rect2(Vector2(wcx - wr - 5.0, wcy - wr - 5.0), Vector2(wr * 2.0 + 10.0, wr * 2.0 + 10.0)), surround)
+		# Ouverture ogivale
+		draw_circle(Vector2(wcx - wr * 0.25, wcy - wr * 0.2), wr * 0.82, stone_dk)
+		draw_circle(Vector2(wcx + wr * 0.25, wcy - wr * 0.2), wr * 0.82, stone_dk)
+		draw_rect(Rect2(Vector2(wcx - wr, wcy - wr * 0.25), Vector2(wr * 2.0, wr * 1.25)), stone_dk)
+		# Vitrail ambré
+		draw_circle(Vector2(wcx - wr * 0.25, wcy - wr * 0.2), wr * 0.58, amber)
+		draw_circle(Vector2(wcx + wr * 0.25, wcy - wr * 0.2), wr * 0.58, amber)
+		draw_rect(Rect2(Vector2(wcx - wr * 0.72, wcy - wr * 0.22), Vector2(wr * 1.44, wr * 1.22)), amber)
+		# Meneau central
+		draw_line(Vector2(wcx, wcy - wr), Vector2(wcx, wcy + wr * 0.9), surround, 2.2)
+		draw_line(Vector2(wcx - wr * 0.85, wcy + wr * 0.1), Vector2(wcx + wr * 0.85, wcy + wr * 0.1), surround, 2.2)
+		# Point lumineux centre
+		draw_circle(Vector2(wcx, wcy), wr * 0.28, Color(1.0, 0.94, 0.65, 0.60))
+
+	# Portail ogival — encadrement + bois + herse fer
+	var gw := 40.0 * sc
+	var gh := 58.0 * sc
+	var gx := base.x - gw * 0.5
+	# Encadrement pierre portail
+	draw_rect(Rect2(Vector2(gx - 9.0 * sc, k_top), Vector2(gw + 18.0 * sc, kh)), surround)
+	# Porte bois
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(gx, base.y),
+		Vector2(gx + gw, base.y),
+		Vector2(gx + gw, base.y - gh * 0.50),
+		Vector2(base.x,  base.y - gh),
+		Vector2(gx, base.y - gh * 0.50)
+	]), wood_dark)
+	# Planches verticales bois
+	for gi in range(1, 4):
+		var px := gx + gw * float(gi) / 4.0
+		draw_line(Vector2(px, base.y), Vector2(px, base.y - gh * 0.48), Color(0.14, 0.09, 0.04), 1.4)
+	# Ferrures horizontales (bandes de fer)
+	for gi in range(1, 4):
+		var fy := base.y - gh * float(gi) * 0.17
+		draw_line(Vector2(gx + 2.0, fy), Vector2(gx + gw - 2.0, fy), iron, 3.5)
+		# Rivet gauche et droit
+		draw_circle(Vector2(gx + 6.0 * sc, fy), 2.2, Color(0.45, 0.45, 0.48))
+		draw_circle(Vector2(gx + gw - 6.0 * sc, fy), 2.2, Color(0.45, 0.45, 0.48))
+	# Herse fer (grille)
+	for gi in range(1, 3):
+		var hx := gx + gw * float(gi) / 3.0
+		draw_line(Vector2(hx, base.y - gh * 0.50), Vector2(hx, base.y), iron, 2.5)
+		# Pointes du bas
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(hx - 2.5, base.y),
+			Vector2(hx + 2.5, base.y),
+			Vector2(hx, base.y + 5.0 * sc)
+		]), iron)
+	draw_line(Vector2(gx, base.y - gh * 0.30), Vector2(gx + gw, base.y - gh * 0.30), iron, 2.0)
+	# Voussures arc ogival
+	draw_arc(Vector2(base.x - gw * 0.2, base.y - gh * 0.50), gw * 0.55, -PI * 0.72, -PI * 0.28, 20, surround, 3.0)
+	draw_arc(Vector2(base.x + gw * 0.2, base.y - gh * 0.50), gw * 0.55, -PI * 0.72, -PI * 0.28, 20, surround, 3.0)
 
 func _transform_points_local(points: Array[Vector2], offset: Vector2, angle: float, scale_factor: float) -> PackedVector2Array:
 	var out := PackedVector2Array()
