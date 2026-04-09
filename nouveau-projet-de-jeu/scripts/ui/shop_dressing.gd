@@ -39,7 +39,7 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(0.0, plank_y), Vector2(size.x, 3.0)), Color(0.31, 0.21, 0.13, 0.34))
 
 	# Fenetre vue ocean.
-	var window_rect := Rect2(Vector2(size.x * 0.08, size.y * 0.10), Vector2(size.x * 0.34, size.y * 0.24))
+	var window_rect := Rect2(Vector2(size.x * 0.06, size.y * 0.08), Vector2(size.x * 0.38, size.y * 0.28))
 	var inner := Rect2(window_rect.position + Vector2(10.0, 10.0), window_rect.size - Vector2(20.0, 20.0))
 	var horizon_y: float = inner.position.y + inner.size.y * 0.42
 
