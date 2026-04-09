@@ -32,7 +32,7 @@ func _draw() -> void:
 		return
 
 	# Interieur de maison (moins uniforme).
-	_draw_gradient_rect(Rect2(Vector2.ZERO, Vector2(size.x, size.y * 0.68)), Color(0.73, 0.53, 0.33), Color(0.48, 0.33, 0.21))
+	_draw_gradient_rect(Rect2(Vector2.ZERO, Vector2(size.x, size.y * 0.68)), Color(0.97, 0.95, 0.90), Color(0.91, 0.88, 0.82))
 	_draw_gradient_rect(Rect2(Vector2(0.0, size.y * 0.68), Vector2(size.x, size.y * 0.32)), Color(0.60, 0.42, 0.26), Color(0.42, 0.28, 0.18))
 	for i in range(8):
 		var plank_y: float = size.y * 0.70 + float(i) * 42.0
