@@ -40,15 +40,76 @@ func _draw() -> void:
 
 	# Fenetre vue ocean.
 	var window_rect := Rect2(Vector2(size.x * 0.08, size.y * 0.10), Vector2(size.x * 0.34, size.y * 0.24))
-	draw_rect(window_rect, Color(0.18, 0.25, 0.30))
+	var inner := Rect2(window_rect.position + Vector2(10.0, 10.0), window_rect.size - Vector2(20.0, 20.0))
+	var horizon_y: float = inner.position.y + inner.size.y * 0.42
+
+	# Cadre bois (ombre exterieure + bois clair + bois fonce interieur).
+	draw_rect(window_rect, Color(0.14, 0.09, 0.05))
+	draw_rect(Rect2(window_rect.position + Vector2(2.0, 2.0), window_rect.size - Vector2(4.0, 4.0)), Color(0.42, 0.28, 0.15))
+	draw_rect(Rect2(window_rect.position + Vector2(5.0, 5.0), window_rect.size - Vector2(10.0, 10.0)), Color(0.30, 0.19, 0.10))
+
+	# Ciel (doré bas -> bleu profond en haut).
 	_draw_gradient_rect(
-		Rect2(window_rect.position + Vector2(8.0, 8.0), window_rect.size - Vector2(16.0, 16.0)),
-		Color(0.89, 0.71, 0.52),
-		Color(0.20, 0.62, 0.85)
+		Rect2(inner.position, Vector2(inner.size.x, horizon_y - inner.position.y)),
+		Color(0.38, 0.66, 0.97),
+		Color(0.99, 0.83, 0.54)
 	)
-	draw_rect(Rect2(window_rect.position + Vector2(8.0, window_rect.size.y * 0.58), Vector2(window_rect.size.x - 16.0, 3.0)), Color(0.92, 0.98, 1.0, 0.55))
-	draw_line(window_rect.position + Vector2(window_rect.size.x * 0.5, 8.0), window_rect.position + Vector2(window_rect.size.x * 0.5, window_rect.size.y - 8.0), Color(0.25, 0.18, 0.12), 3.0)
-	draw_line(window_rect.position + Vector2(8.0, window_rect.size.y * 0.5), window_rect.position + Vector2(window_rect.size.x - 8.0, window_rect.size.y * 0.5), Color(0.25, 0.18, 0.12), 3.0)
+
+	# Soleil.
+	var sun_pos := Vector2(inner.position.x + inner.size.x * 0.74, horizon_y - inner.size.y * 0.20)
+	draw_circle(sun_pos, 20.0, Color(1.0, 0.90, 0.40, 0.30))
+	draw_circle(sun_pos, 14.0, Color(1.0, 0.95, 0.55, 0.70))
+	draw_circle(sun_pos, 9.0, Color(1.0, 0.99, 0.82))
+
+	# Ocean (turquoise -> bleu profond).
+	var ocean_rect := Rect2(Vector2(inner.position.x, horizon_y), Vector2(inner.size.x, inner.position.y + inner.size.y - horizon_y))
+	_draw_gradient_rect(ocean_rect, Color(0.18, 0.76, 0.90), Color(0.04, 0.22, 0.52))
+
+	# Colonne de reflet solaire sur l'eau.
+	_draw_gradient_rect(
+		Rect2(Vector2(sun_pos.x - 14.0, horizon_y), Vector2(28.0, ocean_rect.size.y)),
+		Color(1.0, 0.88, 0.38, 0.48),
+		Color(1.0, 0.60, 0.10, 0.0)
+	)
+
+	# Vagues horizontales.
+	for i in range(5):
+		var t: float = float(i) / 4.0
+		var wy: float = horizon_y + 6.0 + t * (ocean_rect.size.y - 10.0)
+		var wa: float = 0.55 - t * 0.28
+		draw_line(Vector2(inner.position.x + 3.0, wy), Vector2(inner.position.x + inner.size.x - 3.0, wy), Color(0.88, 0.98, 1.0, wa), 1.5)
+
+	# Ligne d'horizon nette.
+	draw_line(Vector2(inner.position.x, horizon_y), Vector2(inner.position.x + inner.size.x, horizon_y), Color(0.95, 1.0, 1.0, 0.85), 2.0)
+
+	# Scintillements sur l'eau.
+	var sparkles := [
+		Vector2(0.15, 0.18), Vector2(0.30, 0.45), Vector2(0.52, 0.28),
+		Vector2(0.68, 0.60), Vector2(0.42, 0.72), Vector2(0.80, 0.36)
+	]
+	for sp in sparkles:
+		var sx: float = inner.position.x + inner.size.x * sp.x
+		var sy: float = horizon_y + ocean_rect.size.y * sp.y
+		draw_circle(Vector2(sx, sy), 2.2, Color(1.0, 1.0, 1.0, 0.65))
+
+	# Traverses bois (vertical + horizontal) avec relief.
+	var cx: float = inner.position.x + inner.size.x * 0.5
+	var cy: float = inner.position.y + inner.size.y * 0.5
+	draw_line(Vector2(cx - 1.0, inner.position.y), Vector2(cx - 1.0, inner.position.y + inner.size.y), Color(0.14, 0.09, 0.05), 5.0)
+	draw_line(Vector2(cx + 1.0, inner.position.y), Vector2(cx + 1.0, inner.position.y + inner.size.y), Color(0.50, 0.33, 0.18), 5.0)
+	draw_line(Vector2(cx, inner.position.y), Vector2(cx, inner.position.y + inner.size.y), Color(0.38, 0.24, 0.13), 4.0)
+	draw_line(Vector2(inner.position.x, cy - 1.0), Vector2(inner.position.x + inner.size.x, cy - 1.0), Color(0.14, 0.09, 0.05), 5.0)
+	draw_line(Vector2(inner.position.x, cy + 1.0), Vector2(inner.position.x + inner.size.x, cy + 1.0), Color(0.50, 0.33, 0.18), 5.0)
+	draw_line(Vector2(inner.position.x, cy), Vector2(inner.position.x + inner.size.x, cy), Color(0.38, 0.24, 0.13), 4.0)
+
+	# Reflet vitre (triangle lumineux discret).
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(inner.position.x + inner.size.x * 0.08, inner.position.y),
+		Vector2(inner.position.x + inner.size.x * 0.30, inner.position.y),
+		Vector2(inner.position.x + inner.size.x * 0.06, inner.position.y + inner.size.y * 0.40),
+		Vector2(inner.position.x, inner.position.y + inner.size.y * 0.40),
+		Vector2(inner.position.x, inner.position.y + inner.size.y * 0.10)
+	]), Color(1.0, 1.0, 1.0, 0.07))
 
 	# Dressing: portant + etageres + planches.
 	var rack_base := Vector2(size.x * 0.62, size.y * 0.70)
