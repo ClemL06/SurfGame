@@ -70,9 +70,8 @@ func _draw() -> void:
 		_draw_hut(Vector2(size.x * 0.22, size.y * 0.82), 1.5)
 		_draw_hut(Vector2(size.x * 0.74, size.y * 0.91), 1.3)
 	_draw_palm(Vector2(size.x * 0.92, size.y * 0.86), 1.55, 0.14)
-	if GameManager.total_xp < 200:
-		_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
-	_draw_home_surfer(Vector2(size.x * 0.56, size.y * 0.61), sin(Time.get_ticks_msec() * 0.0016) * 0.12)
+	_draw_palm(Vector2(size.x * 0.48, size.y * 0.93), 1.25, 0.08)
+	_draw_surfer(Vector2(size.x * 0.56, size.y * 0.61), sin(Time.get_ticks_msec() * 0.0016) * 0.12)
 
 func _draw_hut(base: Vector2, scale_factor: float) -> void:
 	var wall_w := 120.0 * scale_factor
@@ -550,277 +549,878 @@ func _draw_home_wave_band(
 	draw_colored_polygon(points, color)
 	draw_polyline(foam, foam_color, 2.0, true)
 
-func _draw_home_surfer(center: Vector2, angle: float) -> void:
-	var idx: int    = GameManager.selected_character_index
-	var skin        := Color(0.93, 0.79, 0.64)
-	var wet_dark    := Color(0.07, 0.09, 0.15)
-	var wet_mid     := Color(0.13, 0.17, 0.27)
-	var wet_blue    := Color(0.18, 0.58, 0.95)
-	var t: float    = float(Time.get_ticks_msec()) * 0.001
-	var sc: float   = 0.74
+func _draw_surfer(position: Vector2, board_angle: float) -> void:
+	var idx: int = GameManager.selected_character_index
+	if idx == 1:
+		_draw_surfer_female(position, board_angle)
+	elif idx == 2:
+		_draw_surfer_neon(position, board_angle)
+	elif idx == 3:
+		_draw_surfer_water_ninja(position, board_angle)
+	else:
+		_draw_surfer_male(position, board_angle)
 
-	# Couleurs selon le personnage selectionne.
-	if idx == 1:   # Surfeuse Pro
-		skin     = Color(0.85, 0.62, 0.45)
-		wet_dark = Color(0.15, 0.18, 0.28)
-		wet_mid  = Color(0.20, 0.85, 0.85)
-		wet_blue = Color(0.76, 0.18, 0.52)
-	elif idx == 2: # Rider Neon
-		skin     = Color(0.85, 0.60, 0.45)
-		wet_dark = Color(0.10, 0.10, 0.15)
-		wet_mid  = Color(0.95, 0.95, 0.10)
-		wet_blue = Color(0.0,  0.80, 1.0)
-	elif idx == 3: # Water Ninja
-		skin     = Color(0.85, 0.62, 0.45)
-		wet_dark = Color(0.10, 0.12, 0.18)
-		wet_mid  = Color(0.18, 0.35, 0.55)
-		wet_blue = Color(0.0,  0.85, 1.0)
-
-	# ── PLANCHE ─────────────────────────────────────────────────────────
-	var bc := center + Vector2(0.0, 44.0)
-
-	# Ombre portee sous la planche (rail bas).
-	draw_colored_polygon(_transform_points_local([
-		Vector2(-95.0, 6.0), Vector2(-70.0, -10.0), Vector2(-18.0, -16.0),
-		Vector2(65.0, -8.0),  Vector2(92.0, 6.0),   Vector2(65.0, 22.0),
-		Vector2(-18.0, 28.0), Vector2(-70.0, 22.0)
-	], bc + Vector2(0.0, 5.0), angle, sc), Color(0.50, 0.58, 0.70, 0.35))
-
-	# Surface de la planche.
-	var board := _transform_points_local([
-		Vector2(-95.0, 0.0),  Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
-		Vector2(65.0, -14.0), Vector2(92.0, 0.0),    Vector2(65.0, 14.0),
+func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
+	var board_shape := _transform_points([
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
 		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
-	], bc, angle, sc)
-	draw_colored_polygon(board, Color(0.97, 0.98, 1.0))
-	draw_polyline(board, Color(0.62, 0.72, 0.86, 0.75), 1.8, true)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
-	# Rail highlight (bord superieur brillant).
-	draw_polyline(_transform_points_local([
-		Vector2(-90.0, -2.0), Vector2(-66.0, -14.0), Vector2(-14.0, -20.0),
-		Vector2(62.0, -12.0), Vector2(88.0, 0.0)
-	], bc, angle, sc), Color(1.0, 1.0, 1.0, 0.55), 2.4, false)
+	var ninja_blue := Color(0.46, 0.90, 1.0)
+	var ninja_blue_dark := Color(0.14, 0.52, 0.78)
+	var board_stripe := _transform_points([
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_stripe, ninja_blue)
+	draw_polyline(board_stripe, ninja_blue_dark, 2.0, true)
 
-	# Stringer (ligne centrale de fibre de verre).
-	var stg := _transform_points_local([Vector2(0.0, -21.0), Vector2(0.0, 20.0)], bc, angle, sc)
-	draw_line(stg[0], stg[1], Color(0.78, 0.82, 0.90, 0.55), 1.2)
+	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
+	var center = Vector2.ZERO
 
-	# Stripe couleur du personnage.
-	draw_colored_polygon(_transform_points_local([
-		Vector2(-82.0, -4.0), Vector2(80.0, -4.0), Vector2(80.0, 4.0), Vector2(-82.0, 4.0)
-	], bc, angle, sc), wet_blue)
+	# Palette High-Tech Ninja
+	var suit_dark = Color(0.10, 0.12, 0.18)
+	var suit_mid = Color(0.18, 0.35, 0.55)
+	var cyber_blue = Color(0.0, 0.85, 1.0)
+	var armor_grey = Color(0.3, 0.35, 0.4)
+	var skin_base = Color(0.85, 0.62, 0.45)
+	var skin_shadow = Color(0.70, 0.45, 0.30)
+	var mask_black = Color(0.05, 0.05, 0.07)
+	var belt_accents = Color(0.0, 0.5, 0.8)
 
-	# Thruster fins (setup 3 ailerons).
-	draw_colored_polygon(_transform_points_local([
-		Vector2(-60.0, 14.0), Vector2(-50.0, 14.0), Vector2(-44.0, 29.0), Vector2(-66.0, 29.0)
-	], bc, angle, sc), Color(0.10, 0.12, 0.18))
-	draw_colored_polygon(_transform_points_local([
-		Vector2(-69.0, 12.0), Vector2(-58.0, 12.0), Vector2(-54.0, 23.0), Vector2(-72.0, 23.0)
-	], bc, angle, sc), Color(0.15, 0.17, 0.25))
-	draw_colored_polygon(_transform_points_local([
-		Vector2(-48.0, 12.0), Vector2(-37.0, 12.0), Vector2(-34.0, 23.0), Vector2(-51.0, 23.0)
-	], bc, angle, sc), Color(0.15, 0.17, 0.25))
-
-	# Leash (cheville arriere -> queue).
-	var leash_tail := _transform_points_local([Vector2(-91.0, 2.0)], bc, angle, sc)[0]
-	draw_line(center + Vector2(-22.0, 36.0), leash_tail, Color(0.55, 0.58, 0.68, 0.65), 1.5)
-
-	# ── JAMBES (stance surf basse) ───────────────────────────────────────
-	var foot_back  := center + Vector2(-22.0, 37.0)
-	var foot_front := center + Vector2(13.0,  35.0)
-	var knee_back  := center + Vector2(-14.0, 13.0) + Vector2(angle * 16.0, 0.0)
-	var knee_front := center + Vector2(10.0,  11.0) + Vector2(angle * 9.0,  0.0)
-	var hip        := center + Vector2(-4.0,  2.0)
-
-	# Cuisse arriere.
-	draw_line(hip, knee_back, wet_dark, 13.0)
-	draw_line(hip + Vector2(2.0, 0.0), knee_back + Vector2(2.0, 0.0), wet_mid, 5.0)
-	# Mollet arriere.
-	draw_line(knee_back, foot_back, wet_dark, 11.0)
-	draw_line(knee_back + Vector2(2.0, 0.0), foot_back + Vector2(2.0, 0.0), wet_mid, 4.0)
-	# Genouillere arriere.
-	draw_circle(knee_back, 7.0, wet_dark)
-	draw_circle(knee_back, 4.0, Color(0.18, 0.20, 0.30))
-	# Chaussure arriere.
+	# --- Bras Gauche (Background) ---
 	draw_colored_polygon(PackedVector2Array([
-		foot_back + Vector2(-10.0, 0.0), foot_back + Vector2(9.0, 0.0),
-		foot_back + Vector2(11.0,  7.0), foot_back + Vector2(-8.0, 7.0)
-	]), Color(0.18, 0.20, 0.28))
-
-	# Cuisse avant.
-	draw_line(hip, knee_front, wet_dark, 14.0)
-	draw_line(hip + Vector2(2.0, 0.0), knee_front + Vector2(2.0, 0.0), wet_mid, 6.0)
-	# Mollet avant.
-	draw_line(knee_front, foot_front, wet_dark, 12.0)
-	draw_line(knee_front + Vector2(2.0, 0.0), foot_front + Vector2(2.0, 0.0), wet_mid, 5.0)
-	# Genouillere avant.
-	draw_circle(knee_front, 8.0, wet_dark)
-	draw_circle(knee_front, 5.0, Color(0.18, 0.20, 0.30))
-	# Chaussure avant.
+		center + Vector2(-24.0, -84.0), center + Vector2(-36.0, -50.0),
+		center + Vector2(-42.0, -56.0), center + Vector2(-18.0, -74.0)
+	]), suit_dark)
+	# Epaulette armure gauche
 	draw_colored_polygon(PackedVector2Array([
-		foot_front + Vector2(-8.0, 0.0), foot_front + Vector2(11.0, 0.0),
-		foot_front + Vector2(13.0, 7.0), foot_front + Vector2(-6.0, 7.0)
-	]), Color(0.18, 0.20, 0.28))
+		center + Vector2(-22.0, -88.0), center + Vector2(-35.0, -75.0),
+		center + Vector2(-28.0, -68.0), center + Vector2(-15.0, -80.0)
+	]), armor_grey)
+	draw_circle(center + Vector2(-24.0, -28.0), 8.0, mask_black) # Gant G
 
-	# ── TORSE ────────────────────────────────────────────────────────────
-	var sh_l := center + Vector2(-18.0, -22.0)
-	var sh_r := center + Vector2(16.0,  -24.0)
+	# --- Jambes (Combinaison renforcÃ©e) ---
+	# Jambe Gauche
 	draw_colored_polygon(PackedVector2Array([
-		hip   + Vector2(-10.0,  0.0), hip   + Vector2(10.0,  0.0),
-		sh_r  + Vector2(  5.0,  0.0), sh_r,
-		sh_l,                         sh_l  + Vector2(-5.0,  0.0)
-	]), wet_dark)
-	# Panel zip central.
+		center + Vector2(-24.0, 10.0), center + Vector2(-10.0, 10.0),
+		center + Vector2(-14.0, 50.0), center + Vector2(-26.0, 50.0)
+	]), suit_mid)
 	draw_colored_polygon(PackedVector2Array([
-		hip + Vector2(-5.0, 0.0), hip + Vector2(5.0, 0.0),
-		center + Vector2(6.0, -20.0), center + Vector2(-6.0, -20.0)
-	]), wet_blue)
-	# Highlight epaule droite.
+		center + Vector2(-26.0, 50.0), center + Vector2(-14.0, 50.0),
+		center + Vector2(-16.0, 94.0), center + Vector2(-22.0, 94.0)
+	]), suit_dark)
+	# Ligne cybernÃ©tique mollet G
+	draw_line(center + Vector2(-22.0, 60.0), center + Vector2(-18.0, 85.0), cyber_blue, 2.0)
+	# Pied G
 	draw_colored_polygon(PackedVector2Array([
-		sh_r, sh_r + Vector2(5.0, 0.0), sh_r + Vector2(3.0, -8.0), sh_r + Vector2(-4.0, -6.0)
-	]), wet_mid)
+		center + Vector2(-22.0, 94.0), center + Vector2(-12.0, 94.0),
+		center + Vector2(-10.0, 106.0), center + Vector2(-26.0, 106.0)
+	]), armor_grey)
 
-	# ── BRAS ─────────────────────────────────────────────────────────────
-	# Bras arriere (gauche) - bras bas pour contrebalancer.
-	var el_l   := sh_l + Vector2(-22.0, 20.0)
-	var hand_l := el_l + Vector2(-14.0, 12.0)
-	draw_line(sh_l, el_l,   wet_dark, 10.0)
-	draw_line(sh_l + Vector2(1.0, 1.0), el_l + Vector2(1.0, 1.0), wet_mid, 4.0)
-	draw_line(el_l, hand_l, wet_dark,  9.0)
-	draw_line(el_l + Vector2(1.0, 0.0), hand_l + Vector2(1.0, 0.0), wet_mid, 3.5)
-	draw_circle(el_l, 5.5, wet_dark)
+	# Jambe Droite
 	draw_colored_polygon(PackedVector2Array([
-		hand_l + Vector2(-6.0, -3.0), hand_l + Vector2(7.0, -4.0),
-		hand_l + Vector2(8.0,   5.0), hand_l + Vector2(-4.0, 6.0)
-	]), skin)
-
-	# Bras avant (droit) - tendu vers la vague.
-	var el_r   := sh_r + Vector2(24.0, 2.0)
-	var hand_r := el_r + Vector2(17.0, 8.0)
-	draw_line(sh_r, el_r,   wet_dark, 10.0)
-	draw_line(sh_r + Vector2(1.0, -1.0), el_r + Vector2(1.0, -1.0), wet_mid, 4.0)
-	draw_line(el_r, hand_r, wet_dark,  9.0)
-	draw_line(el_r + Vector2(1.0, 0.0), hand_r + Vector2(1.0, 0.0), wet_mid, 3.5)
-	draw_circle(el_r, 5.5, wet_dark)
+		center + Vector2(10.0, 10.0), center + Vector2(25.0, 10.0),
+		center + Vector2(30.0, 48.0), center + Vector2(16.0, 50.0)
+	]), suit_mid)
 	draw_colored_polygon(PackedVector2Array([
-		hand_r + Vector2(-5.0, -6.0), hand_r + Vector2(8.0, -2.0),
-		hand_r + Vector2(6.0,   6.0), hand_r + Vector2(-6.0, 4.0)
-	]), skin)
+		center + Vector2(16.0, 50.0), center + Vector2(30.0, 48.0),
+		center + Vector2(22.0, 92.0), center + Vector2(14.0, 90.0)
+	]), suit_dark)
+	# Plaques armure tibia D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(20.0, 55.0), center + Vector2(28.0, 53.0),
+		center + Vector2(22.0, 85.0), center + Vector2(16.0, 85.0)
+	]), armor_grey)
+	draw_line(center + Vector2(24.0, 58.0), center + Vector2(20.0, 80.0), cyber_blue, 1.5)
+	# Pied D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(14.0, 90.0), center + Vector2(24.0, 92.0),
+		center + Vector2(26.0, 104.0), center + Vector2(10.0, 102.0)
+	]), armor_grey)
 
-	# ── TETE + CASQUE + LUNETTES ─────────────────────────────────────────
-	var head := center + Vector2(4.0, -44.0)
+	# --- Ceinture & Equipement ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, -10.0), center + Vector2(26.0, -12.0),
+		center + Vector2(25.0, 10.0), center + Vector2(-26.0, 12.0)
+	]), suit_dark)
+	# Boucle ceinture lumineuse
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-6.0, -6.0), center + Vector2(6.0, -6.0),
+		center + Vector2(4.0, 6.0), center + Vector2(-4.0, 6.0)
+	]), armor_grey)
+	draw_circle(center + Vector2(0.0, 0.0), 3.0, cyber_blue)
+	# Sangles Ã©tui (cuisse D)
+	draw_line(center + Vector2(25.0, 20.0), center + Vector2(32.0, 18.0), mask_black, 3.0)
+	draw_line(center + Vector2(26.0, 30.0), center + Vector2(34.0, 28.0), mask_black, 3.0)
 
-	if idx == 1:   # Surfeuse Pro — cheveux roses en chignon, lunettes roses.
-		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
-		draw_circle(head, 15.0, skin)
-		var hair_pink   := Color(0.95, 0.25, 0.60)
-		var hair_dark   := Color(0.70, 0.10, 0.40)
-		draw_circle(head + Vector2(-14.0, -6.0), 8.0, hair_dark)
-		draw_circle(head + Vector2(-14.0, -6.0), 6.0, hair_pink)
-		draw_circle(head + Vector2(0.0, -18.0), 10.0, hair_dark)
-		draw_circle(head + Vector2(0.0, -18.0), 7.0, hair_pink)
-		draw_circle(head + Vector2(10.0, -12.0), 7.0, hair_dark)
-		draw_circle(head + Vector2(10.0, -12.0), 5.0, hair_pink)
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-14.0, -4.0), head + Vector2(-22.0, 2.0),
-			head + Vector2(-20.0, 8.0),  head + Vector2(-12.0, 4.0)
-		]), hair_pink)
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
-			head + Vector2(12.0,   2.0), head + Vector2(-12.0,  1.0)
-		]), Color(0.05, 0.06, 0.09, 0.90))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
-			head + Vector2(-1.0,   1.5), head + Vector2(-12.0,  1.0)
-		]), Color(0.85, 0.15, 0.55, 0.85))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(1.0, -5.5), head + Vector2(13.0, -6.0),
-			head + Vector2(12.0,  2.0), head + Vector2(  1.0,  1.5)
-		]), Color(0.85, 0.15, 0.55, 0.85))
-		draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
-		draw_line(head + Vector2(-9.0, -4.0), head + Vector2(-4.0, -4.5), Color(1.0, 1.0, 1.0, 0.35), 1.5)
+	# --- Torse (Combinaison moulante Ninja) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-20.0, -80.0), center + Vector2(22.0, -80.0),
+		center + Vector2(26.0, -12.0), center + Vector2(-28.0, -10.0)
+	]), suit_mid)
+	# Plastron protection
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-15.0, -78.0), center + Vector2(18.0, -78.0),
+		center + Vector2(20.0, -40.0), center + Vector2(0.0, -30.0),
+		center + Vector2(-18.0, -40.0)
+	]), armor_grey)
+	# Lignes d'Ã©nergie plastron
+	draw_line(center + Vector2(0.0, -70.0), center + Vector2(0.0, -35.0), cyber_blue, 2.0)
+	draw_line(center + Vector2(-10.0, -45.0), center + Vector2(0.0, -35.0), cyber_blue, 2.0)
+	draw_line(center + Vector2(12.0, -45.0), center + Vector2(0.0, -35.0), cyber_blue, 2.0)
 
-	elif idx == 2: # Rider Neon — casque noir avec visiere jaune neon et LEDs.
-		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
-		draw_circle(head, 19.0, Color(0.10, 0.10, 0.15))
-		draw_circle(head, 16.0, Color(0.18, 0.18, 0.24))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
-			head + Vector2(12.0,   4.0), head + Vector2(-12.0,  3.0)
-		]), Color(0.95, 0.95, 0.10, 0.92))
-		draw_line(head + Vector2(-10.0, -3.5), head + Vector2(-4.0, -4.0), Color(1.0, 1.0, 1.0, 0.45), 2.0)
-		draw_line(head + Vector2(-16.0, -9.0), head + Vector2(16.0, -10.0), Color(0.0, 0.80, 1.0), 2.0)
-		draw_circle(head + Vector2(-17.0, 1.0), 3.5, Color(1.0, 0.10, 0.60))
-		draw_circle(head + Vector2( 17.0, 1.0), 3.5, Color(1.0, 0.10, 0.60))
+	# --- Bras Droit (Devant) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(18.0, -76.0), center + Vector2(30.0, -80.0),
+		center + Vector2(38.0, -45.0), center + Vector2(26.0, -42.0)
+	]), suit_mid)
+	# Epaulette D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(18.0, -80.0), center + Vector2(32.0, -85.0),
+		center + Vector2(35.0, -70.0), center + Vector2(22.0, -65.0)
+	]), armor_grey)
+	draw_line(center + Vector2(28.0, -80.0), center + Vector2(28.0, -70.0), cyber_blue, 1.5)
+	# Avant-bras & Gant
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(27.0, -36.0), center + Vector2(39.0, -38.0),
+		center + Vector2(45.0, -4.0), center + Vector2(33.0, -2.0)
+	]), suit_dark)
+	draw_circle(center + Vector2(39.0, 2.0), 8.0, mask_black)
+	draw_circle(center + Vector2(39.0, 2.0), 3.0, cyber_blue)
 
-	elif idx == 3: # Water Ninja — cagoule sombre avec visiere cyber bleue.
-		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), Color(0.10, 0.12, 0.18), 11.0)
-		draw_circle(head, 19.0, Color(0.10, 0.12, 0.18))
-		draw_circle(head, 16.0, Color(0.14, 0.18, 0.26))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-12.0, -3.0), head + Vector2(12.0, -4.0),
-			head + Vector2(11.0,   2.0), head + Vector2(-11.0,  1.0)
-		]), Color(0.0, 0.85, 1.0, 0.88))
-		draw_line(head + Vector2(-8.0, -2.5), head + Vector2(-2.0, -3.0), Color(1.0, 1.0, 1.0, 0.45), 1.5)
-		draw_line(head + Vector2(-15.0, -10.0), head + Vector2(15.0, -11.0), Color(0.0, 0.85, 1.0, 0.55), 1.5)
-		draw_line(head + Vector2(-15.0,   6.0), head + Vector2(15.0,   5.0), Color(0.0, 0.85, 1.0, 0.55), 1.5)
+	# --- TÃªte & Masque ---
+	# Cou / Cache-cou
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-10.0, -96.0), center + Vector2(12.0, -96.0),
+		center + Vector2(12.0, -76.0), center + Vector2(-10.0, -76.0)
+	]), suit_dark)
+	
+	# Cagoule Ninja (Englobe la tÃªte)
+	draw_circle(center + Vector2(0.0, -114.0), 25.0, mask_black)
+	draw_circle(center + Vector2(0.0, -112.0), 22.0, suit_dark)
 
-	else:          # Surfeur Classique — cheveux blonds, lunettes miroir bleues.
-		draw_line(center + Vector2(1.0, -22.0), head + Vector2(0.0, 14.0), skin, 8.0)
-		draw_circle(head, 15.0, skin)
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-15.0,  2.0), head + Vector2(-13.0, -10.0),
-			head + Vector2( -6.0, -17.0), head + Vector2(  0.0, -19.0),
-			head + Vector2(  8.0, -17.0), head + Vector2( 14.0,  -8.0),
-			head + Vector2( 15.0,   2.0)
-		]), Color(0.92, 0.78, 0.28))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -8.0), head + Vector2(-20.0, -4.0),
-			head + Vector2(-22.0,  4.0), head + Vector2(-16.0,  6.0),
-			head + Vector2(-14.0,  2.0)
-		]), Color(0.90, 0.76, 0.24))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2( 12.0, -10.0), head + Vector2( 20.0, -8.0),
-			head + Vector2( 18.0,   2.0), head + Vector2( 14.0,  2.0)
-		]), Color(0.90, 0.76, 0.24))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-14.0,  -6.0), head + Vector2(-18.0, -14.0),
-			head + Vector2(-28.0, -10.0), head + Vector2(-26.0,  -2.0),
-			head + Vector2(-18.0,   2.0)
-		]), Color(0.94, 0.80, 0.30))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2( -8.0, -16.0), head + Vector2( -4.0, -22.0),
-			head + Vector2(-14.0, -22.0), head + Vector2(-18.0, -14.0)
-		]), Color(0.88, 0.72, 0.22))
-		draw_line(head + Vector2(-5.0, -18.0), head + Vector2(6.0, -17.0), Color(1.0, 0.96, 0.68, 0.55), 2.5)
-		draw_line(head + Vector2(-2.0, -14.0), head + Vector2(8.0, -12.0), Color(1.0, 0.94, 0.60, 0.35), 1.5)
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -5.0), head + Vector2(13.0, -6.0),
-			head + Vector2(12.0,   2.0), head + Vector2(-12.0,  1.0)
-		]), Color(0.05, 0.06, 0.09, 0.90))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-13.0, -5.0), head + Vector2(-1.0, -5.5),
-			head + Vector2(-1.0,   1.5), head + Vector2(-12.0,  1.0)
-		]), Color(0.06, 0.20, 0.58, 0.90))
-		draw_colored_polygon(PackedVector2Array([
-			head + Vector2(1.0,  -5.5), head + Vector2(13.0, -6.0),
-			head + Vector2(12.0,  2.0), head + Vector2( 1.0,  1.5)
-		]), Color(0.06, 0.20, 0.58, 0.90))
-		draw_line(head + Vector2(-1.0, -3.0), head + Vector2(1.0, -3.0), Color(0.40, 0.42, 0.48), 2.0)
-		draw_line(head + Vector2(-10.0, -4.0), head + Vector2(-5.0, -4.5), Color(1.0, 1.0, 1.0, 0.32), 1.5)
-		draw_line(head + Vector2(  5.0, -4.5), head + Vector2(10.0, -5.0), Color(1.0, 1.0, 1.0, 0.32), 1.5)
+	# Fente regard (Peau exposÃ©e)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-16.0, -125.0), center + Vector2(18.0, -124.0),
+		center + Vector2(16.0, -110.0), center + Vector2(-14.0, -112.0)
+	]), skin_shadow)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-14.0, -123.0), center + Vector2(16.0, -122.0),
+		center + Vector2(14.0, -112.0), center + Vector2(-12.0, -114.0)
+	]), skin_base)
 
-	# ── SPRAY / ECLABOUSSURES ────────────────────────────────────────────
-	# Gouttelettes sous la planche.
-	for i in range(9):
-		var sx: float = -76.0 + float(i) * 18.0
-		var sy: float = sin(float(i) * 1.3 + t * 2.4) * 4.0
-		draw_circle(center + Vector2(sx, 48.0 + sy), 1.8 + sin(float(i) + t) * 0.6, Color(1.0, 1.0, 1.0, 0.80))
-	# Spray lateral (cote vague, bras avant).
-	for i in range(6):
-		var spx: float = 58.0 + float(i) * 9.0
-		var spy: float = 38.0 - float(i) * 5.0 + sin(float(i) * 1.1 + t * 3.2) * 2.5
-		draw_circle(center + Vector2(spx, spy), 4.0 - float(i) * 0.45, Color(1.0, 1.0, 1.0, 0.70 - float(i) * 0.10))
+	# Visor CybernÃ©tique / Lunettes High-Tech
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-18.0, -122.0), center + Vector2(20.0, -121.0),
+		center + Vector2(16.0, -114.0), center + Vector2(-16.0, -115.0)
+	]), Color(0.1, 0.1, 0.15))
+	# Lueur casque
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-14.0, -120.0), center + Vector2(16.0, -119.0),
+		center + Vector2(12.0, -116.0), center + Vector2(-12.0, -117.0)
+	]), cyber_blue)
+	# Deux "yeux" brillants cyan
+	draw_circle(center + Vector2(-6.0, -118.0), 2.5, Color(1.0, 1.0, 1.0))
+	draw_circle(center + Vector2(8.0, -118.0), 2.5, Color(1.0, 1.0, 1.0))
+	
+	# Masque respirateur / Cache-nez tech
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-12.0, -112.0), center + Vector2(14.0, -110.0),
+		center + Vector2(12.0, -96.0), center + Vector2(-10.0, -96.0)
+	]), armor_grey)
+	draw_circle(center + Vector2(-6.0, -104.0), 2.0, mask_black)
+	draw_circle(center + Vector2(6.0, -104.0), 2.0, mask_black)
+	draw_line(center + Vector2(-12.0, -96.0), center + Vector2(0.0, -112.0), suit_dark, 1.5)
+	draw_line(center + Vector2(14.0, -96.0), center + Vector2(0.0, -112.0), suit_dark, 1.5)
+	
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+
+func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
+	var board_shape := _transform_points([
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
+
+	var neon_yellow_board := Color(1.0, 0.93, 0.10)
+	var stripe_black_board := Color(0.04, 0.04, 0.05)
+	var board_stripe := _transform_points([
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_stripe, neon_yellow_board)
+	draw_polyline(board_stripe, stripe_black_board, 2.0, true)
+
+	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
+	var center = Vector2.ZERO
+
+	var skin_base = Color(0.85, 0.60, 0.45)
+	var skin_shadow = Color(0.65, 0.40, 0.25)
+	var neon_yellow = Color(0.95, 0.95, 0.10)
+	var neon_shadow = Color(0.70, 0.70, 0.0)
+	var dark_pants = Color(0.10, 0.10, 0.15)
+	var pants_shadow = Color(0.05, 0.05, 0.08)
+	var cyber_pink = Color(1.0, 0.1, 0.6)
+	var shoe_grey = Color(0.2, 0.2, 0.25)
+	var visor_blue = Color(0.0, 0.8, 1.0)
+
+	# --- Bras Gauche (Background) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -82.0), center + Vector2(-38.0, -50.0),
+		center + Vector2(-32.0, -45.0), center + Vector2(-15.0, -74.0)
+	]), neon_shadow)
+	# Avant-bras G
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-38.0, -50.0), center + Vector2(-44.0, -48.0),
+		center + Vector2(-28.0, -28.0), center + Vector2(-24.0, -32.0)
+	]), dark_pants)
+	draw_circle(center + Vector2(-26.0, -30.0), 7.0, shoe_grey)
+
+	# --- Jambe Gauche ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 10.0), center + Vector2(-8.0, 10.0),
+		center + Vector2(-12.0, 50.0), center + Vector2(-26.0, 48.0)
+	]), dark_pants)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, 48.0), center + Vector2(-12.0, 50.0),
+		center + Vector2(-14.0, 92.0), center + Vector2(-20.0, 92.0)
+	]), pants_shadow)
+	# Bande neon latÃ©rale
+	draw_line(center + Vector2(-22.0, 15.0), center + Vector2(-22.0, 80.0), neon_yellow, 2.0)
+	# Sneaker G
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 92.0), center + Vector2(-12.0, 92.0),
+		center + Vector2(-8.0, 108.0), center + Vector2(-28.0, 106.0)
+	]), shoe_grey)
+	draw_line(center + Vector2(-22.0, 102.0), center + Vector2(-12.0, 102.0), cyber_pink, 3.0)
+
+	# --- Jambe Droite ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(10.0, 10.0), center + Vector2(25.0, 10.0),
+		center + Vector2(30.0, 48.0), center + Vector2(16.0, 50.0)
+	]), dark_pants)
+	# Bande cyber rose sur cuisse haute
+	draw_line(center + Vector2(12.0, 18.0), center + Vector2(24.0, 15.0), cyber_pink, 2.5)
+	
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(16.0, 50.0), center + Vector2(30.0, 48.0),
+		center + Vector2(24.0, 90.0), center + Vector2(14.0, 88.0)
+	]), pants_shadow)
+	# Bande neon latÃ©rale droite
+	draw_line(center + Vector2(25.0, 15.0), center + Vector2(26.0, 85.0), neon_yellow, 2.0)
+	
+	# Sneaker D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(14.0, 88.0), center + Vector2(26.0, 90.0),
+		center + Vector2(28.0, 106.0), center + Vector2(8.0, 104.0)
+	]), shoe_grey)
+	draw_line(center + Vector2(14.0, 100.0), center + Vector2(26.0, 102.0), cyber_pink, 3.0)
+
+	# --- Ceinture & Equipement ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -10.0), center + Vector2(26.0, -10.0),
+		center + Vector2(24.0, 10.0), center + Vector2(-24.0, 10.0)
+	]), shoe_grey)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-6.0, -8.0), center + Vector2(6.0, -8.0),
+		center + Vector2(6.0, 8.0), center + Vector2(-6.0, 8.0)
+	]), dark_pants)
+	draw_circle(center + Vector2(0.0, 0.0), 3.0, neon_yellow)
+
+	# --- Veste Neon (Haut du corps) ---
+	# Partie principale veste
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -84.0), center + Vector2(20.0, -84.0),
+		center + Vector2(30.0, -10.0), center + Vector2(-30.0, -10.0)
+	]), neon_yellow)
+	# Ombres latÃ©rales veste
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -84.0), center + Vector2(-10.0, -80.0),
+		center + Vector2(-20.0, -10.0), center + Vector2(-30.0, -10.0)
+	]), neon_shadow)
+	
+	# Zip et dÃ©tails centraux (T-shirt noir en dessous)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-8.0, -80.0), center + Vector2(8.0, -80.0),
+		center + Vector2(6.0, -10.0), center + Vector2(-6.0, -10.0)
+	]), dark_pants)
+	draw_line(center + Vector2(-8.0, -80.0), center + Vector2(-6.0, -10.0), neon_shadow, 2.0)
+	draw_line(center + Vector2(8.0, -80.0), center + Vector2(6.0, -10.0), neon_shadow, 2.0)
+	
+	# Motif triangle rose sur T-shirt
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(0.0, -60.0), center + Vector2(5.0, -45.0),
+		center + Vector2(-5.0, -45.0)
+	]), cyber_pink)
+
+	# --- Bras Droit (Devant) ---
+	# Epaulette neon
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(16.0, -84.0), center + Vector2(28.0, -88.0),
+		center + Vector2(34.0, -70.0), center + Vector2(20.0, -70.0)
+	]), neon_yellow)
+	# Manche jaune
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(18.0, -76.0), center + Vector2(32.0, -80.0),
+		center + Vector2(40.0, -46.0), center + Vector2(28.0, -44.0)
+	]), neon_yellow)
+	# Ombre manche
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(28.0, -44.0), center + Vector2(40.0, -46.0),
+		center + Vector2(42.0, -40.0), center + Vector2(30.0, -38.0)
+	]), neon_shadow)
+	
+	# Avant-bras tech (noir)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(29.0, -40.0), center + Vector2(41.0, -42.0),
+		center + Vector2(46.0, -8.0), center + Vector2(34.0, -6.0)
+	]), dark_pants)
+	draw_line(center + Vector2(32.0, -35.0), center + Vector2(40.0, -10.0), cyber_pink, 2.0)
+	
+	# Gant D
+	draw_circle(center + Vector2(40.0, -4.0), 8.0, shoe_grey)
+	draw_circle(center + Vector2(40.0, -4.0), 3.0, neon_yellow)
+
+	# --- Cou & Visage ---
+	# Cou peau
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-8.0, -96.0), center + Vector2(8.0, -96.0),
+		center + Vector2(10.0, -80.0), center + Vector2(-10.0, -80.0)
+	]), skin_shadow)
+	
+	draw_circle(center + Vector2(0.0, -114.0), 24.0, skin_base)
+	draw_circle(center + Vector2(0.0, -112.0), 20.0, skin_base.lightened(0.1))
+	
+	# Oreilles
+	draw_circle(center + Vector2(-24.0, -114.0), 5.0, skin_shadow)
+	draw_circle(center + Vector2(24.0, -114.0), 5.0, skin_shadow)
+
+	# Bouche et Nez
+	draw_line(center + Vector2(-3.0, -109.0), center + Vector2(3.0, -109.0), skin_shadow, 2.0)
+	draw_line(center + Vector2(-6.0, -102.0), center + Vector2(6.0, -102.0), skin_shadow, 2.5)
+
+	# Visor Cyberpunk (remplace les yeux)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -122.0), center + Vector2(22.0, -122.0),
+		center + Vector2(20.0, -112.0), center + Vector2(-20.0, -112.0)
+	]), shoe_grey)
+	# Verre Visor lumineux
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-18.0, -120.0), center + Vector2(18.0, -120.0),
+		center + Vector2(16.0, -114.0), center + Vector2(-16.0, -114.0)
+	]), visor_blue)
+	draw_line(center + Vector2(-14.0, -117.0), center + Vector2(14.0, -117.0), Color.WHITE, 1.5)
+
+	# --- Cheveux EbouriffÃ©s Neo-Punk ---
+	var hair_neon = Color(0.1, 0.1, 0.1)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-24.0, -130.0), center + Vector2(24.0, -130.0),
+		center + Vector2(15.0, -145.0), center + Vector2(5.0, -135.0),
+		center + Vector2(-8.0, -150.0), center + Vector2(-18.0, -135.0)
+	]), hair_neon)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, -122.0), center + Vector2(-22.0, -135.0),
+		center + Vector2(-32.0, -130.0)
+	]), hair_neon)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(26.0, -122.0), center + Vector2(22.0, -135.0),
+		center + Vector2(32.0, -130.0)
+	]), hair_neon)
+	
+	# MÃ¨ches jaunes
+	draw_line(center + Vector2(-8.0, -145.0), center + Vector2(-4.0, -132.0), neon_yellow, 2.5)
+	draw_line(center + Vector2(10.0, -140.0), center + Vector2(6.0, -130.0), neon_yellow, 2.5)
+	
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_surfer_female(position: Vector2, board_angle: float) -> void:
+	var board_shape := _transform_points([
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
+
+	var stripe := _transform_points([
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0),
+		Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	draw_colored_polygon(_transform_points([
+		Vector2(-70.0, -10.0), Vector2(68.0, -10.0),
+		Vector2(68.0, -3.0), Vector2(-70.0, -3.0)
+	], position + Vector2(0.0, 40.0), board_angle), Color(0.76, 0.91, 1.0, 0.40))
+
+	var fin := _transform_points([
+		Vector2(-56.0, 10.0), Vector2(-46.0, 25.0), Vector2(-36.0, 10.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
+
+	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
+	var center = Vector2.ZERO
+
+	var skin_base = Color(0.85, 0.62, 0.45)
+	var skin_shadow = Color(0.70, 0.45, 0.30)
+	var skin_highlight = Color(0.92, 0.75, 0.60)
+	var hair_pink = Color(0.95, 0.25, 0.60)
+	var hair_shadow = Color(0.70, 0.10, 0.40)
+	var top_cyan = Color(0.20, 0.85, 0.85)
+	var top_grey = Color(0.35, 0.38, 0.42)
+	var pants_navy = Color(0.15, 0.18, 0.28)
+	var pants_cyan = Color(0.0, 0.75, 0.65)
+	var boots_grey = Color(0.20, 0.22, 0.25)
+	var belt_green = Color(0.30, 0.80, 0.50)
+
+	# --- Cheveux ArriÃ¨re (Chignon) ---
+	draw_circle(center + Vector2(-15.0, -145.0), 16.0, hair_shadow)
+	draw_circle(center + Vector2(18.0, -135.0), 12.0, hair_shadow)
+	draw_circle(center + Vector2(-15.0, -145.0), 12.0, hair_pink)
+	draw_circle(center + Vector2(18.0, -135.0), 9.0, hair_pink)
+	draw_circle(center + Vector2(0.0, -150.0), 18.0, hair_shadow)
+	draw_circle(center + Vector2(0.0, -150.0), 14.0, hair_pink)
+
+	# --- Bras Gauche (Background) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -82.0), center + Vector2(-18.0, -74.0),
+		center + Vector2(-35.0, -50.0), center + Vector2(-42.0, -56.0)
+	]), skin_shadow)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-35.0, -50.0), center + Vector2(-42.0, -56.0),
+		center + Vector2(-26.0, -28.0), center + Vector2(-20.0, -32.0)
+	]), skin_shadow)
+	draw_circle(center + Vector2(-22.0, -28.0), 8.0, skin_shadow)
+
+	# --- Jambe Gauche (Droite, fond) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 5.0), center + Vector2(-8.0, 5.0),
+		center + Vector2(-12.0, 48.0), center + Vector2(-22.0, 48.0)
+	]), pants_navy)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 48.0), center + Vector2(-12.0, 48.0),
+		center + Vector2(-14.0, 92.0), center + Vector2(-20.0, 92.0)
+	]), pants_navy)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 60.0), center + Vector2(-18.0, 60.0),
+		center + Vector2(-18.0, 80.0), center + Vector2(-21.0, 80.0)
+	]), pants_cyan)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, 92.0), center + Vector2(-12.0, 92.0),
+		center + Vector2(-10.0, 106.0), center + Vector2(-26.0, 106.0)
+	]), boots_grey)
+
+	# --- Jambe Droite (LÃ©gÃ¨rement pliÃ©e) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(6.0, 5.0), center + Vector2(25.0, 5.0),
+		center + Vector2(32.0, 46.0), center + Vector2(18.0, 48.0)
+	]), pants_navy)
+	draw_circle(center + Vector2(28.0, 48.0), 10.0, Color(0.1, 0.1, 0.1))
+	draw_circle(center + Vector2(28.0, 48.0), 6.0, boots_grey)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(18.0, 48.0), center + Vector2(32.0, 46.0),
+		center + Vector2(24.0, 90.0), center + Vector2(14.0, 88.0)
+	]), pants_navy)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(30.0, 50.0), center + Vector2(32.0, 65.0),
+		center + Vector2(24.0, 86.0), center + Vector2(22.0, 84.0)
+	]), pants_cyan)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(14.0, 88.0), center + Vector2(26.0, 90.0),
+		center + Vector2(28.0, 104.0), center + Vector2(10.0, 102.0)
+	]), boots_grey)
+	draw_line(center + Vector2(20.0, 94.0), center + Vector2(24.0, 96.0), pants_cyan, 2.0)
+	draw_line(center + Vector2(-18.0, 96.0), center + Vector2(-14.0, 98.0), pants_cyan, 2.0)
+
+	# --- Torse (Ventre, Crop Top) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -32.0), center + Vector2(20.0, -32.0),
+		center + Vector2(22.0, 10.0), center + Vector2(-22.0, 10.0)
+	]), skin_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(12.0, -32.0), center + Vector2(20.0, -32.0),
+		center + Vector2(22.0, 10.0), center + Vector2(16.0, 10.0)
+	]), skin_shadow)
+	draw_circle(center + Vector2(0.0, -5.0), 1.5, skin_shadow)
+
+	# Ceinture / Poche 
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-26.0, 0.0), center + Vector2(24.0, -4.0),
+		center + Vector2(26.0, 10.0), center + Vector2(-24.0, 12.0)
+	]), belt_green)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-34.0, 2.0), center + Vector2(-16.0, -2.0),
+		center + Vector2(-14.0, 24.0), center + Vector2(-30.0, 26.0)
+	]), belt_green)
+	draw_circle(center + Vector2(-24.0, 12.0), 3.0, Color(0.1,0.1,0.1))
+
+	# Crop Top 
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-20.0, -78.0), center + Vector2(20.0, -78.0),
+		center + Vector2(22.0, -32.0), center + Vector2(-22.0, -32.0)
+	]), top_grey)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-5.0, -78.0), center + Vector2(20.0, -78.0),
+		center + Vector2(22.0, -55.0), center + Vector2(-8.0, -55.0)
+	]), top_cyan)
+	draw_line(center + Vector2(-10.0, -82.0), center + Vector2(0.0, -66.0), Color(0.1,0.1,0.3), 1.5)
+	draw_line(center + Vector2(10.0, -82.0), center + Vector2(0.0, -66.0), Color(0.1,0.1,0.3), 1.5)
+	draw_circle(center + Vector2(0.0, -64.0), 4.5, Color(1.0, 0.9, 0.0))
+	draw_circle(center + Vector2(0.0, -64.0), 2.0, Color(0.0, 1.0, 0.8))
+
+	# --- Bras Droit (Devant) ---
+	draw_circle(center + Vector2(22.0, -78.0), 8.0, skin_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(16.0, -76.0), center + Vector2(28.0, -80.0),
+		center + Vector2(38.0, -44.0), center + Vector2(26.0, -42.0)
+	]), skin_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(25.0, -78.0), center + Vector2(28.0, -80.0),
+		center + Vector2(38.0, -44.0), center + Vector2(34.0, -43.0)
+	]), skin_shadow) 
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(26.0, -44.0), center + Vector2(38.0, -46.0),
+		center + Vector2(39.0, -38.0), center + Vector2(27.0, -36.0)
+	]), top_cyan)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(27.0, -36.0), center + Vector2(39.0, -38.0),
+		center + Vector2(46.0, -4.0), center + Vector2(34.0, -2.0)
+	]), skin_base)
+	draw_circle(center + Vector2(40.0, 2.0), 8.0, boots_grey)
+	draw_circle(center + Vector2(40.0, 2.0), 5.0, top_cyan)
+
+	# --- Pickaxe (Arme / Accessoire) ---
+	var axe_center = center + Vector2(42.0, 10.0)
+	draw_line(axe_center + Vector2(-15.0, -45.0), axe_center + Vector2(10.0, 30.0), Color(0.2, 0.2, 0.2), 6.0)
+	draw_line(axe_center + Vector2(-15.0, -45.0), axe_center + Vector2(10.0, 30.0), top_cyan, 2.0)
+	draw_colored_polygon(PackedVector2Array([
+		axe_center + Vector2(-15.0, -45.0), axe_center + Vector2(-35.0, -65.0),
+		axe_center + Vector2(-5.0, -75.0), axe_center + Vector2(5.0, -50.0)
+	]), top_cyan)
+	draw_colored_polygon(PackedVector2Array([
+		axe_center + Vector2(-10.0, -50.0), axe_center + Vector2(-25.0, -60.0),
+		axe_center + Vector2(0.0, -65.0), axe_center + Vector2(5.0, -50.0)
+	]), Color(0.6, 1.0, 1.0))
+
+	# --- Cou & Visage ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-8.0, -94.0), center + Vector2(8.0, -94.0),
+		center + Vector2(10.0, -76.0), center + Vector2(-10.0, -76.0)
+	]), skin_shadow)
+	
+	draw_circle(center + Vector2(0.0, -112.0), 24.0, skin_base)
+	draw_circle(center + Vector2(0.0, -110.0), 20.0, skin_highlight)
+	
+	draw_circle(center + Vector2(-23.0, -112.0), 4.5, skin_shadow)
+	draw_circle(center + Vector2(23.0, -112.0), 4.5, skin_shadow)
+	draw_circle(center + Vector2(-24.0, -108.0), 1.5, top_cyan)
+	draw_circle(center + Vector2(24.0, -108.0), 1.5, top_cyan)
+
+	# DÃ©tails Visage
+	draw_line(center + Vector2(-14.0, -125.0), center + Vector2(-4.0, -122.0), hair_shadow, 3.0)
+	draw_line(center + Vector2(4.0, -122.0), center + Vector2(14.0, -124.0), hair_shadow, 3.0)
+	
+	draw_circle(center + Vector2(-9.0, -116.0), 4.5, Color.WHITE)
+	draw_circle(center + Vector2(9.0, -116.0), 4.5, Color.WHITE)
+	draw_circle(center + Vector2(-8.5, -116.0), 2.5, Color(0.7, 0.4, 0.1))
+	draw_circle(center + Vector2(9.5, -116.0), 2.5, Color(0.7, 0.4, 0.1))
+	draw_circle(center + Vector2(-8.5, -116.0), 1.2, Color.BLACK)
+	draw_circle(center + Vector2(9.5, -116.0), 1.2, Color.BLACK)
+	draw_circle(center + Vector2(-9.2, -117.0), 0.8, Color.WHITE)
+	draw_circle(center + Vector2(8.8, -117.0), 0.8, Color.WHITE)
+	
+	draw_line(center + Vector2(-14.0, -119.0), center + Vector2(-5.0, -119.0), Color(0.1, 0.05, 0.05), 2.0)
+	draw_line(center + Vector2(5.0, -119.0), center + Vector2(14.0, -118.0), Color(0.1, 0.05, 0.05), 2.0)
+
+	draw_line(center + Vector2(-2.0, -110.0), center + Vector2(-2.0, -105.0), skin_shadow, 1.5)
+	draw_line(center + Vector2(-2.0, -105.0), center + Vector2(2.0, -104.0), skin_shadow, 1.5)
+
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-6.0, -98.0), center + Vector2(0.0, -100.0),
+		center + Vector2(6.0, -98.0), center + Vector2(0.0, -97.0)
+	]), Color(0.8, 0.3, 0.4))
+	draw_line(center + Vector2(-6.0, -98.0), center + Vector2(6.0, -98.0), Color(0.5, 0.1, 0.2), 1.0)
+	
+	# Frange / Cheveux avant
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-24.0, -135.0), center + Vector2(24.0, -132.0),
+		center + Vector2(20.0, -115.0), center + Vector2(0.0, -125.0),
+		center + Vector2(-15.0, -115.0)
+	]), hair_pink)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-15.0, -125.0), center + Vector2(-28.0, -110.0),
+		center + Vector2(-22.0, -115.0)
+	]), hair_pink)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(10.0, -128.0), center + Vector2(26.0, -105.0),
+		center + Vector2(20.0, -118.0)
+	]), hair_pink)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-5.0, -132.0), center + Vector2(10.0, -130.0),
+		center + Vector2(5.0, -122.0)
+	]), Color(1.0, 0.5, 0.8))
+
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_surfer_male(position: Vector2, board_angle: float) -> void:
+	var board_shape := _transform_points([
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
+
+	var stripe := _transform_points([
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0),
+		Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	draw_colored_polygon(_transform_points([
+		Vector2(-70.0, -10.0), Vector2(68.0, -10.0),
+		Vector2(68.0, -3.0), Vector2(-70.0, -3.0)
+	], position + Vector2(0.0, 40.0), board_angle), Color(0.76, 0.91, 1.0, 0.40))
+
+	var fin := _transform_points([
+		Vector2(-56.0, 10.0), Vector2(-46.0, 25.0), Vector2(-36.0, 10.0)
+	], position + Vector2(0.0, 40.0), board_angle)
+	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
+
+	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
+	var center = Vector2.ZERO
+
+	var skin_base = Color(0.80, 0.52, 0.30)
+	var skin_shadow = Color(0.65, 0.38, 0.20)
+	var skin_highlight = Color(0.85, 0.60, 0.40)
+	var shorts_base = Color(0.1, 0.4, 0.7)
+	var shorts_shadow = Color(0.05, 0.25, 0.5)
+	var shorts_accent = Color(1.0, 0.6, 0.1) # Motif orange/jaune
+	var hair_base = Color(0.5, 0.3, 0.15)
+	var hair_blonde = Color(0.9, 0.7, 0.3)
+	var tattoo_color = Color(0.2, 0.2, 0.2, 0.8)
+
+	# --- Bras Gauche (Background) ---
+	# Epaule G
+	draw_circle(center + Vector2(-38.0, -76.0), 10.0, skin_shadow)
+	# Haut du bras G
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, -78.0), center + Vector2(-46.0, -78.0),
+		center + Vector2(-50.0, -45.0), center + Vector2(-34.0, -45.0)
+	]), skin_shadow)
+	# Avant-bras G descendant
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-50.0, -45.0), center + Vector2(-34.0, -45.0),
+		center + Vector2(-40.0, -10.0), center + Vector2(-54.0, -10.0)
+	]), skin_shadow)
+	# Main G
+	draw_circle(center + Vector2(-47.0, -5.0), 8.0, skin_shadow)
+
+	# --- Jambe Gauche ---
+	# Cuisse (Boardshort G)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, 5.0), center + Vector2(-10.0, 5.0),
+		center + Vector2(-16.0, 55.0), center + Vector2(-30.0, 55.0)
+	]), shorts_shadow)
+	# Jambe (Peau G)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-30.0, 55.0), center + Vector2(-16.0, 55.0),
+		center + Vector2(-14.0, 95.0), center + Vector2(-24.0, 95.0)
+	]), skin_shadow)
+	# Genou dÃ©tail G
+	draw_arc(center + Vector2(-22.0, 60.0), 4.0, 0, PI, 10, skin_base, 1.5)
+	# Pied G
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-24.0, 95.0), center + Vector2(-14.0, 95.0),
+		center + Vector2(-12.0, 105.0), center + Vector2(-28.0, 105.0)
+	]), skin_shadow)
+
+	# --- Jambe Droite ---
+	# Cuisse (Boardshort D)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(10.0, 5.0), center + Vector2(30.0, 5.0),
+		center + Vector2(35.0, 50.0), center + Vector2(18.0, 52.0)
+	]), shorts_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(26.0, 5.0), center + Vector2(30.0, 5.0),
+		center + Vector2(35.0, 50.0), center + Vector2(30.0, 51.0)
+	]), shorts_shadow)
+	# Motif Boardshort D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(32.0, 15.0), center + Vector2(34.0, 45.0),
+		center + Vector2(28.0, 40.0)
+	]), shorts_accent)
+	# Jambe (Peau D)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(18.0, 52.0), center + Vector2(35.0, 50.0),
+		center + Vector2(26.0, 92.0), center + Vector2(16.0, 90.0)
+	]), skin_base)
+	# Mollet Ombre D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(28.0, 51.0), center + Vector2(35.0, 50.0),
+		center + Vector2(26.0, 92.0), center + Vector2(22.0, 91.0)
+	]), skin_shadow)
+	# Genou dÃ©tail D
+	draw_arc(center + Vector2(25.0, 58.0), 4.0, 0, PI, 10, skin_shadow, 1.5)
+	# Pied D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(16.0, 90.0), center + Vector2(26.0, 92.0),
+		center + Vector2(30.0, 104.0), center + Vector2(12.0, 102.0)
+	]), skin_base)
+
+	# --- Boardshort (Ceinture / Bassin) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-30.0, -10.0), center + Vector2(32.0, -10.0),
+		center + Vector2(30.0, 5.0), center + Vector2(-28.0, 5.0)
+	]), shorts_shadow)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, -10.0), center + Vector2(30.0, -10.0),
+		center + Vector2(30.0, 0.0), center + Vector2(-28.0, 0.0)
+	]), shorts_base)
+	# Cordon et braguette
+	draw_circle(center + Vector2(-2.0, -5.0), 1.5, Color.WHITE)
+	draw_circle(center + Vector2(2.0, -5.0), 1.5, Color.WHITE)
+	draw_line(center + Vector2(-2.0, -5.0), center + Vector2(-8.0, 10.0), Color.WHITE, 2.0)
+	draw_line(center + Vector2(2.0, -5.0), center + Vector2(6.0, 8.0), Color.WHITE, 2.0)
+
+	# --- Torse (Musculature DÃ©taillÃ©e) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-42.0, -80.0), center + Vector2(-34.0, -60.0),
+		center + Vector2(-30.0, -10.0), center + Vector2(32.0, -10.0),
+		center + Vector2(38.0, -60.0), center + Vector2(46.0, -80.0)
+	]), skin_base)
+
+	# Pectoraux & Ombres
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-20.0, -80.0), center + Vector2(-2.0, -80.0),
+		center + Vector2(-4.0, -55.0), center + Vector2(-25.0, -60.0)
+	]), skin_highlight)
+	draw_arc(center + Vector2(-12.0, -55.0), 12.0, 0, PI, 15, skin_shadow, 2.0)
+	draw_arc(center + Vector2(12.0, -55.0), 12.0, 0, PI, 15, skin_shadow, 2.0)
+	draw_line(center + Vector2(0.0, -75.0), center + Vector2(0.0, -50.0), skin_shadow, 1.5)
+
+	# Abdos (6-pack)
+	var abs_y = -45.0
+	for i in range(3):
+		draw_arc(center + Vector2(-6.0, abs_y), 5.0, 0, PI, 8, skin_shadow, 1.5)
+		draw_arc(center + Vector2(6.0, abs_y), 5.0, 0, PI, 8, skin_shadow, 1.5)
+		abs_y += 12.0
+	draw_line(center + Vector2(0.0, -50.0), center + Vector2(0.0, -15.0), skin_shadow, 1.5)
+	
+	# Nombril
+	draw_circle(center + Vector2(0.0, -16.0), 1.5, skin_shadow)
+
+	# --- Bras Droit (Devant) ---
+	# Epaule D douce
+	draw_circle(center + Vector2(38.0, -76.0), 10.0, skin_base)
+	# Haut du bras D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(28.0, -78.0), center + Vector2(46.0, -78.0),
+		center + Vector2(50.0, -45.0), center + Vector2(34.0, -45.0)
+	]), skin_base)
+	# Tatouage Epaule D
+	draw_line(center + Vector2(38.0, -70.0), center + Vector2(46.0, -65.0), tattoo_color, 2.5)
+	draw_line(center + Vector2(36.0, -65.0), center + Vector2(48.0, -58.0), tattoo_color, 2.5)
+	draw_line(center + Vector2(35.0, -60.0), center + Vector2(42.0, -52.0), tattoo_color, 2.5)
+	
+	# Avant-bras D
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(34.0, -45.0), center + Vector2(50.0, -45.0),
+		center + Vector2(54.0, -10.0), center + Vector2(40.0, -10.0)
+	]), skin_base)
+	# Main D
+	draw_circle(center + Vector2(47.0, -5.0), 8.0, skin_base)
+
+	# --- Cou & TÃªte ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-10.0, -96.0), center + Vector2(10.0, -96.0),
+		center + Vector2(14.0, -78.0), center + Vector2(-14.0, -78.0)
+	]), skin_shadow)
+	
+	# Visage Base Strong Jaw
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-22.0, -115.0), center + Vector2(22.0, -115.0),
+		center + Vector2(16.0, -90.0), center + Vector2(0.0, -86.0),
+		center + Vector2(-16.0, -90.0)
+	]), skin_base)
+	draw_circle(center + Vector2(0.0, -115.0), 22.0, skin_base)
+	
+	# Collier Pendentif Dent de Requin
+	draw_line(center + Vector2(-10.0, -82.0), center + Vector2(0.0, -65.0), Color(0.2, 0.1, 0.0), 1.5)
+	draw_line(center + Vector2(10.0, -82.0), center + Vector2(0.0, -65.0), Color(0.2, 0.1, 0.0), 1.5)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-3.0, -65.0), center + Vector2(3.0, -65.0),
+		center + Vector2(0.0, -54.0)
+	]), Color(0.9, 0.9, 0.85))
+
+	# Oreilles
+	draw_circle(center + Vector2(-23.0, -115.0), 5.0, skin_shadow)
+	draw_circle(center + Vector2(23.0, -115.0), 5.0, skin_shadow)
+
+	# DÃ©tails Visage
+	draw_line(center + Vector2(-14.0, -126.0), center + Vector2(-4.0, -124.0), hair_base, 3.5)
+	draw_line(center + Vector2(4.0, -124.0), center + Vector2(14.0, -126.0), hair_base, 3.5)
+	
+	draw_circle(center + Vector2(-9.0, -118.0), 4.2, Color.WHITE)
+	draw_circle(center + Vector2(9.0, -118.0), 4.2, Color.WHITE)
+	draw_circle(center + Vector2(-9.0, -118.0), 2.5, Color(0.3, 0.5, 0.8)) # Yeux bleus
+	draw_circle(center + Vector2(9.0, -118.0), 2.5, Color(0.3, 0.5, 0.8))
+	draw_circle(center + Vector2(-9.0, -118.0), 1.2, Color.BLACK)
+	draw_circle(center + Vector2(9.0, -118.0), 1.2, Color.BLACK)
+	draw_circle(center + Vector2(-9.5, -119.0), 0.8, Color.WHITE)
+	draw_circle(center + Vector2(8.5, -119.0), 0.8, Color.WHITE)
+
+	draw_line(center + Vector2(-2.0, -112.0), center + Vector2(-2.0, -105.0), skin_shadow, 2.0)
+	draw_line(center + Vector2(-2.0, -105.0), center + Vector2(2.0, -104.0), skin_shadow, 2.0)
+
+	draw_line(center + Vector2(-8.0, -98.0), center + Vector2(0.0, -96.0), skin_shadow, 2.0)
+	draw_line(center + Vector2(0.0, -96.0), center + Vector2(8.0, -98.0), skin_shadow, 2.0)
+
+	# --- Cheveux EbouriffÃ©s (Surfer Hair) ---
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-28.0, -130.0), center + Vector2(28.0, -130.0),
+		center + Vector2(15.0, -145.0), center + Vector2(0.0, -155.0),
+		center + Vector2(-15.0, -145.0)
+	]), hair_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-30.0, -115.0), center + Vector2(-25.0, -130.0),
+		center + Vector2(-15.0, -135.0)
+	]), hair_base)
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(30.0, -115.0), center + Vector2(25.0, -130.0),
+		center + Vector2(15.0, -135.0)
+	]), hair_base)
+	
+	# Pointes Blondes
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-10.0, -145.0), center + Vector2(10.0, -140.0),
+		center + Vector2(0.0, -155.0)
+	]), hair_blonde)
+	draw_line(center + Vector2(-25.0, -125.0), center + Vector2(-15.0, -135.0), hair_blonde, 2.0)
+	draw_line(center + Vector2(25.0, -125.0), center + Vector2(15.0, -135.0), hair_blonde, 2.0)
+
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _transform_points(points: Array[Vector2], offset: Vector2, angle: float) -> PackedVector2Array:
+	var output := PackedVector2Array()
+	var c := cos(angle)
+	var s := sin(angle)
+	for p in points:
+		var rotated := Vector2((p.x * c) - (p.y * s), (p.x * s) + (p.y * c))
+		output.append(rotated + offset)
+	return output
+
+func _transform_point(point: Vector2, offset: Vector2, angle: float) -> Vector2:
+	var c := cos(angle)
+	var s := sin(angle)
+	var rotated := Vector2((point.x * c) - (point.y * s), (point.x * s) + (point.y * c))
+	return rotated + offset
+
 
 func _on_play_pressed() -> void:
 	if not GameManager.has_account:
@@ -917,3 +1517,4 @@ func _update_surfer_start_button_hitbox() -> void:
 
 func _on_profile_progress_changed(_new_total_xp: int, _new_total_surfcoin: int) -> void:
 	_update_account_ui_state()
+
