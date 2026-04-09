@@ -111,23 +111,53 @@ func _draw() -> void:
 		Vector2(inner.position.x, inner.position.y + inner.size.y * 0.10)
 	]), Color(1.0, 1.0, 1.0, 0.07))
 
-	# Dressing: portant + etageres + planches.
-	var rack_base := Vector2(size.x * 0.62, size.y * 0.70)
-	draw_line(rack_base + Vector2(-170.0, 0.0), rack_base + Vector2(170.0, 0.0), Color(0.22, 0.16, 0.11), 7.0)
-	draw_line(rack_base + Vector2(-145.0, 0.0), rack_base + Vector2(-145.0, -210.0), Color(0.22, 0.16, 0.11), 8.0)
-	draw_line(rack_base + Vector2(145.0, 0.0), rack_base + Vector2(145.0, -210.0), Color(0.22, 0.16, 0.11), 8.0)
-	draw_line(rack_base + Vector2(-150.0, -210.0), rack_base + Vector2(150.0, -210.0), Color(0.26, 0.19, 0.13), 6.0)
+	# Decoration planches de surf contre le mur droit.
+	var floor_y: float = size.y * 0.68
+	var wall_x_start: float = size.x * 0.57
 
-	for i in range(6):
-		var x: float = rack_base.x - 120.0 + float(i) * 48.0
-		var cloth := PackedVector2Array([
-			Vector2(x - 18.0, rack_base.y - 182.0),
-			Vector2(x + 18.0, rack_base.y - 182.0),
-			Vector2(x + 28.0, rack_base.y - 102.0),
-			Vector2(x - 28.0, rack_base.y - 102.0)
-		])
-		var color_shift: float = float(i) * 0.08
-		draw_colored_polygon(cloth, Color(0.18 + color_shift, 0.45, 0.78 - color_shift * 0.5))
+	# Rack mural horizontal (barre bois sur laquelle les planches s'appuient).
+	var rack_y: float = size.y * 0.22
+	draw_rect(Rect2(Vector2(wall_x_start, rack_y - 4.0), Vector2(size.x - wall_x_start, 12.0)), Color(0.20, 0.13, 0.07))
+	draw_rect(Rect2(Vector2(wall_x_start, rack_y - 2.0), Vector2(size.x - wall_x_start, 7.0)), Color(0.44, 0.29, 0.16))
+	draw_rect(Rect2(Vector2(wall_x_start, rack_y - 2.0), Vector2(size.x - wall_x_start, 2.0)), Color(0.58, 0.40, 0.22))
+	# Crochets du rack.
+	for hook_i in range(3):
+		var hx: float = wall_x_start + 60.0 + float(hook_i) * ((size.x - wall_x_start - 120.0) / 2.0)
+		draw_rect(Rect2(Vector2(hx - 3.0, rack_y + 8.0), Vector2(6.0, 14.0)), Color(0.55, 0.38, 0.18))
+		draw_circle(Vector2(hx, rack_y + 22.0), 5.0, Color(0.48, 0.32, 0.14))
+		draw_circle(Vector2(hx, rack_y + 22.0), 3.0, Color(0.62, 0.44, 0.22))
+
+	# 3 grandes planches de surf.
+	var boards := [
+		{"x": size.x * 0.63, "scale": 4.4, "angle": -0.16,
+		 "base": Color(0.94, 0.97, 1.00), "stripe": Color(0.10, 0.44, 0.92)},
+		{"x": size.x * 0.76, "scale": 4.9, "angle":  0.04,
+		 "base": Color(1.00, 0.88, 0.28), "stripe": Color(0.94, 0.34, 0.10)},
+		{"x": size.x * 0.89, "scale": 4.2, "angle":  0.22,
+		 "base": Color(0.80, 0.98, 0.86), "stripe": Color(0.14, 0.70, 0.44)},
+	]
+
+	for bd in boards:
+		var sc: float = bd["scale"]
+		var tail_reach: float = 28.0 * sc
+		var bpos := Vector2(bd["x"], floor_y - tail_reach)
+
+		# Ombre portee sur le mur (ellipse sombre derriere la planche).
+		var shadow_wall := PackedVector2Array()
+		for j in range(18):
+			var a: float = float(j) * TAU / 18.0
+			shadow_wall.append(Vector2(bpos.x + cos(a) * 18.0, bpos.y + sin(a) * (44.0 * sc * 0.85)))
+		draw_colored_polygon(shadow_wall, Color(0.18, 0.10, 0.05, 0.28))
+
+		# Planche.
+		_draw_surfboard(bpos, sc, bd["angle"], bd["base"], bd["stripe"])
+
+		# Ombre elliptique au sol.
+		var shadow_floor := PackedVector2Array()
+		for j in range(16):
+			var a: float = float(j) * TAU / 16.0
+			shadow_floor.append(Vector2(bpos.x + cos(a) * (sc * 8.0), floor_y + 2.0 + sin(a) * 7.0))
+		draw_colored_polygon(shadow_floor, Color(0.10, 0.06, 0.03, 0.35))
 
 
 func _setup_character_choices() -> void:
