@@ -191,6 +191,9 @@ func _on_back_pressed() -> void:
 
 func _on_character_option_selected(index: int) -> void:
 	character_front.preview_index = index
+	if GameManager.has_account:
+		GameManager.create_or_update_account(GameManager.player_pseudo, character_option.get_selected_id())
+		hint_label.text = "Personnage equipe !"
 
 func _on_tab_dressing_pressed() -> void:
 	dressing_panel.visible = not dressing_panel.visible
