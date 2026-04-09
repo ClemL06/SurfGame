@@ -61,10 +61,7 @@ func goto_settings_page() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/SettingsPage.tscn")
 
 func apply_audio_settings() -> void:
-	if muted:
-		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), -80.0)
-	else:
-		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(music_volume))
+	pass
 
 func reset_progress() -> void:
 	high_score = 0

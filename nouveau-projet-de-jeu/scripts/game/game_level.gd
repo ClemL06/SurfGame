@@ -1049,7 +1049,6 @@ func player_died() -> void:
 	if is_dead:
 		return
 	is_dead = true
-
 	GameManager.game_over(score)
 	game_over.open(score, GameManager.high_score)
 
