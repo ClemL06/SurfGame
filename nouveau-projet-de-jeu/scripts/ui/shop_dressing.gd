@@ -9,6 +9,7 @@ extends Control
 @onready var buy_button: Button = %BuyButton
 @onready var shop_panel: PanelContainer = %ShopPanel
 @onready var hint_label: Label = %HintLabel
+@onready var character_front: Control = $CharacterFront
 
 var current_tab: String = "dressing"
 
@@ -21,6 +22,7 @@ func _ready() -> void:
 	tab_dressing_button.pressed.connect(_on_tab_dressing_pressed)
 	tab_shop_button.pressed.connect(_on_tab_shop_pressed)
 	buy_button.pressed.connect(_on_buy_pressed)
+	character_option.item_selected.connect(_on_character_option_selected)
 	_apply_tab_state()
 
 func _process(delta: float) -> void:
@@ -183,6 +185,9 @@ func _on_save_character_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	GameManager.goto_main_menu()
+
+func _on_character_option_selected(index: int) -> void:
+	character_front.preview_index = index
 
 func _on_tab_dressing_pressed() -> void:
 	current_tab = "dressing"

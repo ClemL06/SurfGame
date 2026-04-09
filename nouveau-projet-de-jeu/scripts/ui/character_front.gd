@@ -4,6 +4,8 @@ extends Control
 @export var scale_factor: float = 1.0
 @export var feet_offset_y: float = 100.0
 
+var preview_index: int = -1
+
 func _ready() -> void:
 	set_process(true)
 
@@ -24,7 +26,7 @@ func _draw() -> void:
 
 func _draw_central_character(center: Vector2) -> void:
 	# 0: homme (Surfeur Classique), 1: femme (Surfeuse Pro), 2: Rider Neon, 3: Water Ninja, autres: fallback
-	var idx: int = GameManager.selected_character_index
+	var idx: int = preview_index if preview_index >= 0 else GameManager.selected_character_index
 	if idx == 1:
 		_draw_central_surfer_female(center)
 	elif idx == 2:
