@@ -360,121 +360,69 @@ func _draw_surfer(position: Vector2, board_angle: float) -> void:
 		_draw_surfer_male(position, board_angle)
 
 func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
-	# Skin Water Ninja: bleu clair, indépendant des autres skins.
 	var board_shape := _transform_points([
-		Vector2(-95.0, 0.0),
-		Vector2(-70.0, -16.0),
-		Vector2(-18.0, -22.0),
-		Vector2(65.0, -14.0),
-		Vector2(92.0, 0.0),
-		Vector2(65.0, 14.0),
-		Vector2(-18.0, 22.0),
-		Vector2(-70.0, 16.0)
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var ninja_blue := Color(0.46, 0.90, 1.0)
 	var ninja_blue_dark := Color(0.14, 0.52, 0.78)
-	var ink := Color(0.03, 0.04, 0.06)
-
-	# Liseré bleu sur la planche.
 	var board_stripe := _transform_points([
-		Vector2(-82.0, -3.0),
-		Vector2(80.0, -3.0),
-		Vector2(80.0, 3.0),
-		Vector2(-82.0, 3.0)
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(board_stripe, ninja_blue)
 	draw_polyline(board_stripe, ninja_blue_dark, 2.0, true)
 
-	# Personnage.
 	var body_offset := position + Vector2(0.0, -4.0)
 	var skin := Color(0.93, 0.78, 0.64)
+	var hair := Color(0.12, 0.10, 0.12)
 
-	# Combinaison bleu clair.
-	var torso := _transform_points([
-		Vector2(-14.0, -44.0),
-		Vector2(12.0, -44.0),
-		Vector2(18.0, -10.0),
-		Vector2(11.0, 28.0),
-		Vector2(-11.0, 30.0),
-		Vector2(-18.0, -8.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(torso, ninja_blue)
+	# Jambes (bleu)
+	draw_colored_polygon(_transform_points([
+		Vector2(5.0, 24.0), Vector2(14.0, 22.0), Vector2(22.0, 50.0), Vector2(11.0, 52.0)
+	], body_offset, board_angle * 0.5), ninja_blue)
+	draw_colored_polygon(_transform_points([
+		Vector2(-12.0, 24.0), Vector2(-3.0, 24.0), Vector2(4.0, 50.0), Vector2(-10.0, 50.0)
+	], body_offset, board_angle * 0.5), ninja_blue)
+	# Jambières bleu foncé
+	draw_colored_polygon(_transform_points([
+		Vector2(-5.0, 34.0), Vector2(5.0, 34.0), Vector2(5.0, 40.0), Vector2(-5.0, 40.0)
+	], body_offset, board_angle * 0.5), ninja_blue_dark)
 
-	# Motif "ninja" (traits/ceinture) en bleu foncé.
-	var belt := _transform_points([
-		Vector2(-12.0, 2.0),
-		Vector2(12.0, 2.0),
-		Vector2(12.0, 8.0),
-		Vector2(-12.0, 8.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(belt, ninja_blue_dark)
-	draw_circle(_transform_point(Vector2(0.0, 5.0), body_offset, board_angle * 0.4), 2.0, ink)
+	# Ceinture
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -6.0), Vector2(14.0, -6.0), Vector2(15.0, 28.0), Vector2(-17.0, 28.0)
+	], body_offset, board_angle * 0.4), ninja_blue_dark)
+	draw_circle(_transform_point(Vector2(0.0, 5.0), body_offset, board_angle * 0.4), 2.0, Color(0.03, 0.04, 0.06))
 
-	var back_arm := _transform_points([
-		Vector2(11.0, -32.0),
-		Vector2(22.0, -26.0),
-		Vector2(26.0, -7.0),
-		Vector2(15.0, -10.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(back_arm, ninja_blue)
+	# Torso
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -44.0), Vector2(14.0, -44.0), Vector2(16.0, -6.0), Vector2(-16.0, -6.0)
+	], body_offset, board_angle * 0.4), ninja_blue)
+
+	# Bras (bleu, mains peau)
+	draw_colored_polygon(_transform_points([
+		Vector2(11.0, -32.0), Vector2(22.0, -26.0), Vector2(26.0, -7.0), Vector2(15.0, -10.0)
+	], body_offset, board_angle * 0.6), ninja_blue)
 	draw_circle(_transform_point(Vector2(24.0, -3.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	var front_arm := _transform_points([
-		Vector2(-14.0, -26.0),
-		Vector2(-32.0, -12.0),
-		Vector2(-28.0, 0.0),
-		Vector2(-10.0, -14.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(front_arm, ninja_blue)
-	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	# Brassards.
 	draw_circle(_transform_point(Vector2(18.0, -18.0), body_offset, board_angle * 0.6), 3.2, ninja_blue_dark)
+
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -26.0), Vector2(-32.0, -12.0), Vector2(-28.0, 0.0), Vector2(-10.0, -14.0)
+	], body_offset, board_angle * 0.6), ninja_blue)
+	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
 	draw_circle(_transform_point(Vector2(-22.0, -14.0), body_offset, board_angle * 0.6), 3.2, ninja_blue_dark)
 
-	var back_leg := _transform_points([
-		Vector2(5.0, 24.0),
-		Vector2(14.0, 22.0),
-		Vector2(22.0, 50.0),
-		Vector2(11.0, 52.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(back_leg, ninja_blue)
-
-	var front_leg := _transform_points([
-		Vector2(-12.0, 24.0),
-		Vector2(-3.0, 24.0),
-		Vector2(4.0, 50.0),
-		Vector2(-10.0, 50.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(front_leg, ninja_blue)
-
-	# Jambières.
-	var shin := _transform_points([
-		Vector2(-6.0, 34.0),
-		Vector2(6.0, 34.0),
-		Vector2(6.0, 40.0),
-		Vector2(-6.0, 40.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(shin, ninja_blue_dark)
-
-	# Tête.
+	# Tête
 	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
 	draw_circle(head_center, 14.0, skin)
-
-	# Cheveux courts.
 	draw_colored_polygon(_transform_points([
-		Vector2(-14.0, -14.0),
-		Vector2(12.0, -14.0),
-		Vector2(16.0, -6.0),
-		Vector2(12.0, -1.0),
-		Vector2(-12.0, -1.0),
-		Vector2(-16.0, -6.0)
-	], head_center, board_angle * 0.25), Color(0.12, 0.10, 0.12))
-
-	# Yeux.
+		Vector2(-14.0, -14.0), Vector2(12.0, -14.0), Vector2(14.0, -7.0),
+		Vector2(10.0, -2.0), Vector2(-10.0, -2.0), Vector2(-14.0, -7.0)
+	], head_center, board_angle * 0.25), hair)
 	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
 	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
 	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
@@ -482,123 +430,75 @@ func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
 	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
 	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
 
+
 func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
-	# Skin Rider Neon: combinaison jaune flashy + traits noirs (indépendant des autres skins).
-	# Planche: on garde la même base pour la lisibilité.
 	var board_shape := _transform_points([
-		Vector2(-95.0, 0.0),
-		Vector2(-70.0, -16.0),
-		Vector2(-18.0, -22.0),
-		Vector2(65.0, -14.0),
-		Vector2(92.0, 0.0),
-		Vector2(65.0, 14.0),
-		Vector2(-18.0, 22.0),
-		Vector2(-70.0, 16.0)
+		Vector2(-95.0, 0.0), Vector2(-70.0, -16.0), Vector2(-18.0, -22.0),
+		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
+		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var neon_yellow := Color(1.0, 0.93, 0.10)
 	var stripe_black := Color(0.04, 0.04, 0.05)
-
-	# Bande "neon" sur la planche.
 	var board_stripe := _transform_points([
-		Vector2(-82.0, -3.0),
-		Vector2(80.0, -3.0),
-		Vector2(80.0, 3.0),
-		Vector2(-82.0, 3.0)
+		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(board_stripe, neon_yellow)
 	draw_polyline(board_stripe, stripe_black, 2.0, true)
 
-	# Personnage.
 	var body_offset := position + Vector2(0.0, -4.0)
 	var skin := Color(0.93, 0.78, 0.64)
+	var hair := Color(0.16, 0.10, 0.06)
 
-	var torso := _transform_points([
-		Vector2(-14.0, -44.0),
-		Vector2(12.0, -44.0),
-		Vector2(18.0, -10.0),
-		Vector2(11.0, 28.0),
-		Vector2(-11.0, 30.0),
-		Vector2(-18.0, -8.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(torso, neon_yellow)
+	# Jambes (jaune + bandes noires)
+	draw_colored_polygon(_transform_points([
+		Vector2(5.0, 24.0), Vector2(14.0, 22.0), Vector2(22.0, 50.0), Vector2(11.0, 52.0)
+	], body_offset, board_angle * 0.5), neon_yellow)
+	draw_colored_polygon(_transform_points([
+		Vector2(-12.0, 24.0), Vector2(-3.0, 24.0), Vector2(4.0, 50.0), Vector2(-10.0, 50.0)
+	], body_offset, board_angle * 0.5), neon_yellow)
+	draw_colored_polygon(_transform_points([
+		Vector2(-5.0, 34.0), Vector2(5.0, 34.0), Vector2(5.0, 40.0), Vector2(-5.0, 40.0)
+	], body_offset, board_angle * 0.5), stripe_black)
 
-	# Traits noirs (sangles/stripes) sur le torse.
-	var chest_stripe := _transform_points([
-		Vector2(-10.0, -28.0),
-		Vector2(10.0, -28.0),
-		Vector2(12.0, -22.0),
-		Vector2(-12.0, -22.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(chest_stripe, stripe_black)
-	var chest_stripe2 := _transform_points([
-		Vector2(-8.0, -6.0),
-		Vector2(8.0, -6.0),
-		Vector2(10.0, 0.0),
-		Vector2(-10.0, 0.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(chest_stripe2, stripe_black)
+	# Ceinture noire
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -6.0), Vector2(14.0, -6.0), Vector2(15.0, 28.0), Vector2(-17.0, 28.0)
+	], body_offset, board_angle * 0.4), stripe_black)
 
-	var back_arm := _transform_points([
-		Vector2(11.0, -32.0),
-		Vector2(22.0, -26.0),
-		Vector2(26.0, -7.0),
-		Vector2(15.0, -10.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(back_arm, neon_yellow)
+	# Torso jaune + bandes
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -44.0), Vector2(14.0, -44.0), Vector2(16.0, -6.0), Vector2(-16.0, -6.0)
+	], body_offset, board_angle * 0.4), neon_yellow)
+	draw_colored_polygon(_transform_points([
+		Vector2(-10.0, -28.0), Vector2(10.0, -28.0), Vector2(12.0, -22.0), Vector2(-12.0, -22.0)
+	], body_offset, board_angle * 0.4), stripe_black)
+	draw_colored_polygon(_transform_points([
+		Vector2(-8.0, -12.0), Vector2(8.0, -12.0), Vector2(10.0, -6.0), Vector2(-10.0, -6.0)
+	], body_offset, board_angle * 0.4), stripe_black)
+
+	# Bras (jaune, mains peau)
+	draw_colored_polygon(_transform_points([
+		Vector2(11.0, -32.0), Vector2(22.0, -26.0), Vector2(26.0, -7.0), Vector2(15.0, -10.0)
+	], body_offset, board_angle * 0.6), neon_yellow)
 	draw_circle(_transform_point(Vector2(24.0, -3.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	var front_arm := _transform_points([
-		Vector2(-14.0, -26.0),
-		Vector2(-32.0, -12.0),
-		Vector2(-28.0, 0.0),
-		Vector2(-10.0, -14.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(front_arm, neon_yellow)
-	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	# Traits noirs sur les avant-bras.
 	draw_circle(_transform_point(Vector2(18.0, -18.0), body_offset, board_angle * 0.6), 3.2, stripe_black)
+
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -26.0), Vector2(-32.0, -12.0), Vector2(-28.0, 0.0), Vector2(-10.0, -14.0)
+	], body_offset, board_angle * 0.6), neon_yellow)
+	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
 	draw_circle(_transform_point(Vector2(-22.0, -14.0), body_offset, board_angle * 0.6), 3.2, stripe_black)
 
-	var back_leg := _transform_points([
-		Vector2(5.0, 24.0),
-		Vector2(14.0, 22.0),
-		Vector2(22.0, 50.0),
-		Vector2(11.0, 52.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(back_leg, neon_yellow)
-
-	var front_leg := _transform_points([
-		Vector2(-12.0, 24.0),
-		Vector2(-3.0, 24.0),
-		Vector2(4.0, 50.0),
-		Vector2(-10.0, 50.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(front_leg, neon_yellow)
-
-	# Traits noirs sur les jambes.
-	var leg_stripe := _transform_points([
-		Vector2(-6.0, 34.0),
-		Vector2(6.0, 34.0),
-		Vector2(6.0, 40.0),
-		Vector2(-6.0, 40.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(leg_stripe, stripe_black)
-
+	# Tête
 	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
 	draw_circle(head_center, 14.0, skin)
-	# Cheveux courts (brun) simples.
 	draw_colored_polygon(_transform_points([
-		Vector2(-14.0, -14.0),
-		Vector2(12.0, -14.0),
-		Vector2(16.0, -6.0),
-		Vector2(12.0, -1.0),
-		Vector2(-12.0, -1.0),
-		Vector2(-16.0, -6.0)
-	], head_center, board_angle * 0.25), Color(0.16, 0.10, 0.06))
+		Vector2(-14.0, -14.0), Vector2(12.0, -14.0), Vector2(14.0, -7.0),
+		Vector2(10.0, -2.0), Vector2(-10.0, -2.0), Vector2(-14.0, -7.0)
+	], head_center, board_angle * 0.25), hair)
 	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
 	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
 	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
@@ -607,7 +507,6 @@ func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
 	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
 
 func _draw_surfer_female(position: Vector2, board_angle: float) -> void:
-	# Planche style surfboard: nose arrondi, tail plus large.
 	var board_shape := _transform_points([
 		Vector2(-95.0, 0.0),
 		Vector2(-70.0, -16.0),
@@ -642,91 +541,107 @@ func _draw_surfer_female(position: Vector2, board_angle: float) -> void:
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
 
-	# Personnage (fille en combinaison, mince).
 	var body_offset := position + Vector2(0.0, -4.0)
-	var wetsuit_main := Color(0.09, 0.11, 0.16)
-	var wetsuit_panel := Color(0.20, 0.62, 0.92)
-	var skin := Color(0.93, 0.78, 0.64)
+	var skin := Color(0.88, 0.70, 0.50)
+	var bikini := Color(0.08, 0.08, 0.10)
+	var hair_dark := Color(0.72, 0.54, 0.12)
+	var hair_light := Color(0.98, 0.90, 0.52)
 
-	var torso := _transform_points([
-		Vector2(-13.0, -42.0),
-		Vector2(11.0, -42.0),
-		Vector2(16.0, -10.0),
-		Vector2(10.0, 26.0),
-		Vector2(-10.0, 28.0),
-		Vector2(-16.0, -8.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(torso, wetsuit_main)
+	# Cheveux longs blonds (derriere)
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -14.0),
+		Vector2(16.0, -14.0),
+		Vector2(20.0, 14.0),
+		Vector2(-20.0, 14.0)
+	], _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3), board_angle * 0.2), hair_dark)
 
-	var chest_panel := _transform_points([
-		Vector2(-6.0, -34.0),
-		Vector2(6.0, -34.0),
-		Vector2(9.0, 14.0),
-		Vector2(-9.0, 14.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(chest_panel, wetsuit_panel)
-
-	var back_arm := _transform_points([
-		Vector2(10.0, -30.0),
-		Vector2(20.0, -26.0),
-		Vector2(24.0, -7.0),
-		Vector2(14.0, -10.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(back_arm, wetsuit_main)
-	draw_circle(_transform_point(Vector2(22.0, -3.0), body_offset, board_angle * 0.6), 5.2, skin)
-
-	var front_arm := _transform_points([
-		Vector2(-13.0, -24.0),
-		Vector2(-30.0, -12.0),
-		Vector2(-26.0, -1.0),
-		Vector2(-9.0, -13.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(front_arm, wetsuit_main)
-	draw_circle(_transform_point(Vector2(-28.0, 1.0), body_offset, board_angle * 0.6), 5.2, skin)
-
-	var back_leg := _transform_points([
+	# Jambes (peau)
+	draw_colored_polygon(_transform_points([
 		Vector2(4.0, 22.0),
 		Vector2(13.0, 21.0),
 		Vector2(20.0, 46.0),
 		Vector2(10.0, 48.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(back_leg, wetsuit_main)
-
-	var front_leg := _transform_points([
+	], body_offset, board_angle * 0.5), skin)
+	draw_colored_polygon(_transform_points([
 		Vector2(-11.0, 22.0),
 		Vector2(-2.0, 22.0),
 		Vector2(4.0, 46.0),
 		Vector2(-9.0, 46.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(front_leg, wetsuit_main)
+	], body_offset, board_angle * 0.5), skin)
 
+	# Bikini bas
+	draw_colored_polygon(_transform_points([
+		Vector2(-13.0, 8.0),
+		Vector2(11.0, 8.0),
+		Vector2(12.0, 22.0),
+		Vector2(-14.0, 22.0)
+	], body_offset, board_angle * 0.4), bikini)
+
+	# Torse peau (entre les deux pieces)
+	draw_colored_polygon(_transform_points([
+		Vector2(-13.0, -20.0),
+		Vector2(11.0, -20.0),
+		Vector2(12.0, 8.0),
+		Vector2(-13.0, 8.0)
+	], body_offset, board_angle * 0.4), skin)
+
+	# Bikini haut
+	draw_colored_polygon(_transform_points([
+		Vector2(-13.0, -36.0),
+		Vector2(11.0, -36.0),
+		Vector2(12.0, -20.0),
+		Vector2(-13.0, -20.0)
+	], body_offset, board_angle * 0.4), bikini)
+
+	# Epaules (peau)
+	draw_colored_polygon(_transform_points([
+		Vector2(-13.0, -42.0),
+		Vector2(11.0, -42.0),
+		Vector2(12.0, -36.0),
+		Vector2(-13.0, -36.0)
+	], body_offset, board_angle * 0.4), skin)
+
+	# Bras (peau)
+	draw_colored_polygon(_transform_points([
+		Vector2(10.0, -30.0),
+		Vector2(20.0, -26.0),
+		Vector2(24.0, -7.0),
+		Vector2(14.0, -10.0)
+	], body_offset, board_angle * 0.6), skin)
+	draw_colored_polygon(_transform_points([
+		Vector2(-13.0, -24.0),
+		Vector2(-30.0, -12.0),
+		Vector2(-26.0, -1.0),
+		Vector2(-9.0, -13.0)
+	], body_offset, board_angle * 0.6), skin)
+
+	# Tête
 	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
 	draw_circle(head_center, 14.0, skin)
 
-	# Cheveux bouclés.
-	var hair_dark := Color(0.23, 0.14, 0.09)
-	var hair_light := Color(0.34, 0.22, 0.14)
-	for p in [
-		Vector2(-16.0, -16.0), Vector2(0.0, -20.0), Vector2(16.0, -16.0),
-		Vector2(-20.0, -2.0), Vector2(20.0, -2.0),
-		Vector2(-16.0, 12.0), Vector2(16.0, 12.0),
-		Vector2(-8.0, 18.0), Vector2(8.0, 18.0)
-	]:
-		draw_circle(_transform_point(p, head_center, board_angle * 0.25), 6.6, hair_dark)
-	for p in [Vector2(-8.0, -18.0), Vector2(8.0, -18.0), Vector2(-22.0, -8.0), Vector2(22.0, -8.0)]:
-		draw_circle(_transform_point(p, head_center, board_angle * 0.25), 4.4, hair_light)
+	# Cheveux avant blonds
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -14.0),
+		Vector2(14.0, -14.0),
+		Vector2(14.0, -4.0),
+		Vector2(-14.0, -4.0)
+	], head_center, board_angle * 0.25), hair_dark)
+	draw_colored_polygon(_transform_points([
+		Vector2(-6.0, -14.0),
+		Vector2(6.0, -14.0),
+		Vector2(4.0, -6.0),
+		Vector2(-4.0, -6.0)
+	], head_center, board_angle * 0.25), hair_light)
 
-	# Yeux visibles.
+	# Yeux
 	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
 	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
 	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
 	draw_circle(eye_right, 2.2, Color(1.0, 1.0, 1.0))
-	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
-	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
-	draw_line(_transform_point(Vector2(-3.5, 4.0), head_center, board_angle * 0.25), _transform_point(Vector2(3.5, 4.0), head_center, board_angle * 0.25), Color(0.54, 0.31, 0.24), 1.6)
+	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.18, 0.12, 0.08))
+	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.18, 0.12, 0.08))
 
 func _draw_surfer_male(position: Vector2, board_angle: float) -> void:
-	# Même planche pour rester cohérent.
 	var board_shape := _transform_points([
 		Vector2(-95.0, 0.0),
 		Vector2(-70.0, -16.0),
@@ -761,78 +676,76 @@ func _draw_surfer_male(position: Vector2, board_angle: float) -> void:
 	], position + Vector2(0.0, 40.0), board_angle)
 	draw_colored_polygon(fin, Color(0.10, 0.12, 0.18))
 
-	# Personnage: brun, mince, sans masque, combinaison full black.
 	var body_offset := position + Vector2(0.0, -4.0)
-	var wetsuit_main := Color(0.03, 0.03, 0.04)
-	var skin := Color(0.93, 0.78, 0.64)
+	var skin := Color(0.76, 0.54, 0.32)
+	var hair := Color(0.10, 0.07, 0.04)
+	var shorts := Color(0.06, 0.06, 0.08)
 
-	var torso := _transform_points([
-		Vector2(-14.0, -44.0),
-		Vector2(12.0, -44.0),
-		Vector2(18.0, -10.0),
-		Vector2(11.0, 28.0),
-		Vector2(-11.0, 30.0),
-		Vector2(-18.0, -8.0)
-	], body_offset, board_angle * 0.4)
-	draw_colored_polygon(torso, wetsuit_main)
-
-	var back_arm := _transform_points([
-		Vector2(11.0, -32.0),
-		Vector2(22.0, -26.0),
-		Vector2(26.0, -7.0),
-		Vector2(15.0, -10.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(back_arm, wetsuit_main)
-	draw_circle(_transform_point(Vector2(24.0, -3.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	var front_arm := _transform_points([
-		Vector2(-14.0, -26.0),
-		Vector2(-32.0, -12.0),
-		Vector2(-28.0, 0.0),
-		Vector2(-10.0, -14.0)
-	], body_offset, board_angle * 0.6)
-	draw_colored_polygon(front_arm, wetsuit_main)
-	draw_circle(_transform_point(Vector2(-30.0, 2.0), body_offset, board_angle * 0.6), 5.4, skin)
-
-	var back_leg := _transform_points([
+	# Jambes (boardshort noir)
+	draw_colored_polygon(_transform_points([
 		Vector2(5.0, 24.0),
 		Vector2(14.0, 22.0),
 		Vector2(22.0, 50.0),
 		Vector2(11.0, 52.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(back_leg, wetsuit_main)
-
-	var front_leg := _transform_points([
+	], body_offset, board_angle * 0.5), shorts)
+	draw_colored_polygon(_transform_points([
 		Vector2(-12.0, 24.0),
 		Vector2(-3.0, 24.0),
 		Vector2(4.0, 50.0),
 		Vector2(-10.0, 50.0)
-	], body_offset, board_angle * 0.5)
-	draw_colored_polygon(front_leg, wetsuit_main)
+	], body_offset, board_angle * 0.5), shorts)
 
+	# Boardshort (ceinture)
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -6.0),
+		Vector2(14.0, -6.0),
+		Vector2(15.0, 28.0),
+		Vector2(-17.0, 28.0)
+	], body_offset, board_angle * 0.4), shorts)
+
+	# Torse nu bronzé
+	draw_colored_polygon(_transform_points([
+		Vector2(-16.0, -44.0),
+		Vector2(14.0, -44.0),
+		Vector2(16.0, -6.0),
+		Vector2(-16.0, -6.0)
+	], body_offset, board_angle * 0.4), skin)
+
+	# Bras (peau bronzée)
+	draw_colored_polygon(_transform_points([
+		Vector2(11.0, -32.0),
+		Vector2(22.0, -26.0),
+		Vector2(26.0, -7.0),
+		Vector2(15.0, -10.0)
+	], body_offset, board_angle * 0.6), skin)
+	draw_colored_polygon(_transform_points([
+		Vector2(-14.0, -26.0),
+		Vector2(-32.0, -12.0),
+		Vector2(-28.0, 0.0),
+		Vector2(-10.0, -14.0)
+	], body_offset, board_angle * 0.6), skin)
+
+	# Tête
 	var head_center := _transform_point(Vector2(0.0, -50.0), body_offset, board_angle * 0.3)
 	draw_circle(head_center, 14.0, skin)
 
-	# Cheveux courts (brun).
+	# Cheveux courts sombres (haut de tête seulement)
 	draw_colored_polygon(_transform_points([
-		# Cap de cheveux qui reste sur le haut du visage (pas de "masque").
 		Vector2(-14.0, -14.0),
 		Vector2(12.0, -14.0),
-		Vector2(16.0, -6.0),
-		Vector2(12.0, -1.0),
-		Vector2(-12.0, -1.0),
-		Vector2(-16.0, -6.0)
-	], head_center, board_angle * 0.25), Color(0.16, 0.10, 0.06))
+		Vector2(14.0, -7.0),
+		Vector2(10.0, -2.0),
+		Vector2(-10.0, -2.0),
+		Vector2(-14.0, -7.0)
+	], head_center, board_angle * 0.25), hair)
 
-	# Yeux.
+	# Yeux
 	var eye_left := _transform_point(Vector2(-5.0, -2.0), head_center, board_angle * 0.25)
 	var eye_right := _transform_point(Vector2(5.0, -2.0), head_center, board_angle * 0.25)
 	draw_circle(eye_left, 2.2, Color(1.0, 1.0, 1.0))
 	draw_circle(eye_right, 2.2, Color(1.0, 1.0, 1.0))
-	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
-	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.15, 0.28, 0.55))
-	# Petit nez discret.
-	draw_circle(_transform_point(Vector2(0.0, 2.0), head_center, board_angle * 0.25), 1.0, Color(0.82, 0.62, 0.50))
+	draw_circle(eye_left + Vector2(0.4, 0.4), 1.1, Color(0.12, 0.08, 0.04))
+	draw_circle(eye_right + Vector2(0.4, 0.4), 1.1, Color(0.12, 0.08, 0.04))
 
 func _draw_gradient_rect(rect: Rect2, top_color: Color, bottom_color: Color) -> void:
 	var points := PackedVector2Array([
