@@ -26,6 +26,16 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.93, 0.99, 1, 0.95)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gear_transparent"]
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gear_hover"]
+bg_color = Color(1, 1, 1, 0.10)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile_panel_opaque"]
 bg_color = Color(0.08, 0.13, 0.20, 1)
 corner_radius_top_left = 14
@@ -106,16 +116,6 @@ theme_override_font_sizes/font_size = 36
 text = "Boutique/Skins"
 custom_minimum_size = Vector2(320, 90)
 
-[node name="SettingsButton" type="Button" parent="SafeArea/Margin/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/normal = SubResource("StyleBoxFlat_profile_tab")
-theme_override_styles/hover = SubResource("StyleBoxFlat_profile_tab_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_profile_tab_hover")
-theme_override_font_sizes/font_size = 36
-text = "Paramètres"
-custom_minimum_size = Vector2(320, 90)
 
 [node name="LeftHouseButton" type="Button" parent="."]
 unique_name_in_owner = true
@@ -150,6 +150,25 @@ offset_bottom = 840.0
 mouse_filter = 0
 flat = true
 text = ""
+
+[node name="SettingsButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -90.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 86.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_gear_transparent")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gear_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_gear_hover")
+theme_override_colors/font_color = Color(1, 1, 1, 0.90)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 42
+text = "⚙"
 
 [node name="ProfileTabButton" type="Button" parent="."]
 unique_name_in_owner = true
