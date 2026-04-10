@@ -14,6 +14,8 @@ var selected_character_index: int = 0
 var has_account: bool = false
 var total_xp: int = 0
 var total_surfcoin: int = 0
+var owned_items: Array = []        # IDs des articles achetés
+var selected_board_index: int = 0  # 0 = planche classique (gratuite)
 
 # Paramètres.
 var music_volume: float = 0.8
@@ -116,6 +118,19 @@ func add_surfcoin(amount: int) -> void:
 	save_game()
 	profile_progress_changed.emit(total_xp, total_surfcoin)
 
+func spend_surfcoin(amount: int) -> bool:
+	if total_surfcoin < amount:
+		return false
+	total_surfcoin -= amount
+	save_game()
+	profile_progress_changed.emit(total_xp, total_surfcoin)
+	return true
+
+func unlock_item(item_id: String) -> void:
+	if item_id not in owned_items:
+		owned_items.append(item_id)
+	save_game()
+
 func save_game() -> void:
 	var data : Dictionary = {
 		"high_score": high_score,
@@ -124,6 +139,8 @@ func save_game() -> void:
 		"has_account": has_account,
 		"total_xp": total_xp,
 		"total_surfcoin": total_surfcoin,
+		"owned_items": owned_items,
+		"selected_board_index": selected_board_index,
 		"music_volume": music_volume,
 		"sfx_volume": sfx_volume,
 		"controls_sensitivity": controls_sensitivity,
@@ -166,6 +183,8 @@ func load_game() -> void:
 	has_account = bool(parsed.get("has_account", false)) and not player_pseudo.is_empty()
 	total_xp = maxi(0, int(parsed.get("total_xp", 0)))
 	total_surfcoin = maxi(0, int(parsed.get("total_surfcoin", 0)))
+	owned_items = Array(parsed.get("owned_items", []))
+	selected_board_index = maxi(0, int(parsed.get("selected_board_index", 0)))
 	music_volume = clampf(float(parsed.get("music_volume", 0.8)), 0.0, 1.0)
 	sfx_volume = clampf(float(parsed.get("sfx_volume", 1.0)), 0.0, 1.0)
 	controls_sensitivity = clampf(float(parsed.get("controls_sensitivity", 1.0)), 0.2, 1.5)
