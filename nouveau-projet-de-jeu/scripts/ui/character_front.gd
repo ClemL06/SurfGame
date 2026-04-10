@@ -3,6 +3,8 @@ extends Control
 @export var center_y_ratio: float = 0.52
 @export var scale_factor: float = 1.0
 @export var feet_offset_y: float = 100.0
+# Quand true, dessine dans sa propre taille (usage embarqué dans une carte).
+@export var use_own_size: bool = false
 
 var preview_index: int = -1
 
@@ -13,7 +15,7 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var size: Vector2 = get_viewport_rect().size
+	var size: Vector2 = self.size if use_own_size else get_viewport_rect().size
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
 

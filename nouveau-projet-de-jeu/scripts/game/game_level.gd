@@ -42,6 +42,15 @@ var trick_jump_offset: float = 0.0
 var trick_rotation: float = 0.0
 var trick_cooldown: float = 0.0
 
+# Palette des planches (base + bande) — index = GameManager.selected_board_index.
+const BOARD_PALETTE: Array = [
+	{"base": Color(0.97, 0.98, 1.00), "stripe": Color(0.18, 0.52, 0.92)},  # 0 Classique
+	{"base": Color(1.00, 0.55, 0.15), "stripe": Color(0.88, 0.10, 0.05)},  # 1 Flammes
+	{"base": Color(0.22, 0.92, 0.55), "stripe": Color(0.96, 0.82, 0.08)},  # 2 Tropicale
+	{"base": Color(0.08, 0.04, 0.22), "stripe": Color(0.55, 0.08, 1.00)},  # 3 Galaxy
+	{"base": Color(1.00, 0.84, 0.10), "stripe": Color(0.92, 0.50, 0.04)},  # 4 Or
+]
+
 var hud: HUD
 var pause_menu: PauseMenu
 var game_over: GameOverScreen
@@ -613,7 +622,7 @@ func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
 		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
 		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_colored_polygon(board_shape, _board_colors()["base"])
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var ninja_blue := Color(0.46, 0.90, 1.0)
@@ -621,7 +630,7 @@ func _draw_surfer_water_ninja(position: Vector2, board_angle: float) -> void:
 	var board_stripe := _transform_points([
 		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_stripe, ninja_blue)
+	draw_colored_polygon(board_stripe, _board_colors()["stripe"])
 	draw_polyline(board_stripe, ninja_blue_dark, 2.0, true)
 
 	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
@@ -793,7 +802,7 @@ func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
 		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
 		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_colored_polygon(board_shape, _board_colors()["base"])
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var neon_yellow_board := Color(1.0, 0.93, 0.10)
@@ -801,7 +810,7 @@ func _draw_surfer_neon(position: Vector2, board_angle: float) -> void:
 	var board_stripe := _transform_points([
 		Vector2(-82.0, -3.0), Vector2(80.0, -3.0), Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_stripe, neon_yellow_board)
+	draw_colored_polygon(board_stripe, _board_colors()["stripe"])
 	draw_polyline(board_stripe, stripe_black_board, 2.0, true)
 
 	draw_set_transform(position + Vector2(0.0, -12.0), board_angle * 0.45, Vector2(0.5, 0.5))
@@ -992,14 +1001,14 @@ func _draw_surfer_female(position: Vector2, board_angle: float) -> void:
 		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
 		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_colored_polygon(board_shape, _board_colors()["base"])
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var stripe := _transform_points([
 		Vector2(-82.0, -3.0), Vector2(80.0, -3.0),
 		Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	draw_colored_polygon(stripe, _board_colors()["stripe"])
 	draw_colored_polygon(_transform_points([
 		Vector2(-70.0, -10.0), Vector2(68.0, -10.0),
 		Vector2(68.0, -3.0), Vector2(-70.0, -3.0)
@@ -1220,14 +1229,14 @@ func _draw_surfer_male(position: Vector2, board_angle: float) -> void:
 		Vector2(65.0, -14.0), Vector2(92.0, 0.0), Vector2(65.0, 14.0),
 		Vector2(-18.0, 22.0), Vector2(-70.0, 16.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(board_shape, Color(0.97, 0.98, 1.0))
+	draw_colored_polygon(board_shape, _board_colors()["base"])
 	draw_polyline(board_shape, Color(0.73, 0.80, 0.90), 2.0, true)
 
 	var stripe := _transform_points([
 		Vector2(-82.0, -3.0), Vector2(80.0, -3.0),
 		Vector2(80.0, 3.0), Vector2(-82.0, 3.0)
 	], position + Vector2(0.0, 40.0), board_angle)
-	draw_colored_polygon(stripe, Color(0.18, 0.52, 0.92))
+	draw_colored_polygon(stripe, _board_colors()["stripe"])
 	draw_colored_polygon(_transform_points([
 		Vector2(-70.0, -10.0), Vector2(68.0, -10.0),
 		Vector2(68.0, -3.0), Vector2(-70.0, -3.0)
@@ -1481,6 +1490,9 @@ func _transform_point(point: Vector2, offset: Vector2, angle: float) -> Vector2:
 	var s := sin(angle)
 	var rotated := Vector2((point.x * c) - (point.y * s), (point.x * s) + (point.y * c))
 	return rotated + offset
+
+func _board_colors() -> Dictionary:
+	return BOARD_PALETTE[clampi(GameManager.selected_board_index, 0, BOARD_PALETTE.size() - 1)]
 
 func player_died() -> void:
 	if is_dead:

@@ -5,13 +5,45 @@ extends Control
 @onready var back_button: Button = %BackButton
 @onready var tab_dressing_button: Button = %TabDressingButton
 @onready var tab_shop_button: Button = %TabShopButton
-@onready var buy_button: Button = %BuyButton
 @onready var shop_panel: PanelContainer = %ShopPanel
 @onready var dressing_panel: PanelContainer = %DressingPanel
 @onready var hint_label: Label = %HintLabel
 @onready var character_front: Control = $CharacterFront
 
 var current_tab: String = "dressing"
+
+# ── Catalogue de la boutique ──────────────────────────────────────────────────
+const SHOP_ITEMS = [
+	{"id": "char_0",  "cat": "Combinaisons", "name": "Surfeur Classique", "price": 0,   "idx": 0, "type": "char"},
+	{"id": "char_1",  "cat": "Combinaisons", "name": "Surfeuse Pro",      "price": 200, "idx": 1, "type": "char"},
+	{"id": "char_2",  "cat": "Combinaisons", "name": "Rider Neon",        "price": 350, "idx": 2, "type": "char"},
+	{"id": "char_3",  "cat": "Combinaisons", "name": "Water Ninja",       "price": 500, "idx": 3, "type": "char"},
+	{"id": "board_0", "cat": "Planches",     "name": "Planche Classique", "price": 0,   "idx": 0, "type": "board"},
+	{"id": "board_1", "cat": "Planches",     "name": "Planche Flammes",   "price": 100, "idx": 1, "type": "board"},
+	{"id": "board_2", "cat": "Planches",     "name": "Planche Tropicale", "price": 150, "idx": 2, "type": "board"},
+	{"id": "board_3", "cat": "Planches",     "name": "Planche Galaxy",    "price": 300, "idx": 3, "type": "board"},
+	{"id": "board_4", "cat": "Planches",     "name": "Planche Or",        "price": 450, "idx": 4, "type": "board"},
+]
+
+# Couleurs de prévisualisation — doit correspondre à BOARD_PALETTE dans game_level.gd.
+const BOARD_COLORS_PREVIEW = [
+	{"base": Color(0.97, 0.98, 1.00), "stripe": Color(0.18, 0.52, 0.92)},
+	{"base": Color(1.00, 0.55, 0.15), "stripe": Color(0.88, 0.10, 0.05)},
+	{"base": Color(0.22, 0.92, 0.55), "stripe": Color(0.96, 0.82, 0.08)},
+	{"base": Color(0.08, 0.04, 0.22), "stripe": Color(0.55, 0.08, 1.00)},
+	{"base": Color(1.00, 0.84, 0.10), "stripe": Color(0.92, 0.50, 0.04)},
+]
+
+const CHAR_COLORS_PREVIEW = [
+	Color(0.18, 0.52, 0.92),  # Surfeur Classique
+	Color(0.85, 0.35, 0.55),  # Surfeuse Pro
+	Color(0.90, 0.88, 0.10),  # Rider Neon
+	Color(0.08, 0.72, 0.90),  # Water Ninja
+]
+
+var _shop_coin_label: Label = null
+
+const _CharacterFront = preload("res://scripts/ui/character_front.gd")
 
 func _ready() -> void:
 	set_process(true)
@@ -21,7 +53,6 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	tab_dressing_button.pressed.connect(_on_tab_dressing_pressed)
 	tab_shop_button.pressed.connect(_on_tab_shop_pressed)
-	buy_button.pressed.connect(_on_buy_pressed)
 	character_option.item_selected.connect(_on_character_option_selected)
 	_apply_tab_state()
 
@@ -193,25 +224,275 @@ func _on_character_option_selected(index: int) -> void:
 	character_front.preview_index = index
 	if GameManager.has_account:
 		GameManager.create_or_update_account(GameManager.player_pseudo, character_option.get_selected_id())
-		hint_label.text = "Personnage equipe !"
+		_show_hint("Personnage equipe !")
 
 func _on_tab_dressing_pressed() -> void:
 	dressing_panel.visible = not dressing_panel.visible
 	shop_panel.visible = false
-	buy_button.visible = false
 
 func _on_tab_shop_pressed() -> void:
-	shop_panel.visible = not shop_panel.visible
-	buy_button.visible = shop_panel.visible
+	var opening := not shop_panel.visible
+	shop_panel.visible = opening
 	dressing_panel.visible = false
-
-func _on_buy_pressed() -> void:
-	hint_label.text = "Boutique: achat de skins disponible bientot."
+	if opening:
+		_build_shop_ui()
 
 func _apply_tab_state() -> void:
 	dressing_panel.visible = false
 	shop_panel.visible = false
-	buy_button.visible = false
+
+# ── Construction de l'UI de boutique (grille 3 colonnes) ─────────────────────
+
+func _build_shop_ui() -> void:
+	for child in shop_panel.get_children():
+		child.queue_free()
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left",   16)
+	margin.add_theme_constant_override("margin_top",    12)
+	margin.add_theme_constant_override("margin_right",  16)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	shop_panel.add_child(margin)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	margin.add_child(scroll)
+
+	var outer := VBoxContainer.new()
+	outer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_theme_constant_override("separation", 10)
+	scroll.add_child(outer)
+
+	# Ligne du haut : solde + bouton fermer.
+	var top_row := HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 10)
+	outer.add_child(top_row)
+
+	_shop_coin_label = Label.new()
+	_shop_coin_label.text = "Solde : %d SC" % GameManager.total_surfcoin
+	_shop_coin_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_shop_coin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_shop_coin_label.add_theme_font_size_override("font_size", 22)
+	_shop_coin_label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.20))
+	top_row.add_child(_shop_coin_label)
+
+	var close_btn := Button.new()
+	close_btn.text = "X"
+	close_btn.add_theme_font_size_override("font_size", 20)
+	close_btn.custom_minimum_size = Vector2(44, 44)
+	close_btn.pressed.connect(func():
+		shop_panel.visible = false
+	)
+	top_row.add_child(close_btn)
+
+	# Section Combinaisons.
+	_add_section_header(outer, "Combinaisons")
+	var char_grid := _make_grid()
+	outer.add_child(char_grid)
+	for item in SHOP_ITEMS:
+		if item["cat"] == "Combinaisons":
+			_add_item_card(char_grid, item)
+
+	# Section Planches.
+	_add_section_header(outer, "Planches de surf")
+	var board_grid := _make_grid()
+	outer.add_child(board_grid)
+	for item in SHOP_ITEMS:
+		if item["cat"] == "Planches":
+			_add_item_card(board_grid, item)
+
+func _make_grid() -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = 3
+	g.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	g.add_theme_constant_override("h_separation", 10)
+	g.add_theme_constant_override("v_separation", 10)
+	return g
+
+func _add_section_header(parent: VBoxContainer, title: String) -> void:
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("color", Color(0.30, 0.60, 1.0, 0.30))
+	parent.add_child(sep)
+	var lbl := Label.new()
+	lbl.text = title.to_upper()
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.add_theme_color_override("font_color", Color(0.55, 0.82, 1.0, 0.95))
+	parent.add_child(lbl)
+
+func _add_item_card(grid: GridContainer, item: Dictionary) -> void:
+	var is_owned: bool    = item["price"] == 0 or item["id"] in GameManager.owned_items
+	var is_equipped: bool = _is_equipped(item)
+
+	# Carte (PanelContainer stylé).
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(0.07, 0.13, 0.26, 0.97)
+	card_style.corner_radius_top_left    = 12
+	card_style.corner_radius_top_right   = 12
+	card_style.corner_radius_bottom_right = 12
+	card_style.corner_radius_bottom_left  = 12
+	card_style.border_width_left   = 2
+	card_style.border_width_top    = 2
+	card_style.border_width_right  = 2
+	card_style.border_width_bottom = 2
+	card_style.border_color = Color(0.40, 1.0, 0.55, 0.85) if is_equipped \
+							else (Color(0.28, 0.62, 1.0, 0.65) if is_owned \
+							else Color(0.18, 0.32, 0.58, 0.50))
+
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", card_style)
+	grid.add_child(card)
+
+	var inner := MarginContainer.new()
+	inner.add_theme_constant_override("margin_left",   8)
+	inner.add_theme_constant_override("margin_top",    8)
+	inner.add_theme_constant_override("margin_right",  8)
+	inner.add_theme_constant_override("margin_bottom", 8)
+	card.add_child(inner)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 5)
+	inner.add_child(vbox)
+
+	# ── Aperçu dessiné ──────────────────────────────────────────────────────
+	if item["type"] == "board":
+		var preview := Control.new()
+		preview.custom_minimum_size = Vector2(0, 95)
+		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vbox.add_child(preview)
+		var bc: Dictionary = BOARD_COLORS_PREVIEW[item["idx"]]
+		var base_col:   Color = bc["base"]
+		var stripe_col: Color = bc["stripe"]
+		preview.draw.connect(func(): _draw_board_preview(preview, base_col, stripe_col))
+	else:
+		# Personnage : on réutilise exactement le même dessin que le dressing.
+		var cf = _CharacterFront.new()
+		cf.use_own_size    = true
+		cf.preview_index   = item["idx"]
+		cf.scale_factor    = 0.30
+		cf.center_y_ratio  = 0.30
+		cf.feet_offset_y   = 30.0
+		cf.custom_minimum_size   = Vector2(0, 95)
+		cf.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vbox.add_child(cf)
+
+	# ── Nom ──────────────────────────────────────────────────────────────────
+	var name_lbl := Label.new()
+	name_lbl.text = item["name"]
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_color_override("font_color",
+		Color(1.0, 1.0, 1.0) if is_owned else Color(0.72, 0.78, 0.88))
+	name_lbl.clip_text = true
+	vbox.add_child(name_lbl)
+
+	# ── Prix ──────────────────────────────────────────────────────────────────
+	var price_lbl := Label.new()
+	price_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price_lbl.add_theme_font_size_override("font_size", 13)
+	if item["price"] == 0:
+		price_lbl.text = "Gratuit"
+		price_lbl.add_theme_color_override("font_color", Color(0.40, 1.0, 0.52))
+	elif is_owned:
+		price_lbl.text = "Acheté"
+		price_lbl.add_theme_color_override("font_color", Color(0.50, 0.85, 1.0))
+	else:
+		price_lbl.text = "%d SC" % item["price"]
+		var can_afford: bool = GameManager.total_surfcoin >= item["price"]
+		price_lbl.add_theme_color_override("font_color",
+			Color(1.0, 0.85, 0.20) if can_afford else Color(0.90, 0.32, 0.32))
+	vbox.add_child(price_lbl)
+
+	# ── Bouton ────────────────────────────────────────────────────────────────
+	var btn := Button.new()
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.add_theme_font_size_override("font_size", 14)
+	if is_equipped:
+		btn.text = "Equipe"
+		btn.disabled = true
+	elif is_owned:
+		btn.text = "Equiper"
+		btn.pressed.connect(_equip_item.bind(item))
+	else:
+		btn.text = "Acheter"
+		btn.disabled = GameManager.total_surfcoin < item["price"]
+		btn.pressed.connect(_buy_item.bind(item))
+	vbox.add_child(btn)
+
+# ── Dessin des aperçus ────────────────────────────────────────────────────────
+
+func _draw_board_preview(ctrl: Control, base: Color, stripe: Color) -> void:
+	var w := ctrl.size.x
+	var h := ctrl.size.y
+	if w < 4.0 or h < 4.0:
+		return
+	var cx := w * 0.5
+	var cy := h * 0.5
+
+	# Fond sombre.
+	ctrl.draw_rect(Rect2(0.0, 0.0, w, h), Color(0.05, 0.09, 0.18))
+
+	# Forme de planche horizontale.
+	var bl := w * 0.80   # longueur
+	var bt := h * 0.36   # épaisseur
+	var pts := PackedVector2Array([
+		Vector2(cx - bl*0.50, cy),
+		Vector2(cx - bl*0.38, cy - bt*0.50),
+		Vector2(cx + bl*0.08, cy - bt*0.58),
+		Vector2(cx + bl*0.44, cy - bt*0.32),
+		Vector2(cx + bl*0.50, cy),
+		Vector2(cx + bl*0.44, cy + bt*0.32),
+		Vector2(cx + bl*0.08, cy + bt*0.58),
+		Vector2(cx - bl*0.38, cy + bt*0.50),
+	])
+	ctrl.draw_colored_polygon(pts, base)
+
+	# Bande centrale (stripe).
+	ctrl.draw_rect(
+		Rect2(cx - bl*0.46, cy - bt*0.14, bl*0.92, bt*0.28),
+		stripe
+	)
+
+	# Aileron (fin) côté queue — couleur fixe sombre pour éviter les traînées claires.
+	var fin := PackedVector2Array([
+		Vector2(cx - bl*0.32, cy + bt*0.44),
+		Vector2(cx - bl*0.20, cy + bt*0.72),
+		Vector2(cx - bl*0.10, cy + bt*0.44),
+	])
+	ctrl.draw_colored_polygon(fin, Color(0.12, 0.16, 0.24))
+
+	# Contour léger.
+	ctrl.draw_polyline(pts, base.lightened(0.25), 1.2, true)
+
+
+func _is_equipped(item: Dictionary) -> bool:
+	if item["type"] == "char":
+		return GameManager.selected_character_index == item["idx"]
+	else:
+		return GameManager.selected_board_index == item["idx"]
+
+func _buy_item(item: Dictionary) -> void:
+	if not GameManager.spend_surfcoin(item["price"]):
+		_show_hint("Pas assez de SC !")
+		return
+	GameManager.unlock_item(item["id"])
+	_show_hint("%s acheté !" % item["name"])
+	_build_shop_ui()
+
+func _equip_item(item: Dictionary) -> void:
+	if item["type"] == "char":
+		GameManager.create_or_update_account(GameManager.player_pseudo, item["idx"])
+		character_front.preview_index = item["idx"]
+	else:
+		GameManager.selected_board_index = item["idx"]
+		GameManager.save_game()
+	_show_hint("%s équipé !" % item["name"])
+	_build_shop_ui()
+
+func _show_hint(msg: String) -> void:
+	hint_label.text = msg
+	hint_label.visible = true
 
 
 func _draw_surfboard(center: Vector2, scale_factor: float, angle: float, base_color: Color, stripe_color: Color) -> void:
