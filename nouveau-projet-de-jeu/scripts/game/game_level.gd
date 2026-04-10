@@ -9,11 +9,13 @@ var surfer_velocity: Vector2 = Vector2.ZERO
 var surfer_speed: float = 420.0
 var obstacles: Array[Dictionary] = []
 
-# Contrôles tactiles (mobile).
-var touch_active: bool = false
-var touch_start_pos: Vector2 = Vector2.ZERO
-var touch_current_pos: Vector2 = Vector2.ZERO
-var touch_finger_id: int = -1
+# Contrôles tactiles (mobile) - Joystick fixe.
+var joystick_active: bool = false
+var joystick_finger_id: int = -1
+var joystick_direction: Vector2 = Vector2.ZERO
+var joystick_knob_offset: Vector2 = Vector2.ZERO
+const JOYSTICK_RADIUS: float = 72.0
+const JOYSTICK_KNOB_RADIUS: float = 30.0
 # Double-tap pour figure.
 var last_tap_time: float = -999.0
 var double_tap_threshold: float = 0.35
@@ -180,6 +182,25 @@ func _draw() -> void:
 	_draw_obstacles()
 	_draw_coins()
 	_draw_stars()
+	_draw_joystick()
+
+func _draw_joystick() -> void:
+	var jc := _joystick_center()
+	# Fond extérieur (cercle de base).
+	draw_circle(jc, JOYSTICK_RADIUS, Color(0.0, 0.0, 0.0, 0.28))
+	draw_arc(jc, JOYSTICK_RADIUS, 0.0, TAU, 48, Color(1.0, 1.0, 1.0, 0.45), 3.0, true)
+	# Croix de guidage (indicateurs directionnels).
+	var cross_len := JOYSTICK_RADIUS * 0.55
+	var cross_color := Color(1.0, 1.0, 1.0, 0.22)
+	draw_line(jc + Vector2(0.0, -cross_len), jc + Vector2(0.0, cross_len), cross_color, 1.5)
+	draw_line(jc + Vector2(-cross_len, 0.0), jc + Vector2(cross_len, 0.0), cross_color, 1.5)
+	# Knob (suit le doigt, clampé dans le rayon).
+	var knob_pos := jc + joystick_knob_offset
+	var knob_alpha := 0.85 if joystick_active else 0.55
+	draw_circle(knob_pos, JOYSTICK_KNOB_RADIUS, Color(0.20, 0.70, 1.0, knob_alpha))
+	draw_arc(knob_pos, JOYSTICK_KNOB_RADIUS, 0.0, TAU, 32, Color(1.0, 1.0, 1.0, knob_alpha * 0.7), 2.5, true)
+	# Reflet sur le knob.
+	draw_circle(knob_pos + Vector2(-6.0, -6.0), JOYSTICK_KNOB_RADIUS * 0.35, Color(1.0, 1.0, 1.0, 0.30))
 
 # Retourne un facteur entre 0.0 et ~1.0 qui augmente très lentement.
 # À 5 min ≈ 0.50 | À 10 min ≈ 0.67 | À 20 min ≈ 0.80 | À 30 min ≈ 0.86
@@ -193,19 +214,11 @@ func _update_surfer_controls(delta: float) -> void:
 	# --- Contrôles clavier (bureau) ---
 	var keyboard_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
-	# --- Contrôles tactiles (mobile) : le surfeur suit le doigt ---
-	var touch_dir := Vector2.ZERO
-	if touch_active:
-		var delta_pos := touch_current_pos - surfer_position
-		# Ne déplace que si le doigt est assez loin du surfeur (zone morte 8px).
-		if delta_pos.length() > 8.0:
-			touch_dir = delta_pos.normalized()
-			# Accélère proportionnellement à la distance (max à 200px).
-			var strength := clampf(delta_pos.length() / 200.0, 0.0, 1.0)
-			touch_dir *= strength
+	# --- Contrôles tactiles (mobile) : joystick fixe ---
+	var touch_dir := joystick_direction if joystick_active else Vector2.ZERO
 
 	# Priorité tactile si actif, sinon clavier.
-	var direction := touch_dir if touch_active else keyboard_dir
+	var direction := touch_dir if joystick_active else keyboard_dir
 	surfer_velocity = direction * move_speed
 	surfer_position += surfer_velocity * delta
 
@@ -221,38 +234,58 @@ func _update_surfer_controls(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_accept") and not trick_active and trick_cooldown <= 0.0:
 		_start_trick()
 
+func _joystick_center() -> Vector2:
+	var size := get_viewport_rect().size
+	return Vector2(size.x * 0.18, size.y * 0.82)
+
 func _input(event: InputEvent) -> void:
 	if is_dead or GameManager.state != GameManager.GameState.PLAYING:
 		return
 
-	# --- Gestion du drag tactile ---
+	var size := get_viewport_rect().size
+
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			# Ignorer si on appuie sur le bouton pause (zone haute).
-			var size := get_viewport_rect().size
+			# Ignorer la zone du bouton pause (haut de l'écran).
 			if event.position.y < size.y * 0.12:
 				return
-			# Détecter double-tap pour figure.
+
+			var jc := _joystick_center()
+			var in_joystick: bool = event.position.distance_to(jc) <= JOYSTICK_RADIUS * 1.4
+
+			# Double-tap pour figure (côté droit ou hors zone joystick).
 			var now := surf_time
 			if (now - last_tap_time) <= double_tap_threshold and not trick_active and trick_cooldown <= 0.0:
 				_start_trick()
 				last_tap_time = -999.0
 			else:
 				last_tap_time = now
-			# Démarrer le suivi du doigt.
-			touch_finger_id = event.index
-			touch_start_pos = event.position
-			touch_current_pos = event.position
-			touch_active = true
+
+			# Assigner ce doigt au joystick si pas déjà actif.
+			if in_joystick and joystick_finger_id == -1:
+				joystick_finger_id = event.index
+				joystick_active = true
+				joystick_knob_offset = Vector2.ZERO
+				joystick_direction = Vector2.ZERO
 		else:
-			if event.index == touch_finger_id:
-				touch_active = false
-				touch_finger_id = -1
+			if event.index == joystick_finger_id:
+				joystick_active = false
+				joystick_finger_id = -1
+				joystick_direction = Vector2.ZERO
+				joystick_knob_offset = Vector2.ZERO
 				surfer_velocity = Vector2.ZERO
 
 	if event is InputEventScreenDrag:
-		if event.index == touch_finger_id:
-			touch_current_pos = event.position
+		if event.index == joystick_finger_id:
+			var jc := _joystick_center()
+			var offset: Vector2 = event.position - jc
+			var clamped: Vector2 = offset.limit_length(JOYSTICK_RADIUS)
+			joystick_knob_offset = clamped
+			var dead_zone := 8.0
+			if clamped.length() > dead_zone:
+				joystick_direction = clamped / JOYSTICK_RADIUS
+			else:
+				joystick_direction = Vector2.ZERO
 
 func _start_trick() -> void:
 	trick_active = true
