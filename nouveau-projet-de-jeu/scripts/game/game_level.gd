@@ -37,6 +37,12 @@ var hud: HUD
 var pause_menu: PauseMenu
 var game_over: GameOverScreen
 
+# Effets sonores (générés procéduralement, sans fichiers audio externes).
+var sfx_coin: AudioStreamPlayer
+var sfx_star: AudioStreamPlayer
+var sfx_death: AudioStreamPlayer
+var sfx_trick: AudioStreamPlayer
+
 func _ready() -> void:
 	GameManager.set_state(GameManager.GameState.PLAYING)
 	randomize()
@@ -62,6 +68,8 @@ func _ready() -> void:
 	add_child(game_over)
 	game_over.replay_requested.connect(_on_restart_requested)
 	game_over.menu_requested.connect(_on_quit_requested)
+
+	_setup_sfx()
 
 func _process(delta: float) -> void:
 	surf_time += delta
@@ -201,6 +209,7 @@ func _start_trick() -> void:
 	trick_timer = 0.0
 	trick_rotation = 0.0
 	trick_jump_offset = 0.0
+	_play_sfx(sfx_trick)
 
 func _update_trick(delta: float) -> void:
 	if trick_cooldown > 0.0:
@@ -395,6 +404,7 @@ func _collect_stars() -> void:
 		if hits:
 			boost_active = true
 			boost_timer  = 0.0
+			_play_sfx(sfx_star)
 		else:
 			remaining.append(star)
 	stars = remaining
@@ -491,6 +501,7 @@ func _collect_coins() -> void:
 		GameManager.add_surfcoin(collected_count)
 		surfcoin = GameManager.total_surfcoin
 		hud.set_surfcoin(surfcoin)
+		_play_sfx(sfx_coin)
 	coins = remaining
 
 func _distance_point_to_segment(point: Vector2, a: Vector2, b: Vector2) -> float:
@@ -1425,6 +1436,7 @@ func player_died() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	_play_sfx(sfx_death)
 	GameManager.game_over(score)
 	game_over.open(score, GameManager.high_score)
 
@@ -1441,3 +1453,168 @@ func _on_restart_requested() -> void:
 
 func _on_quit_requested() -> void:
 	GameManager.goto_main_menu()
+
+# ─── Audio procédural ────────────────────────────────────────────────────────
+
+func _setup_sfx() -> void:
+	sfx_coin = AudioStreamPlayer.new()
+	sfx_coin.stream = _make_coin_sfx()
+	add_child(sfx_coin)
+
+	sfx_star = AudioStreamPlayer.new()
+	sfx_star.stream = _make_star_sfx()
+	add_child(sfx_star)
+
+	sfx_death = AudioStreamPlayer.new()
+	sfx_death.stream = _make_death_sfx()
+	add_child(sfx_death)
+
+	sfx_trick = AudioStreamPlayer.new()
+	sfx_trick.stream = _make_trick_sfx()
+	add_child(sfx_trick)
+
+func _play_sfx(player: AudioStreamPlayer) -> void:
+	if GameManager.muted or GameManager.sfx_volume <= 0.0:
+		return
+	player.volume_db = linear_to_db(GameManager.sfx_volume)
+	player.play()
+
+# Backflip : chirp ascendant "woosh" + arpège final C5-E5-G5-B5.
+func _make_trick_sfx() -> AudioStreamWAV:
+	var rate       := 22050
+	var frames     := int(rate * 0.55)
+	var buf        := PackedByteArray()
+	buf.resize(frames * 2)
+
+	var arp_notes: Array[float] = [523.25, 659.25, 784.00, 987.77]
+	var arp_start  := int(rate * 0.18)
+	var note_len   := int(rate * 0.075)
+
+	# Chirp : accumulation de phase pour un sweep sans annulation de signal.
+	var chirp_phase := 0.0
+	var chirp_end   := int(rate * 0.22)
+
+	# Phase de chaque note d'arpège (accumulée pour éviter les clics).
+	var arp_phases: Array[float] = [0.0, 0.0, 0.0, 0.0]
+
+	for i in range(frames):
+		var t    := float(i) / float(rate)
+		var wave := 0.0
+
+		# Woosh : chirp sinus 150 Hz → 1800 Hz, enveloppe en cloche.
+		if i < chirp_end:
+			var p      := float(i) / float(chirp_end)
+			var freq   := 150.0 + p * p * 1650.0         # courbe quadratique
+			chirp_phase += TAU * freq / float(rate)
+			var env    := sin(p * PI) * 0.75
+			wave += sin(chirp_phase) * env
+
+		# Arpège : C5 E5 G5 B5 — chaque note en phase accumulée.
+		if i >= arp_start:
+			var rel := i - arp_start
+			var ni  := rel / note_len
+			if ni < arp_notes.size():
+				var freq: float = arp_notes[ni]
+				arp_phases[ni] += TAU * freq / float(rate)
+				var local_p := float(rel - ni * note_len) / float(note_len)
+				var env     := 1.0 - local_p
+				wave += (sin(arp_phases[ni]) * 0.65 + sin(arp_phases[ni] * 3.0) * 0.18) * env
+
+		var v := int(wave * 0.88 * 32767.0)
+		buf.encode_s16(i * 2, clamp(v, -32768, 32767))
+
+	var s := AudioStreamWAV.new()
+	s.data     = buf
+	s.format   = AudioStreamWAV.FORMAT_16_BITS
+	s.mix_rate = rate
+	s.stereo   = false
+	return s
+
+# Pièce : "ba-ding!" style chiptune (deux notes ascendantes, onde carrée tronquée).
+func _make_coin_sfx() -> AudioStreamWAV:
+	var rate      := 22050
+	var cut       := int(rate * 0.055)   # durée note basse
+	var frames    := int(rate * 0.20)    # durée totale
+	var buf       := PackedByteArray()
+	buf.resize(frames * 2)
+
+	for i in range(frames):
+		var wave: float
+		if i < cut:
+			# Note basse : A5 = 880 Hz, onde carrée tronquée (harmoniques impaires).
+			var t   := float(i) / float(rate)
+			var env := exp(-float(i) / float(cut) * 2.5)
+			wave  = sin(TAU * 880.0 * t)         * 0.55
+			wave += sin(TAU * 880.0 * 3.0 * t)   * 0.18
+			wave += sin(TAU * 880.0 * 5.0 * t)   * 0.09
+			wave *= env
+		else:
+			# Note haute : A6 = 1760 Hz, decay plus long = le "ding" qui résonne.
+			var t   := float(i - cut) / float(rate)
+			var env := exp(-t * 12.0)
+			wave  = sin(TAU * 1760.0 * t)         * 0.60
+			wave += sin(TAU * 1760.0 * 3.0 * t)   * 0.15
+			wave += sin(TAU * 1760.0 * 5.0 * t)   * 0.06
+			wave *= env
+
+		var v := int(wave * 0.80 * 32767.0)
+		buf.encode_s16(i * 2, clamp(v, -32768, 32767))
+
+	var s := AudioStreamWAV.new()
+	s.data     = buf
+	s.format   = AudioStreamWAV.FORMAT_16_BITS
+	s.mix_rate = rate
+	s.stereo   = false
+	return s
+
+# Étoile : arpège magique C5-E5-G5-C6 (4 × 0.10 s = 0.40 s total).
+func _make_star_sfx() -> AudioStreamWAV:
+	var rate  := 22050
+	var notes := [523.25, 659.25, 784.00, 1046.50]
+	var note_frames := int(rate * 0.10)
+	var total_frames := note_frames * notes.size()
+	var buf  := PackedByteArray()
+	buf.resize(total_frames * 2)
+	for ni in range(notes.size()):
+		var freq: float = notes[ni]
+		for i in range(note_frames):
+			var t       := float(ni * note_frames + i) / float(rate)
+			var local_p := float(i) / float(note_frames)
+			var env     := 1.0 - local_p            # decay rapide par note
+			var v       := int(sin(TAU * freq * t) * env * 0.65 * 32767.0)
+			buf.encode_s16((ni * note_frames + i) * 2, clamp(v, -32768, 32767))
+	var s := AudioStreamWAV.new()
+	s.data     = buf
+	s.format   = AudioStreamWAV.FORMAT_16_BITS
+	s.mix_rate = rate
+	s.stereo   = false
+	return s
+
+# Mort : impact brutal + chute dramatique (300 Hz → 40 Hz, 0.65 s).
+func _make_death_sfx() -> AudioStreamWAV:
+	var rate   := 22050
+	var frames := int(rate * 0.65)
+	var buf    := PackedByteArray()
+	buf.resize(frames * 2)
+	for i in range(frames):
+		var t        := float(i) / float(rate)
+		var progress := float(i) / float(frames)
+		# Chute de fréquence rapide au début, plus lente ensuite (courbe exponentielle).
+		var freq     := 300.0 * pow(0.13, progress)
+		# Envelope : attaque instantanée, decay exponentiel pour garder la puissance longtemps.
+		var env      := exp(-t * 3.5)
+		# Couches : fondamentale + octave + bruit d'impact sur les 30 premières ms.
+		var wave     := sin(TAU * freq * t) * 0.55
+		wave        += sin(TAU * freq * 2.0 * t) * 0.28
+		wave        += sin(TAU * freq * 3.0 * t) * 0.12
+		if i < int(rate * 0.030):
+			# Coup de "bang" initial : bruit blanc bref pour le choc.
+			wave += (randf() * 2.0 - 1.0) * 0.50 * (1.0 - float(i) / float(int(rate * 0.030)))
+		var v := int(wave * env * 32767.0)
+		buf.encode_s16(i * 2, clamp(v, -32768, 32767))
+	var s := AudioStreamWAV.new()
+	s.data     = buf
+	s.format   = AudioStreamWAV.FORMAT_16_BITS
+	s.mix_rate = rate
+	s.stereo   = false
+	return s
