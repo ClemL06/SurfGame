@@ -5,13 +5,11 @@ extends Control
 @onready var xp_label: Label           = %XPLabel
 @onready var coin_label: Label         = %CoinLabel
 @onready var pseudo_input: LineEdit    = %PseudoInput
-@onready var character_option: OptionButton = %CharacterOption
 @onready var save_button: Button       = %SaveButton
 @onready var status_label: Label       = %StatusLabel
 @onready var back_button: Button       = %BackButton
 
 func _ready() -> void:
-	_setup_character_choices()
 	_load_profile()
 	save_button.pressed.connect(_on_save_pressed)
 	back_button.pressed.connect(_on_back_pressed)
@@ -69,18 +67,8 @@ func _draw() -> void:
 	# Ligne d'horizon.
 	draw_rect(Rect2(Vector2(0.0, size.y * 0.595), Vector2(size.x, 3.0)), Color(0.92, 0.98, 1.0, 0.55))
 
-func _setup_character_choices() -> void:
-	character_option.clear()
-	character_option.add_item("Surfeur Classique")
-	character_option.add_item("Surfeuse Pro")
-	character_option.add_item("Rider Neon")
-	character_option.add_item("Water Ninja")
-
 func _load_profile() -> void:
 	pseudo_input.text = GameManager.player_pseudo
-	var idx: int = maxi(0, character_option.get_item_index(GameManager.selected_character_index))
-	if idx >= 0:
-		character_option.select(idx)
 	_refresh_labels()
 
 func _on_save_pressed() -> void:
@@ -89,8 +77,7 @@ func _on_save_pressed() -> void:
 		status_label.text = "Pseudo invalide."
 		status_label.add_theme_color_override("font_color", Color(1.0, 0.42, 0.38, 0.95))
 		return
-	var selected_idx: int = character_option.get_selected_id()
-	GameManager.create_or_update_account(pseudo, selected_idx)
+	GameManager.create_or_update_account(pseudo, GameManager.selected_character_index)
 	status_label.text = "✓  Profil enregistre avec succes !"
 	status_label.add_theme_color_override("font_color", Color(0.42, 0.96, 0.64, 0.95))
 	_refresh_labels()
