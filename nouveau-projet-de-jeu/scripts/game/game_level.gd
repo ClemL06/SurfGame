@@ -8,6 +8,15 @@ var surfer_position: Vector2 = Vector2.ZERO
 var surfer_velocity: Vector2 = Vector2.ZERO
 var surfer_speed: float = 420.0
 var obstacles: Array[Dictionary] = []
+
+# Contrôles tactiles (mobile).
+var touch_active: bool = false
+var touch_start_pos: Vector2 = Vector2.ZERO
+var touch_current_pos: Vector2 = Vector2.ZERO
+var touch_finger_id: int = -1
+# Double-tap pour figure.
+var last_tap_time: float = -999.0
+var double_tap_threshold: float = 0.35
 var obstacle_spawn_timer: float = 0.0
 var obstacle_spawn_interval: float = 1.5
 var coins: Array[Dictionary] = []
@@ -179,9 +188,24 @@ func _difficulty() -> float:
 
 func _update_surfer_controls(delta: float) -> void:
 	var size := get_viewport_rect().size
-	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	# Le joueur accélère légèrement pour rester manœuvrable malgré les obstacles plus rapides.
 	var move_speed := surfer_speed * (1.0 + _difficulty() * 0.35) * GameManager.controls_sensitivity
+
+	# --- Contrôles clavier (bureau) ---
+	var keyboard_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+
+	# --- Contrôles tactiles (mobile) : le surfeur suit le doigt ---
+	var touch_dir := Vector2.ZERO
+	if touch_active:
+		var delta_pos := touch_current_pos - surfer_position
+		# Ne déplace que si le doigt est assez loin du surfeur (zone morte 8px).
+		if delta_pos.length() > 8.0:
+			touch_dir = delta_pos.normalized()
+			# Accélère proportionnellement à la distance (max à 200px).
+			var strength := clampf(delta_pos.length() / 200.0, 0.0, 1.0)
+			touch_dir *= strength
+
+	# Priorité tactile si actif, sinon clavier.
+	var direction := touch_dir if touch_active else keyboard_dir
 	surfer_velocity = direction * move_speed
 	surfer_position += surfer_velocity * delta
 
@@ -198,11 +222,37 @@ func _update_surfer_controls(delta: float) -> void:
 		_start_trick()
 
 func _input(event: InputEvent) -> void:
-	# Toucher l'ecran = figure (mobile).
-	if event is InputEventScreenTouch and event.pressed:
-		if not is_dead and not trick_active and trick_cooldown <= 0.0:
-			if GameManager.state == GameManager.GameState.PLAYING:
+	if is_dead or GameManager.state != GameManager.GameState.PLAYING:
+		return
+
+	# --- Gestion du drag tactile ---
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			# Ignorer si on appuie sur le bouton pause (zone haute).
+			var size := get_viewport_rect().size
+			if event.position.y < size.y * 0.12:
+				return
+			# Détecter double-tap pour figure.
+			var now := surf_time
+			if (now - last_tap_time) <= double_tap_threshold and not trick_active and trick_cooldown <= 0.0:
 				_start_trick()
+				last_tap_time = -999.0
+			else:
+				last_tap_time = now
+			# Démarrer le suivi du doigt.
+			touch_finger_id = event.index
+			touch_start_pos = event.position
+			touch_current_pos = event.position
+			touch_active = true
+		else:
+			if event.index == touch_finger_id:
+				touch_active = false
+				touch_finger_id = -1
+				surfer_velocity = Vector2.ZERO
+
+	if event is InputEventScreenDrag:
+		if event.index == touch_finger_id:
+			touch_current_pos = event.position
 
 func _start_trick() -> void:
 	trick_active = true
