@@ -153,54 +153,18 @@ text = "Boutique"
 [node name="DressingPanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -260.0
-offset_right = 180.0
-offset_bottom = -30.0
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -270.0
+offset_right = 360.0
+offset_bottom = 250.0
 z_index = 100
+visible = false
 theme_override_styles/panel = SubResource("StyleBoxFlat_dressing_panel")
-
-[node name="DressingMargin" type="MarginContainer" parent="DressingPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 18
-
-[node name="DressingVBox" type="VBoxContainer" parent="DressingPanel/DressingMargin"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="DressingLabel" type="Label" parent="DressingPanel/DressingMargin/DressingVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.88, 1.0, 0.85)
-theme_override_font_sizes/font_size = 20
-text = "Choisir mon personnage"
-horizontal_alignment = 1
-
-[node name="CharacterOption" type="OptionButton" parent="DressingPanel/DressingMargin/DressingVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 52)
-theme_override_colors/font_color = Color(0.92, 0.97, 1.0, 1.0)
-theme_override_font_sizes/font_size = 26
-
-[node name="SaveCharacterButton" type="Button" parent="DressingPanel/DressingMargin/DressingVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 58)
-theme_override_styles/normal = SubResource("StyleBoxFlat_save_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_save_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_save_btn_pressed")
-theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
-theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
-theme_override_font_sizes/font_size = 28
-text = "Equiper ce personnage"
 
 [node name="ShopPanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true

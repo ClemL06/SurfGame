@@ -1,7 +1,5 @@
 extends Control
 
-@onready var character_option: OptionButton = %CharacterOption
-@onready var save_character_button: Button = %SaveCharacterButton
 @onready var back_button: Button = %BackButton
 @onready var tab_dressing_button: Button = %TabDressingButton
 @onready var tab_shop_button: Button = %TabShopButton
@@ -47,13 +45,9 @@ const _CharacterFront = preload("res://scripts/ui/character_front.gd")
 
 func _ready() -> void:
 	set_process(true)
-	_setup_character_choices()
-	_load_current_data()
-	save_character_button.pressed.connect(_on_save_character_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 	tab_dressing_button.pressed.connect(_on_tab_dressing_pressed)
 	tab_shop_button.pressed.connect(_on_tab_shop_pressed)
-	character_option.item_selected.connect(_on_character_option_selected)
 	_apply_tab_state()
 
 func _process(delta: float) -> void:
@@ -199,36 +193,15 @@ func _draw() -> void:
 	_draw_monstera_plant(Vector2(size.x * 0.92, rack_surface_y), 0.48)
 
 
-func _setup_character_choices() -> void:
-	character_option.clear()
-	character_option.add_item("Surfeur Classique")
-	character_option.add_item("Surfeuse Pro")
-	character_option.add_item("Rider Neon")
-	character_option.add_item("Water Ninja")
-
-func _load_current_data() -> void:
-	var idx: int = maxi(0, character_option.get_item_index(GameManager.selected_character_index))
-	if idx >= 0:
-		character_option.select(idx)
-
-func _on_save_character_pressed() -> void:
-	if not GameManager.has_account:
-		return
-	var selected_idx: int = character_option.get_selected_id()
-	GameManager.create_or_update_account(GameManager.player_pseudo, selected_idx)
-
 func _on_back_pressed() -> void:
 	GameManager.goto_main_menu()
 
-func _on_character_option_selected(index: int) -> void:
-	character_front.preview_index = index
-	if GameManager.has_account:
-		GameManager.create_or_update_account(GameManager.player_pseudo, character_option.get_selected_id())
-		_show_hint("Personnage equipe !")
-
 func _on_tab_dressing_pressed() -> void:
-	dressing_panel.visible = not dressing_panel.visible
+	var opening := not dressing_panel.visible
+	dressing_panel.visible = opening
 	shop_panel.visible = false
+	if opening:
+		_build_dressing_ui()
 
 func _on_tab_shop_pressed() -> void:
 	var opening := not shop_panel.visible
@@ -240,6 +213,174 @@ func _on_tab_shop_pressed() -> void:
 func _apply_tab_state() -> void:
 	dressing_panel.visible = false
 	shop_panel.visible = false
+
+# ── Construction de l'UI du dressing (items possédés uniquement) ──────────────
+
+func _build_dressing_ui() -> void:
+	for child in dressing_panel.get_children():
+		child.queue_free()
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left",   16)
+	margin.add_theme_constant_override("margin_top",    12)
+	margin.add_theme_constant_override("margin_right",  16)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	dressing_panel.add_child(margin)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical   = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	margin.add_child(scroll)
+
+	var outer := VBoxContainer.new()
+	outer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_theme_constant_override("separation", 10)
+	scroll.add_child(outer)
+
+	# Ligne du haut : titre + bouton fermer.
+	var top_row := HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 10)
+	outer.add_child(top_row)
+
+	var title_lbl := Label.new()
+	title_lbl.text = "Mon Dressing"
+	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_color_override("font_color", Color(0.55, 0.82, 1.0))
+	top_row.add_child(title_lbl)
+
+	var close_btn := Button.new()
+	close_btn.text = "X"
+	close_btn.add_theme_font_size_override("font_size", 20)
+	close_btn.custom_minimum_size = Vector2(44, 44)
+	close_btn.pressed.connect(func():
+		dressing_panel.visible = false
+	)
+	top_row.add_child(close_btn)
+
+	# Filtrer les items possédés.
+	var owned_chars: Array = []
+	var owned_boards: Array = []
+	for item in SHOP_ITEMS:
+		var is_owned: bool = item["price"] == 0 or item["id"] in GameManager.owned_items
+		if is_owned:
+			if item["cat"] == "Combinaisons":
+				owned_chars.append(item)
+			else:
+				owned_boards.append(item)
+
+	# Section Combinaisons possédées.
+	_add_section_header(outer, "Mes Combinaisons")
+	if owned_chars.is_empty():
+		var empty_lbl := Label.new()
+		empty_lbl.text = "Aucune combinaison. Visite la boutique !"
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty_lbl.add_theme_color_override("font_color", Color(0.65, 0.70, 0.80))
+		outer.add_child(empty_lbl)
+	else:
+		var char_grid := _make_grid()
+		outer.add_child(char_grid)
+		for item in owned_chars:
+			_add_dressing_card(char_grid, item)
+
+	# Section Planches possédées.
+	_add_section_header(outer, "Mes Planches")
+	if owned_boards.is_empty():
+		var empty_lbl := Label.new()
+		empty_lbl.text = "Aucune planche. Visite la boutique !"
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty_lbl.add_theme_color_override("font_color", Color(0.65, 0.70, 0.80))
+		outer.add_child(empty_lbl)
+	else:
+		var board_grid := _make_grid()
+		outer.add_child(board_grid)
+		for item in owned_boards:
+			_add_dressing_card(board_grid, item)
+
+func _add_dressing_card(grid: GridContainer, item: Dictionary) -> void:
+	var is_equipped: bool = _is_equipped(item)
+
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(0.07, 0.13, 0.26, 0.97)
+	card_style.corner_radius_top_left     = 12
+	card_style.corner_radius_top_right    = 12
+	card_style.corner_radius_bottom_right = 12
+	card_style.corner_radius_bottom_left  = 12
+	card_style.border_width_left   = 2
+	card_style.border_width_top    = 2
+	card_style.border_width_right  = 2
+	card_style.border_width_bottom = 2
+	card_style.border_color = Color(0.40, 1.0, 0.55, 0.85) if is_equipped \
+							else Color(0.28, 0.62, 1.0, 0.65)
+
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", card_style)
+	grid.add_child(card)
+
+	var inner := MarginContainer.new()
+	inner.add_theme_constant_override("margin_left",   8)
+	inner.add_theme_constant_override("margin_top",    8)
+	inner.add_theme_constant_override("margin_right",  8)
+	inner.add_theme_constant_override("margin_bottom", 8)
+	card.add_child(inner)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 5)
+	inner.add_child(vbox)
+
+	# Aperçu.
+	if item["type"] == "board":
+		var preview := Control.new()
+		preview.custom_minimum_size = Vector2(0, 95)
+		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vbox.add_child(preview)
+		var bc: Dictionary = BOARD_COLORS_PREVIEW[item["idx"]]
+		var base_col: Color = bc["base"]
+		var stripe_col: Color = bc["stripe"]
+		preview.draw.connect(func(): _draw_board_preview(preview, base_col, stripe_col))
+	else:
+		var cf = _CharacterFront.new()
+		cf.use_own_size    = true
+		cf.preview_index   = item["idx"]
+		cf.scale_factor    = 0.30
+		cf.center_y_ratio  = 0.30
+		cf.feet_offset_y   = 30.0
+		cf.custom_minimum_size   = Vector2(0, 95)
+		cf.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vbox.add_child(cf)
+
+	# Nom.
+	var name_lbl := Label.new()
+	name_lbl.text = item["name"]
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+	name_lbl.clip_text = true
+	vbox.add_child(name_lbl)
+
+	# Bouton équiper.
+	var btn := Button.new()
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.add_theme_font_size_override("font_size", 14)
+	if is_equipped:
+		btn.text = "Equipe"
+		btn.disabled = true
+	else:
+		btn.text = "Equiper"
+		btn.pressed.connect(_equip_item_dressing.bind(item))
+	vbox.add_child(btn)
+
+func _equip_item_dressing(item: Dictionary) -> void:
+	if item["type"] == "char":
+		GameManager.create_or_update_account(GameManager.player_pseudo, item["idx"])
+		character_front.preview_index = item["idx"]
+	else:
+		GameManager.selected_board_index = item["idx"]
+		GameManager.save_game()
+	_show_hint("%s équipé !" % item["name"])
+	_build_dressing_ui()
 
 # ── Construction de l'UI de boutique (grille 3 colonnes) ─────────────────────
 
@@ -477,7 +618,7 @@ func _buy_item(item: Dictionary) -> void:
 		_show_hint("Pas assez de SC !")
 		return
 	GameManager.unlock_item(item["id"])
-	_show_hint("%s acheté !" % item["name"])
+	_show_hint("%s acheté ! Disponible dans ton dressing." % item["name"])
 	_build_shop_ui()
 
 func _equip_item(item: Dictionary) -> void:
